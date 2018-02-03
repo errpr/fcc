@@ -12,7 +12,10 @@
 <h1 id="title">Twitch Checker</h1>
 
 <div id="root">
-    <button onclick="getStream('freecodecamp');">Check fCC stream</button>
+    <input id="addStreamInput" type="text" placeholder="Stream Name">
+    <button onclick="addStream();">Add a stream to check</button>
+    <button onclick="collectStreams();">Check stream(s) status</button>
+    <ul id="stream-list"></ul>
 </div>
 
 <script src="app.js"></script>
