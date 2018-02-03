@@ -1,1 +1,1 @@
-Shows current status of Twitch streamers.
+Shows current status of Twitch streamers using freeCodeCamp's Twitch API redirect.
