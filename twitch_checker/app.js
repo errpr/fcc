@@ -17,10 +17,11 @@ function addStream() {
 }
 
 function collectStreams() {
-    for(i in streamsToCheck) {
-        getStream(streamsToCheck[i]);
-    }
+    let streamsCopy = streamsToCheck.slice();
     streamsToCheck = [];
+    for(i in streamsCopy) {
+        getStream(streamsCopy[i]);
+    }
 }
 
 function getStream(streamId) {
@@ -35,8 +36,7 @@ function getStream(streamId) {
 }
 
 function outputStreamInfo(json){
-    var name = getName(json);
-    json.name = name;
+    json.name = getName(json);
     streamList.push(json);
     rebuildList();
 }
