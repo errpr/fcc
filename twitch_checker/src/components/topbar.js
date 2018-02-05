@@ -6,6 +6,7 @@ export default class TopBar extends React.Component {
         this.state = { value: "" };
         this.handleClick = this.handleClick.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
     handleClick(e) {
@@ -14,19 +15,21 @@ export default class TopBar extends React.Component {
     }
 
     handleChange(e) {
+        this.setState({ value: e.target.value });
+    }
+
+    handleKeyDown(e) {
         if(e.key === "Enter"){
             e.preventDefault();
             this.props.addStream(this.state.value);
             this.setState({ value: "" });
-        } else {
-            this.setState({ value: e.target.value });
         }
     }
 
     render() {
         return(
             <div>
-                <input type="text" placeholder="Stream Name" value={this.state.value} onChange={this.handleChange} />
+                <input type="text" placeholder="Stream Name" value={this.state.value} onKeyDown={this.handleKeyDown} onChange={this.handleChange} />
                 <button onClick={this.handleClick}>Add Stream</button>
             </div>
         )
