@@ -19,17 +19,15 @@ export default class App extends React.Component {
     }
 
     addStream(name) {
-        if(this.state.streams.filter(el => el.name == name).length == 0){
+        if(this.state.streams.filter(stream => stream.name == name).length == 0){
             this.setState(prevState => (
-                { ...prevState, streams: [ ...prevState.streams, { name: name }]}
+                { streams: [ ...prevState.streams, { name: name }]}
             ))
         }
     }
 
     changeFilter(newFilter) {
-        this.setState(prevState => (
-            { ...prevState, filter: newFilter }
-        ));
+        this.setState({ filter: newFilter });
     }
 
     visibleStreams() {
