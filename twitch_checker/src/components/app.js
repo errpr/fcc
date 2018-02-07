@@ -19,6 +19,7 @@ export default class App extends React.Component {
         this.collectStreams = this.collectStreams.bind(this);
         this.streamDataCallback = this.streamDataCallback.bind(this);
         this.getStream = this.getStream.bind(this);
+        this.deleteStream = this.deleteStream.bind(this);
     }
 
     componentDidMount() {
@@ -26,8 +27,13 @@ export default class App extends React.Component {
             this.setState({ streams: JSON.parse(localStorage.getItem('streams'))})
         }
         if(localStorage.getItem('filter')) {
-            this.setState({ filter: JSON.parse(localStorage.getItem('filter'))})
+            this.setState({ filter: localStorage.getItem('filter')})
         }
+    }
+
+    componentDidUpdate() {
+        localStorage.setItem('filter', this.state.filter);
+        localStorage.setItem('streams', JSON.stringify(this.state.streams));
     }
 
     collectStreams() {
@@ -48,15 +54,14 @@ export default class App extends React.Component {
                 stream 
             ]
         }));
-        localStorage.setItem('streams', JSON.stringify(this.state.streams));
     }
 
     getStream(streamId, callback) {
         const apiBaseUrl = "https://wind-bow.glitch.me/twitch-api";
         const callbackName = "jsonp_callback_" + Math.round(100000 * Math.random());
         
-        let script = document.createElement('script');
-        let e = document.getElementById('jsonp');
+        const script = document.createElement('script');
+        const e = document.getElementById('jsonp');
         
         window[callbackName] = function(data) {
             delete window[callbackName];
@@ -91,14 +96,20 @@ export default class App extends React.Component {
         if(this.state.streams.filter(stream => stream.name == name).length == 0){
             this.setState(prevState => (
                 { streams: [ ...prevState.streams, this.blankStream(name)]}
-            ))
-            localStorage.setItem('streams', JSON.stringify(this.state.streams));
+            ));
         }
     }
 
-    changeFilter(newFilter) {
+    deleteStream(e) {
+        const streamName = e.target.dataset["streamName"];
+        this.setState(prevState => (
+            { streams: [ ...prevState.streams.filter(el => el.name !== streamName)]}
+        ));
+    }
+
+    changeFilter(e) {
+        const newFilter = e.target.dataset["filterName"];
         this.setState({ filter: newFilter });
-        localStorage.setItem('filter', JSON.stringify(this.state.filter));
     }
 
     visibleStreams() {
@@ -116,7 +127,7 @@ export default class App extends React.Component {
                 <button onClick={this.collectStreams}>Check Streams</button>
                 <Logo />
                 <TopBar addStream={this.addStream} />
-                <StreamList streams={this.visibleStreams()} />
+                <StreamList streams={this.visibleStreams()} deleteStream={this.deleteStream} />
                 <FilterBar changeFilter={this.changeFilter} />
             </div>
         )

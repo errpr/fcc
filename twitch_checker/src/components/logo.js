@@ -1,9 +1,7 @@
 import React from "react";
 
-export default class Logo extends React.Component {
-    render() {
-        return(
-            <h1>Twitch Checker</h1>
-        )
-    }
+export default function Logo(props) {
+    return(
+        <h1>Twitch Checker</h1>
+    )
 }

@@ -1,13 +1,11 @@
 import React from "react";
 
-export default class FilterBar extends React.Component {
-    render() {
-        return(
-            <div>
-                <button onClick={() => this.props.changeFilter("all")}>All</button>
-                <button onClick={() => this.props.changeFilter("online")}>Online</button>
-                <button onClick={() => this.props.changeFilter("offline")}>Offline</button>
-            </div>
-        )
-    }
+export default function FilterBar(props) {
+    return(
+        <div className="filterBar">
+            <button data-filter-name="all" onClick={props.changeFilter}>All</button>
+            <button data-filter-name="online" onClick={props.changeFilter}>Online</button>
+            <button data-filter-name="offline" onClick={props.changeFilter}>Offline</button>
+        </div>
+    )
 }
