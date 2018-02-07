@@ -33,3 +33,15 @@
 .streamItemLine {
     margin: 1px;
 }
+
+.streamItemDeleteButton {
+    background: none;
+    border: none;
+    font-size: 150%;
+    color: tomato;
+    opacity: 0.4;
+}
+
+.streamItemDeleteButton:hover {
+    opacity: 1;
+}

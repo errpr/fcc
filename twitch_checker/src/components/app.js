@@ -8,10 +8,7 @@ export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
-            streams: [
-                this.blankStream('freeCodeCamp'),
-                this.blankStream('dansgaming'),
-            ],
+            streams: [],
             filter: "all"
         };
         this.addStream = this.addStream.bind(this);
@@ -25,6 +22,11 @@ export default class App extends React.Component {
     componentDidMount() {
         if(localStorage.getItem('streams')) {
             this.setState({ streams: JSON.parse(localStorage.getItem('streams'))})
+        } else {
+            this.setState({ streams: [
+                this.blankStream('freeCodeCamp'),
+                this.blankStream('dansgaming')
+            ]});
         }
         if(localStorage.getItem('filter')) {
             this.setState({ filter: localStorage.getItem('filter')})
