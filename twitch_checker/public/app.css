@@ -53,8 +53,17 @@ legend{color:#000}
     vertical-align: sub;
 }
 
+.topBarContainer {
+    position: relative;
+}
+
 .settingsMenu {
-    float: right;
+    opacity: 1;
+    position: absolute;
+    right: 1.5em;
+    color: white;
+    background-color: black;
+    padding: 0.5em;
 }
 
 .filterBar {
@@ -124,6 +133,11 @@ legend{color:#000}
     font-size: 150%;
     color: tomato;
     opacity: 0.4;
+}
+
+.toggledBurger {
+    color: white;
+    background-color: black;
 }
 
 .streamItemDeleteButton:hover {

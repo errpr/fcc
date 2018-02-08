@@ -28,7 +28,7 @@ export default class TopBar extends React.Component {
 
     render() {
         return(
-            <div>
+            <div className="topBarContainer">
                 <div className="topBar">
                     <input 
                         className="streamInput"
@@ -38,17 +38,18 @@ export default class TopBar extends React.Component {
                         onKeyDown={this.handleKeyDown} 
                         onChange={this.handleChange} />
                     <button 
-                        className={"settingsButton " + (this.state.settingsVisible ? 'toggledButton' : '')} 
+                        className={"settingsButton " + (this.state.settingsVisible ? 'toggledBurger' : '')} 
                         onClick={this.toggleSettings}>
                         &#9776;
                     </button>
                 </div>
-                <SettingsMenu 
-                    useLocalStorage={this.props.useLocalStorage}
-                    toggleLocalStorage={this.props.toggleLocalStorage} 
-                    refreshStreams={this.props.refreshStreams}
-                    toggleRefreshStreams={this.props.toggleRefreshStreams}
-                    visible={this.state.settingsVisible} />
+                { this.state.settingsVisible &&
+                    <SettingsMenu 
+                        useLocalStorage={this.props.useLocalStorage}
+                        toggleLocalStorage={this.props.toggleLocalStorage} 
+                        refreshStreams={this.props.refreshStreams}
+                        toggleRefreshStreams={this.props.toggleRefreshStreams} />
+                }
             </div>
         )
     }
