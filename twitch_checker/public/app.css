@@ -1,5 +1,69 @@
-* {
-    box-sizing: border-box;
+html{color:#000;background:#FFF}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}
+table{border-collapse:collapse;border-spacing:0}
+fieldset,img{border:0}
+address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal}
+ol,ul{list-style:none}
+caption,th{text-align:left}
+h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal}
+q:before,q:after{content:''}
+abbr,acronym{border:0;font-variant:normal}
+sup{vertical-align:text-top}
+sub{vertical-align:text-bottom}
+input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;*font-size:100%}
+legend{color:#000}
+
+.appContainer {
+    max-width: 600px;
+    margin: auto;
+}
+
+.topBar {
+    display: flex;
+}
+
+.streamInput {
+    font-size: 150%;
+    flex-grow: 1;
+    margin-left: 1em;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.settingsButton {
+    background: none;
+    padding: 0;
+    margin-left: 1em;
+    margin-right: 1em;
+    border: none;
+    font-size: 175%;
+    font-weight: bold;
+    vertical-align: sub;
+}
+
+.settingsMenu {
+    float: right;
+}
+
+.filterBar {
+    display: flex;
+    justify-content: space-around;
+    max-width: 500px;
+    margin: auto;
+    margin-top: 1em;
+}
+
+.filterItem {
+    flex-grow: 0;
+    background: 0;
+    border: 0;
+    font-size: 110%;
+    opacity: 0.5;
+}
+
+.toggledButton {
+    opacity: 1;
+    border-bottom: 1px solid purple;
 }
 
 .streamList {
@@ -9,11 +73,14 @@
 }
 
 .streamItem {
+    font-size: 150%;
     margin: 1em;
+    display: flex;
 }
 
 .streamItemBlockContainer {
     display: inline-block;
+    flex-grow: 1;
     vertical-align: middle;
 }
 
@@ -37,6 +104,7 @@
 .streamItemDeleteButton {
     background: none;
     border: none;
+    padding: 0;
     font-size: 150%;
     color: tomato;
     opacity: 0.4;

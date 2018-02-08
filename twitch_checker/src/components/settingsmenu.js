@@ -1,15 +1,13 @@
 import React from 'react';
 
-export default class SettingsMenu extends React.Component {
-    render() {
-        if(this.props.visible) {
-            return(
-                <div>
-                    <p>Settings Menu</p>
-                </div>
-            )
-        } else {
-            return(<div></div>)
-        }
+export default function SettingsMenu(props) {
+    if(props.visible) {
+        return(
+            <div className="settingsMenu">
+                <p className="settingsItem">Settings Menu</p>
+            </div>
+        )
+    } else {
+        return(<div></div>)
     }
 }
