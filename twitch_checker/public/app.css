@@ -1,4 +1,4 @@
-html{color:#000;background:#FFF}
+html{color:#000;background:#FFF;font-family:Arial, Helvetica, sans-serif;}
 body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0}
 table{border-collapse:collapse;border-spacing:0}
 fieldset,img{border:0}
@@ -18,12 +18,24 @@ legend{color:#000}
     margin: auto;
 }
 
+.logo {
+    font-size: 400%;
+    margin: auto;
+    margin-top: 1em;
+    display: block;
+    text-align: center;
+}
+
+.purple {
+    color: purple;
+}
+
 .topBar {
     display: flex;
 }
 
 .streamInput {
-    font-size: 150%;
+    font-size: 125%;
     flex-grow: 1;
     margin-left: 1em;
     padding-left: 1em;
@@ -36,7 +48,7 @@ legend{color:#000}
     margin-left: 1em;
     margin-right: 1em;
     border: none;
-    font-size: 175%;
+    font-size: 150%;
     font-weight: bold;
     vertical-align: sub;
 }
@@ -57,7 +69,7 @@ legend{color:#000}
     flex-grow: 0;
     background: 0;
     border: 0;
-    font-size: 110%;
+    font-size: 100%;
     opacity: 0.5;
 }
 
@@ -73,10 +85,13 @@ legend{color:#000}
 }
 
 .streamItem {
-    font-size: 150%;
-    margin: 1em;
+    font-size: 125%;
+    padding: 1em;
     display: flex;
+    box-sizing: border-box;
+    border-bottom: 1px solid rgba(1,1,1,0);
 }
+
 
 .streamItemBlockContainer {
     display: inline-block;
@@ -99,6 +114,7 @@ legend{color:#000}
 
 .streamItemLine {
     margin: 1px;
+    font-size: 16px;
 }
 
 .streamItemDeleteButton {
@@ -112,4 +128,9 @@ legend{color:#000}
 
 .streamItemDeleteButton:hover {
     opacity: 1;
+}
+
+
+.streamItem:hover {
+    border-bottom: 1px solid purple;
 }

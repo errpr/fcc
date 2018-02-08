@@ -7,16 +7,25 @@ import FilterBar from './filterbar';
 export default class App extends React.Component {
     constructor(props) {
         super(props);
+
+        this.refreshInterval = 60000;
+
         this.state = { 
             streams: [],
             filter: "all",
+            useLocalStorage: true,
+            refreshStreams: true,
+            intervalId: null
         };
+
         this.addStream = this.addStream.bind(this);
         this.changeFilter = this.changeFilter.bind(this);
         this.collectStreams = this.collectStreams.bind(this);
         this.streamDataCallback = this.streamDataCallback.bind(this);
         this.getStream = this.getStream.bind(this);
         this.deleteStream = this.deleteStream.bind(this);
+        this.toggleLocalStorage = this.toggleLocalStorage.bind(this);
+        this.toggleRefreshStreams = this.toggleRefreshStreams.bind(this);
     }
 
     componentDidMount() {
@@ -31,11 +40,27 @@ export default class App extends React.Component {
         if(localStorage.getItem('filter')) {
             this.setState({ filter: localStorage.getItem('filter')})
         }
+        if(localStorage.getItem('refreshStreams')) {
+            const rs = localStorage.getItem('refreshStreams');
+            this.setState({ refreshStreams: rs });
+            if(rs) {
+                this.state.intervalId = setInterval(this.collectStreams, this.refreshInterval);
+            }
+        } else {
+            this.state.intervalId = setInterval(this.collectStreams, this.refreshInterval);
+        }
+        this.collectStreams();
     }
 
     componentDidUpdate() {
-        localStorage.setItem('filter', this.state.filter);
-        localStorage.setItem('streams', JSON.stringify(this.state.streams));
+        if(this.state.useLocalStorage){
+            localStorage.setItem('filter', this.state.filter);
+            localStorage.setItem('streams', JSON.stringify(this.state.streams));
+        }
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.state.intervalId);
     }
 
     collectStreams() {
@@ -82,7 +107,7 @@ export default class App extends React.Component {
     blankStream(name) {
         return {
             name: name,
-            status: 'unchecked',
+            status: 'offline',
             "stream": {
                 "channel": {
                     "game": "Unknown",
@@ -123,14 +148,37 @@ export default class App extends React.Component {
         }
     }
 
+    toggleLocalStorage() {
+        this.setState(prevState => ({ useLocalStorage: !prevState.useLocalStorage }));
+        localStorage.clear();
+    }
+
+    toggleRefreshStreams() {
+        if(this.state.refreshStreams) {
+            clearInterval(this.state.intervalId);
+            this.setState({ refreshStreams: false, intervalId: null });
+        } else {
+            const id = setInterval(this.collectStreams, this.refreshInterval);
+            this.setState({ refreshStreams: true, intervalId: id });
+        }
+    }
+
     render() {
         return(
             <div className="appContainer">
-                <button onClick={this.collectStreams}>Check Streams</button>
                 <Logo />
-                <TopBar addStream={this.addStream} />
-                <FilterBar changeFilter={this.changeFilter} selectedFilter={this.state.filter} />
-                <StreamList streams={this.visibleStreams()} deleteStream={this.deleteStream} />
+                <TopBar 
+                    addStream={this.addStream}
+                    useLocalStorage={this.state.useLocalStorage}
+                    toggleLocalStorage={this.toggleLocalStorage}
+                    refreshStreams={this.state.refreshStreams}
+                    toggleRefreshStreams={this.toggleRefreshStreams} />
+                <FilterBar 
+                    changeFilter={this.changeFilter} 
+                    selectedFilter={this.state.filter} />
+                <StreamList 
+                    streams={this.visibleStreams()} 
+                    deleteStream={this.deleteStream} />
             </div>
         )
     }

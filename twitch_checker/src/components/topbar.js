@@ -43,7 +43,12 @@ export default class TopBar extends React.Component {
                         &#9776;
                     </button>
                 </div>
-                <SettingsMenu visible={this.state.settingsVisible} />
+                <SettingsMenu 
+                    useLocalStorage={this.props.useLocalStorage}
+                    toggleLocalStorage={this.props.toggleLocalStorage} 
+                    refreshStreams={this.props.refreshStreams}
+                    toggleRefreshStreams={this.props.toggleRefreshStreams}
+                    visible={this.state.settingsVisible} />
             </div>
         )
     }
