@@ -20,7 +20,7 @@ export default function StreamItem(props) {
                     data-stream-name={props.stream.name} 
                     className="streamItemDeleteButton" 
                     onClick={props.deleteStream}>
-                    x
+                    &#x1F5D9;
                 </button>
             </li>
         );

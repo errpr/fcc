@@ -4,14 +4,8 @@ export default class TopBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = { value: "" };
-        this.handleClick = this.handleClick.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
-    }
-
-    handleClick(e) {
-        this.props.addStream(this.state.value);
-        this.setState({ value: "" });
     }
 
     handleChange(e) {
@@ -30,7 +24,7 @@ export default class TopBar extends React.Component {
         return(
             <div>
                 <input type="text" placeholder="Stream Name" value={this.state.value} onKeyDown={this.handleKeyDown} onChange={this.handleChange} />
-                <button onClick={this.handleClick}>Add Stream</button>
+                <button onClick={this.props.toggleSettings}>Settings</button>
             </div>
         )
     }

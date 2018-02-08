@@ -3,13 +3,15 @@ import Logo from './logo';
 import TopBar from './topbar';
 import StreamList from './streamlist';
 import FilterBar from './filterbar';
+import SettingsMenu from './settingsmenu';
 
 export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = { 
             streams: [],
-            filter: "all"
+            filter: "all",
+            settingsVisible: false
         };
         this.addStream = this.addStream.bind(this);
         this.changeFilter = this.changeFilter.bind(this);
@@ -17,6 +19,7 @@ export default class App extends React.Component {
         this.streamDataCallback = this.streamDataCallback.bind(this);
         this.getStream = this.getStream.bind(this);
         this.deleteStream = this.deleteStream.bind(this);
+        this.toggleSettings = this.toggleSettings.bind(this);
     }
 
     componentDidMount() {
@@ -102,6 +105,10 @@ export default class App extends React.Component {
         }
     }
 
+    toggleSettings() {
+        this.setState(prevState => ({ settingsVisible: !prevState.settingsVisible }));
+    }
+
     deleteStream(e) {
         const streamName = e.target.dataset["streamName"];
         this.setState(prevState => (
@@ -128,7 +135,8 @@ export default class App extends React.Component {
             <div>
                 <button onClick={this.collectStreams}>Check Streams</button>
                 <Logo />
-                <TopBar addStream={this.addStream} />
+                <TopBar addStream={this.addStream} toggleSettings={this.toggleSettings} />
+                <SettingsMenu visible={this.state.settingsVisible} />
                 <StreamList streams={this.visibleStreams()} deleteStream={this.deleteStream} />
                 <FilterBar changeFilter={this.changeFilter} />
             </div>
