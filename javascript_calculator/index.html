@@ -14,9 +14,9 @@
         <div id="top-bar">
             <div id="app-name">Calculator</div>
             <div id="app-controls">
-                <button id="app-minimize">&#x207b;</button>
-                <button id="app-maximize">&#x2610;</button>
-                <button id="app-close">&#x2715;</button>
+                <button class="app-control-item" id="app-minimize">&#8212;</button>
+                <button class="app-control-item" id="app-maximize">&#x2610;</button>
+                <button class="app-control-item" id="app-close">&#x2715;</button>
             </div>
         </div>
         <div id="menu-container">
@@ -28,50 +28,50 @@
                 <li class="menu-item">Menu Item</li>
             </ul>
         </div>
+        <div id="second-bar">
+            <button class="second-bar-item" id="menu-button">&#9776;</button>
+            <div id="calculator-type">Standard</div>
+            <button class="second-bar-item" id="history-button">&#x21ba;</button>
+        </div>
         <div id="display-container">
-            <div id="menu-button-container">
-                <button id="menu-button">&#9776;</button>
-            </div>
-            <div id="history-button-container">
-                <button id="history-button">&#x21ba;</button>
-            </div>
             <div id="previous-operation-display-container">
-                <p id="previous-operation-display"></p>
+                <p id="previous-operation-display">-9 x</p>
             </div>
-            <input id="display-input">
+            <input id="display-input" value="-9">
         </div>
         <div id="memory-controls-container">
-            <button id="memory-clear">MC</button>
-            <button id="memory-recall">MR</button>
-            <button id="memory-add">M+</button>
-            <button id="memory-subtract">M-</button>
-            <button id="memory-store">MS</button>
-            <button id="memory-expand">M&#x25bc;</button>
+            <button class="memory-control-item" id="memory-clear">MC</button>
+            <button class="memory-control-item" id="memory-recall">MR</button>
+            <button class="memory-control-item" id="memory-add">M+</button>
+            <button class="memory-control-item" id="memory-subtract">M-</button>
+            <button class="memory-control-item" id="memory-store">MS</button>
+            <button class="memory-control-item" id="memory-expand">M&#x25bc;</button>
         </div>
         <div id="main-button-grid">
-            <button class="main-button" id="percent">%</button>
-            <button class="main-button" id="square-root">&#x221a;</button>
+            <button id="percent" class="main-button">%</button>
+            <button id="square-root" class="main-button">&#x221a;</button>
             <button id="square" class="main-button">&#x1d4cd;&#xb2;</button>
             <button id="one-over" class="main-button">1/&#x1d4cd;</button>
             <button id="clear-entry" class="main-button">CE</button>
             <button id="clear" class="main-button">C</button>
             <button id="backspace" class="main-button">&#x232b;</button>
-            <button id="divide" class="main-button">&#xf7;</button>
-            <button id="multiply" class="main-button">&#x2715;</button>
-            <button id="subtract" class="main-button">&#x2212;</button>
-            <button id="add" class="main-button">&#x2b;</button>
+            <button id="divide" class="main-button blue-bg">&#xf7;</button>
+            <button id="multiply" class="main-button blue-bg">&#x2715;</button>
+            <button id="subtract" class="main-button blue-bg">&#x2212;</button>
+            <button id="add" class="main-button blue-bg">&#x2b;</button>
             <button id="sign" class="main-button">&#xb1;</button>
             <button id="decimal" class="main-button">.</button>
-            <button id="9" class="main-button">9</button>
-            <button id="8" class="main-button">8</button>
-            <button id="7" class="main-button">7</button>
-            <button id="6" class="main-button">6</button>
-            <button id="5" class="main-button">5</button>
-            <button id="4" class="main-button">4</button>
-            <button id="3" class="main-button">3</button>
-            <button id="2" class="main-button">2</button>
-            <button id="1" class="main-button">1</button>
-            <button id="0" class="main-button">0</button>
+            <button id="equals" class="main-button blue-bg">=</button>
+            <button id="9" class="main-button number-button">9</button>
+            <button id="8" class="main-button number-button">8</button>
+            <button id="7" class="main-button number-button">7</button>
+            <button id="6" class="main-button number-button">6</button>
+            <button id="5" class="main-button number-button">5</button>
+            <button id="4" class="main-button number-button">4</button>
+            <button id="3" class="main-button number-button">3</button>
+            <button id="2" class="main-button number-button">2</button>
+            <button id="1" class="main-button number-button">1</button>
+            <button id="0" class="main-button number-button">0</button>
         </div>
         <div id="history-and-memory-container">
             <div id="history-container">
