@@ -32,10 +32,9 @@ button:active, button.clicked {
     background-color: rgb(31, 31, 31);
     border: 1px solid rgb(42, 139, 215);
     color: white;
-    min-width: 475px;
+    min-width: 350px;
     width: 75vw;
-    max-width: 700px;
-    min-height: 650px;
+    min-height: 625px;
     height: 90vh;
     box-shadow: 6px 6px 12px 3px rgba(0, 0, 0, 0.6);
     box-sizing: border-box;
