@@ -50,7 +50,7 @@ button:active, button.clicked {
     grid-column: 1 / span 4;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: auto auto auto auto auto auto;
-    padding: 0.2em;
+    padding: 0.25em;
 }
 
 #top-bar {
@@ -63,8 +63,9 @@ button:active, button.clicked {
 
 #app-name {
     display: inline-block;
-    font-size: 80%;
-    padding: 1em;
+    font-size: 75%;
+    padding-left: 1em;
+    padding-top: 0.75em;
 }
 
 #app-controls {

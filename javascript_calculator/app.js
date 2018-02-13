@@ -76,8 +76,10 @@ function currentOp(opString) {
 
 function operationButton(opString) {
     if(displayingTotal) {
-        swapOp(opString);
-        return;
+        if(!!currentOperation) {
+            swapOp(opString);
+            return;
+        }
     }
     if(!currentNumber) { return; }
     executeOperation(currentOperation);
