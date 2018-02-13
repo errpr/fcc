@@ -31,13 +31,13 @@
         <div id="second-bar">
             <button class="second-bar-item" id="menu-button">&#9776;</button>
             <div id="calculator-type">Standard</div>
-            <button class="second-bar-item" id="history-button">&#x21ba;</button>
+            <button onclick="toggleHistory()" class="second-bar-item" id="history-button">&#x21ba;</button>
         </div>
         <div id="display-container">
             <div id="previous-operation-display-container">
-                <p id="previous-operation-display">-9 x</p>
+                <p id="previous-operation-display"></p>
             </div>
-            <input id="display-input" value="-9">
+            <p id="display-current">0</p>
         </div>
         <div id="memory-controls-container">
             <button class="memory-control-item" id="memory-clear">MC</button>
@@ -45,46 +45,45 @@
             <button class="memory-control-item" id="memory-add">M+</button>
             <button class="memory-control-item" id="memory-subtract">M-</button>
             <button class="memory-control-item" id="memory-store">MS</button>
-            <button class="memory-control-item" id="memory-expand">M&#x25bc;</button>
+            <button onclick="toggleMemory()" class="memory-control-item" id="memory-expand">M&#x25bc;</button>
         </div>
-        <div id="main-button-grid">
-            <button id="percent" class="main-button">%</button>
-            <button id="square-root" class="main-button">&#x221a;</button>
-            <button id="square" class="main-button">&#x1d4cd;&#xb2;</button>
-            <button id="one-over" class="main-button">1/&#x1d4cd;</button>
-            <button id="clear-entry" class="main-button">CE</button>
-            <button id="clear" class="main-button">C</button>
-            <button id="backspace" class="main-button">&#x232b;</button>
-            <button id="divide" class="main-button blue-bg">&#xf7;</button>
-            <button id="multiply" class="main-button blue-bg">&#x2715;</button>
-            <button id="subtract" class="main-button blue-bg">&#x2212;</button>
-            <button id="add" class="main-button blue-bg">&#x2b;</button>
-            <button id="sign" class="main-button">&#xb1;</button>
-            <button id="decimal" class="main-button">.</button>
-            <button id="equals" class="main-button blue-bg">=</button>
-            <button id="9" class="main-button number-button">9</button>
-            <button id="8" class="main-button number-button">8</button>
-            <button id="7" class="main-button number-button">7</button>
-            <button id="6" class="main-button number-button">6</button>
-            <button id="5" class="main-button number-button">5</button>
-            <button id="4" class="main-button number-button">4</button>
-            <button id="3" class="main-button number-button">3</button>
-            <button id="2" class="main-button number-button">2</button>
-            <button id="1" class="main-button number-button">1</button>
-            <button id="0" class="main-button number-button">0</button>
+        <button onclick="currentOp('%')" id="percent" class="main-button">%</button>
+        <button onclick="currentOp('sqrt')" id="square-root" class="main-button">&#x221a;</button>
+        <button onclick="currentOp('square')" id="square" class="main-button">&#x1d4cd;&#xb2;</button>
+        <button onclick="currentOp('oneOver')" id="one-over" class="main-button">1/&#x1d4cd;</button>
+        <button onclick="clearEntryButton()" id="clear-entry" class="main-button">CE</button>
+        <button onclick="clearButton()" id="clear" class="main-button">C</button>
+        <button onclick="currentOp('backspace')" id="backspace" class="main-button">&#x232b;</button>
+        <button onclick="operationButton('/')" id="divide" class="main-button blue-bg">&#xf7;</button>
+        <button onclick="operationButton('*')" id="multiply" class="main-button blue-bg">&#x2715;</button>
+        <button onclick="operationButton('-')" id="subtract" class="main-button blue-bg">&#x2212;</button>
+        <button onclick="operationButton('+')" id="add" class="main-button blue-bg">&#x2b;</button>
+        <button onclick="currentOp('sign')" id="sign" class="main-button">&#xb1;</button>
+        <button onclick="decimal()" id="decimal" class="main-button">.</button>
+        <button onclick="equalsButton()" id="equals" class="main-button blue-bg">=</button>
+        <button onclick="numberButton('9')" id="nine" class="main-button number-button">9</button>
+        <button onclick="numberButton('8')" id="eight" class="main-button number-button">8</button>
+        <button onclick="numberButton('7')" id="seven" class="main-button number-button">7</button>
+        <button onclick="numberButton('6')" id="six" class="main-button number-button">6</button>
+        <button onclick="numberButton('5')" id="five" class="main-button number-button">5</button>
+        <button onclick="numberButton('4')" id="four" class="main-button number-button">4</button>
+        <button onclick="numberButton('3')" id="three" class="main-button number-button">3</button>
+        <button onclick="numberButton('2')" id="two" class="main-button number-button">2</button>
+        <button onclick="numberButton('1')" id="one" class="main-button number-button">1</button>
+        <button onclick="numberButton('0')" id="zero" class="main-button number-button">0</button>
+
+        <div class="history-and-memory-container" id="history-container">
+            <ul id="history-list">
+                <li id="history-item">History Item</li>
+            </ul>
+            <button id="history-trash">&#x1f5d1;</button>
         </div>
-        <div id="history-and-memory-container">
-            <div id="history-container">
-                <ul id="history-list">
-                    <li id="history-item">History Item</li>
-                </ul>
-            </div>
-            <div id="memory-container">
-                <ul class="memory-list">
-                    <li class="memory-item">Memory Item</li>
-                </ul>
-            </div>
+        <div class="history-and-memory-container" id="memory-container">
+            <ul class="memory-list">
+                <li class="memory-item">Memory Item</li>
+            </ul>
         </div>
+
     </div>
 </div>
 
