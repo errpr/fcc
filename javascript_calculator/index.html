@@ -47,31 +47,32 @@
             <button class="memory-control-item" id="memory-store">MS</button>
             <button onclick="toggleMemory()" class="memory-control-item" id="memory-expand">M&#x25bc;</button>
         </div>
-        <button onclick="currentOp('%')" id="percent" class="main-button">%</button>
-        <button onclick="currentOp('sqrt')" id="square-root" class="main-button">&#x221a;</button>
-        <button onclick="currentOp('square')" id="square" class="main-button">&#x1d4cd;&#xb2;</button>
-        <button onclick="currentOp('oneOver')" id="one-over" class="main-button">1/&#x1d4cd;</button>
-        <button onclick="clearEntryButton()" id="clear-entry" class="main-button">CE</button>
-        <button onclick="clearButton()" id="clear" class="main-button">C</button>
-        <button onclick="currentOp('backspace')" id="backspace" class="main-button">&#x232b;</button>
-        <button onclick="operationButton('/')" id="divide" class="main-button blue-bg">&#xf7;</button>
-        <button onclick="operationButton('*')" id="multiply" class="main-button blue-bg">&#x2715;</button>
-        <button onclick="operationButton('-')" id="subtract" class="main-button blue-bg">&#x2212;</button>
-        <button onclick="operationButton('+')" id="add" class="main-button blue-bg">&#x2b;</button>
-        <button onclick="currentOp('sign')" id="sign" class="main-button">&#xb1;</button>
-        <button onclick="decimal()" id="decimal" class="main-button">.</button>
-        <button onclick="equalsButton()" id="equals" class="main-button blue-bg">=</button>
-        <button onclick="numberButton('9')" id="nine" class="main-button number-button">9</button>
-        <button onclick="numberButton('8')" id="eight" class="main-button number-button">8</button>
-        <button onclick="numberButton('7')" id="seven" class="main-button number-button">7</button>
-        <button onclick="numberButton('6')" id="six" class="main-button number-button">6</button>
-        <button onclick="numberButton('5')" id="five" class="main-button number-button">5</button>
-        <button onclick="numberButton('4')" id="four" class="main-button number-button">4</button>
-        <button onclick="numberButton('3')" id="three" class="main-button number-button">3</button>
-        <button onclick="numberButton('2')" id="two" class="main-button number-button">2</button>
-        <button onclick="numberButton('1')" id="one" class="main-button number-button">1</button>
-        <button onclick="numberButton('0')" id="zero" class="main-button number-button">0</button>
-
+        <div id="main-button-grid">
+            <button onclick="currentOp('%')" id="percent" class="main-button">%</button>
+            <button onclick="currentOp('sqrt')" id="square-root" class="main-button">&#x221a;</button>
+            <button onclick="currentOp('square')" id="square" class="main-button">&#x1d4cd;&#xb2;</button>
+            <button onclick="currentOp('oneOver')" id="one-over" class="main-button">1/&#x1d4cd;</button>
+            <button onclick="clearEntryButton()" id="clear-entry" class="main-button">CE</button>
+            <button onclick="clearButton()" id="clear" class="main-button">C</button>
+            <button onclick="currentOp('backspace')" id="backspace" class="main-button">&#x232b;</button>
+            <button onclick="operationButton('/')" id="divide" class="main-button blue-bg">&#xf7;</button>
+            <button onclick="operationButton('*')" id="multiply" class="main-button blue-bg">&#x2715;</button>
+            <button onclick="operationButton('-')" id="subtract" class="main-button blue-bg">&#x2212;</button>
+            <button onclick="operationButton('+')" id="add" class="main-button blue-bg">&#x2b;</button>
+            <button onclick="currentOp('sign')" id="sign" class="main-button">&#xb1;</button>
+            <button onclick="decimal()" id="decimal" class="main-button">.</button>
+            <button onclick="equalsButton()" id="equals" class="main-button blue-bg">=</button>
+            <button onclick="numberButton('9')" id="nine" class="main-button number-button">9</button>
+            <button onclick="numberButton('8')" id="eight" class="main-button number-button">8</button>
+            <button onclick="numberButton('7')" id="seven" class="main-button number-button">7</button>
+            <button onclick="numberButton('6')" id="six" class="main-button number-button">6</button>
+            <button onclick="numberButton('5')" id="five" class="main-button number-button">5</button>
+            <button onclick="numberButton('4')" id="four" class="main-button number-button">4</button>
+            <button onclick="numberButton('3')" id="three" class="main-button number-button">3</button>
+            <button onclick="numberButton('2')" id="two" class="main-button number-button">2</button>
+            <button onclick="numberButton('1')" id="one" class="main-button number-button">1</button>
+            <button onclick="numberButton('0')" id="zero" class="main-button number-button">0</button>
+        </div>
         <div class="history-and-memory-container" id="history-container">
             <ul id="history-list">
                 <li id="history-item">History Item</li>
