@@ -4,8 +4,10 @@ let currentNumber = "";
 let currentOperation = "";
 let operationStack = "";
 let displayingTotal = false;
+let calcHistory = [];
 const display = document.getElementById('display-current');
 const opStackElement = document.getElementById('previous-operation-display');
+const historyElement = document.getElementById('history-list');
 
 function toggleHistory() {
     document.getElementById('memory-container').classList.remove('h-and-m-open');
@@ -97,10 +99,19 @@ function swapOp(opString) {
 function equalsButton() {
     executeOperation(currentOperation);
     var final = total;
+    saveHistory(final);
     clearState();
     total = final;
     finalizeOperation();
     total = 0;
+}
+
+function saveHistory(final) {
+    calcHistory.push({
+        operationStack: operationStack + ' ' + currentNumber,
+        total: final
+    })
+    rebuildHistory();
 }
 
 function clearEntryButton() {
@@ -120,6 +131,23 @@ function clearState() {
     currentNumber = "";
     total = 0;
     prevNumber = 0;
+}
+
+function rebuildHistory() {
+    historyElement.innerHTML = '';
+    calcHistory.forEach(function(o){
+        let li = document.createElement('li');
+        let p1 = document.createElement('p');
+        let p2 = document.createElement('p');
+        li.classList.add('history-item');
+        p1.classList.add('history-item-ops');
+        p1.innerText = o.operationStack + ' =';
+        p2.classList.add('history-item-total');
+        p2.innerText = o.total;
+        li.appendChild(p1);
+        li.appendChild(p2);
+        historyElement.appendChild(li);
+    });
 }
 
 function fireClick(buttonId) {
