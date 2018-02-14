@@ -159,10 +159,15 @@ function clearHistory() {
     rebuildHistory();
 }
 
+function closeHistory() {
+    document.getElementById('history-container').classList.remove('h-and-m-open');
+}
+
 function handleHistoryClick(e) {
     const el = e.target;
     const index = el.getAttribute('data-index');
     const o = calcHistory[index];
+    closeHistory();
     clearState();
     restoredHistory = true;
     operationStack = o.operationStack;
@@ -237,8 +242,13 @@ function memorySubtract(i = calcMemory.length - 1) {
     rebuildMemory();
 }
 
+function closeMemory() {
+    document.getElementById('memory-container').classList.remove('h-and-m-open');
+}
+
 function memoryRecall(i = calcMemory.length - 1) {
     if(i === -1) { return; }
+    closeMemory();
     clearState();
     currentNumber = "" + calcMemory[i];
     updateDisplays();
