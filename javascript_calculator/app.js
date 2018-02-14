@@ -22,8 +22,22 @@ function toggleMemory() {
     document.getElementById('memory-container').classList.toggle('h-and-m-open');
 }
 
+// length numbers set for small display, need a way to generate dynamically
 function updateDisplays() {
     display.innerText = currentNumber;
+    if(currentNumber.length < 12) {
+        display.classList.add('large-text');
+        display.classList.remove('medium-text');
+        display.classList.remove('small-text');
+    } else if(currentNumber.length < 20) {
+        display.classList.add('medium-text');
+        display.classList.remove('large-text');
+        display.classList.remove('small-text');
+    } else {
+        display.classList.add('small-text');
+        display.classList.remove('large-text');
+        display.classList.remove('medium-text');
+    }
     opStackElement.innerText = operationStack;
 }
 

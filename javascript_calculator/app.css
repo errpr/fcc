@@ -114,6 +114,8 @@ button:active, button.clicked {
     grid-row: 3 / span 2;
     text-align: right;
     padding-right: 1em;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 #previous-operation-display:after {
@@ -129,12 +131,23 @@ button:active, button.clicked {
 
 #display-current {
     margin: 0;
-    font-size: 300%;
     background: none;
     border: none;
     color: white;
     text-align: right;
     width: 100%;
+}
+
+.large-text {
+    font-size: 300%;
+}
+
+.medium-text {
+    font-size: 175%;
+}
+
+.small-text {
+    font-size: 80%;
 }
 
 #memory-controls-container {
