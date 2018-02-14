@@ -19,6 +19,11 @@ export default function SettingsMenu(props) {
                     checked={props.refreshStreams} />
                 Refresh streams automatically.
             </div>
+            <div id="githubLink">
+                <a href="https://github.com/errpr/fcc/tree/master/twitch_checker">
+                    Check out the source on github
+                </a>
+            </div>
         </div>
     )
 }
