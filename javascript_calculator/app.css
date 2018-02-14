@@ -21,10 +21,6 @@ button:active, button.clicked {
     background-color: rgb(96, 96, 96);
 }
 
-#root {
-    height: 100vh;
-}
-
 #calculator-container {
     z-index: 1;
     position: relative;
@@ -323,7 +319,7 @@ button:active, button.clicked {
 
 #history-list {
     flex-grow: 1;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 .history-item {
@@ -332,6 +328,7 @@ button:active, button.clicked {
     text-align: right;
     padding: 0.5em;
     padding-right: 1em;
+    cursor: pointer;
 }
 
 .history-item-ops {
@@ -351,6 +348,46 @@ button:active, button.clicked {
 }
 
 #history-trash {
+    margin-left: auto;
+    font-size: 300%;
+    flex-grow: 0;
+    height: 1.5em;
+    width: 1.5em;
+}
+
+#memory-list {
+    flex-grow: 1;
+    overflow-y: scroll;
+}
+
+.memory-item {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    text-align: right;
+    padding: 0.5em;
+    padding-right: 1em;
+    cursor: pointer;
+}
+
+.memory-item-value {
+    font-size: 150%;
+    padding: 0.5em;
+}
+
+.memory-item-button {
+    font-size: 80%;
+    padding: 1em;
+}
+
+.memory-item:hover {
+    background-color: rgb(64,64,64);
+}
+
+.memory-item-button:hover {
+    background-color: rgb(96, 96, 96);
+}
+
+#memory-trash {
     margin-left: auto;
     font-size: 300%;
     flex-grow: 0;

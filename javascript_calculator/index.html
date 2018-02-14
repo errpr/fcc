@@ -40,11 +40,11 @@
             <p id="display-current">0</p>
         </div>
         <div id="memory-controls-container">
-            <button class="memory-control-item" id="memory-clear">MC</button>
-            <button class="memory-control-item" id="memory-recall">MR</button>
-            <button class="memory-control-item" id="memory-add">M+</button>
-            <button class="memory-control-item" id="memory-subtract">M-</button>
-            <button class="memory-control-item" id="memory-store">MS</button>
+            <button onclick="clearMemory()" class="memory-control-item" id="memory-clear">MC</button>
+            <button onclick="memoryRecall()" class="memory-control-item" id="memory-recall">MR</button>
+            <button onclick="memoryAdd()" class="memory-control-item" id="memory-add">M+</button>
+            <button onclick="memorySubtract()" class="memory-control-item" id="memory-subtract">M-</button>
+            <button onclick="storeMemory()" class="memory-control-item" id="memory-store">MS</button>
             <button onclick="toggleMemory()" class="memory-control-item" id="memory-expand">M&#x25bc;</button>
         </div>
         <div id="main-button-grid">
@@ -75,17 +75,13 @@
         </div>
         <div class="history-and-memory-container" id="history-container">
             <ul id="history-list">
-                <li class="history-item">
-                    <p class="history-item-ops">2 + 2 =</p>
-                    <p class="history-item-total">4</p>
-                </li>
             </ul>
-            <button id="history-trash">&#x1f5d1;</button>
+            <button onclick="clearHistory()" id="history-trash">&#x1f5d1;</button>
         </div>
         <div class="history-and-memory-container" id="memory-container">
-            <ul class="memory-list">
-                <li class="memory-item">Memory Item</li>
+            <ul id="memory-list">
             </ul>
+            <button onclick="clearMemory()" id="memory-trash">&#x1f5d1;</button>
         </div>
 
     </div>
