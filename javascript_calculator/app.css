@@ -310,6 +310,10 @@ button:active, button.clicked {
     height: 0px;
     transition-property: height top;
     transition-duration: 0.5s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: right;
 }
 
 .h-and-m-open {
@@ -317,6 +321,39 @@ button:active, button.clicked {
     top: 0;
 }
 
-#history-container {
-    z-index: 20;
+#history-list {
+    flex-grow: 1;
+    overflow: scroll;
+}
+
+.history-item {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    text-align: right;
+    padding: 0.5em;
+    padding-right: 1em;
+}
+
+.history-item-ops {
+    text-align: right;
+    color: grey;
+}
+
+.history-item-total {
+    text-align: right;
+    color: white;
+    font-size: 175%;
+    margin-top: 0.5em;
+}
+
+.history-item:hover {
+    background-color: rgb(64,64,64);
+}
+
+#history-trash {
+    margin-left: auto;
+    font-size: 300%;
+    flex-grow: 0;
+    height: 1.5em;
+    width: 1.5em;
 }
