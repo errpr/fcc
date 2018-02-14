@@ -160,7 +160,6 @@ function clearHistory() {
 }
 
 function handleHistoryClick(e) {
-    console.log(e);
     const el = e.target;
     const index = el.getAttribute('data-index');
     const o = calcHistory[index];
@@ -209,7 +208,6 @@ function storeMemory() {
 }
 
 function handleMemoryItemClick(e) {
-    console.log(e);
     const i = e.target.getAttribute('data-index');
     const func = e.target.getAttribute('data-func');
     switch(func){
