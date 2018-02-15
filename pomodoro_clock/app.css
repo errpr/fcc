@@ -1,0 +1,46 @@
+* {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 16pt;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#root {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#app-title {
+    font-size: 300%;
+    color: tomato;
+}
+
+#timer-controls {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.timer-control-containers {
+    display: flex;
+    flex-flow: row wrap;
+    max-width: 300px;
+    margin: 1em;
+}
+
+.timer-control-titles {
+    width: 100%;
+}
+
+.timer-control-buttons {
+    flex-grow: 1;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.timer-control-values {
+    font-size: 150%;
+    flex-grow: 1;
+}
