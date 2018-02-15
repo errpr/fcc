@@ -87,6 +87,7 @@
     margin-top: -150px;
     opacity: 0.70;
     font-size: 800%;
+    vertical-align: super;
 }
 
 #timer-floater {
@@ -111,5 +112,6 @@
         width: 450px;
         margin-left: -225px;
         margin-top: -275px;
+        padding-bottom: 50px;
     }
 }

@@ -1,9 +1,9 @@
 let state = {
     startTime: 0,
     endTime: 0,
-    timerInterval: 25 * 60 * 1000,
+    timerInterval: 1 * 60 * 1000,
     timerName: 'Session',
-    sessionInterval: 25 * 60 * 1000,
+    sessionInterval: 1 * 60 * 1000,
     breakInterval: 5 * 60 * 1000
 }
 
