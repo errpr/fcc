@@ -5,6 +5,17 @@
     margin: 0;
     padding: 0;
     border: 0;
+    background: none;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome and Opera */
 }
 
 #root {
@@ -21,6 +32,7 @@
 #timer-controls {
     display: flex;
     flex-flow: row nowrap;
+    justify-content: center;
 }
 
 .timer-control-containers {
@@ -36,11 +48,68 @@
 
 .timer-control-buttons {
     flex-grow: 1;
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
 }
 
 .timer-control-values {
     font-size: 150%;
     flex-grow: 1;
+}
+
+#timer-display {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 10;
+    height: 50vh;
+    min-height: 280px;
+    width: 75vw;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#timer-name, #timer-minutes {
+    z-index: 20;
+    font-size: 200%;
+}
+
+#tomato-picture {
+    z-index: 5;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 250px;
+    width: 250px;
+    margin-left: -125px;
+    margin-top: -150px;
+    opacity: 0.70;
+    font-size: 800%;
+}
+
+#timer-floater {
+    z-index: 15;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 150px;
+    height: 150px;
+    margin-left: -75px;
+    margin-top: -75px;
+}
+
+@media (min-height: 675px) and (min-width: 440px) {
+    #timer-display {
+        margin-top: 3em;
+    }
+
+    #tomato-picture {
+        font-size: 1500%;
+        height: 450px;
+        width: 450px;
+        margin-left: -225px;
+        margin-top: -275px;
+    }
 }
