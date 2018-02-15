@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Pomodoro Clock">
+    <meta name="author" content="Steven Branson">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="app.css">
+    <title>Pomodoro Clock</title>
+</head>
+<body>
+
+<div id="root">
+    <h1 id="app-title">Pomodoro Clock</h1>
+    <div id="timer-controls">
+        <div id="session-controls" class="timer-control-containers">
+            <p id="session-control-title" class="timer-control-titles">Session Length</p>
+            <button id="session-control-decrease" class="timer-control-buttons">-</button>
+            <button id="session-control-increase" class="timer-control-buttons">+</button>
+        </div>
+        <div class="timer-control-containers" id="break-controls">
+            <p class="timer-control-titles" id="break-control-title">Break Length</p>
+            <button class="timer-control-buttons" id="button-control-decrease">-</button>
+            <button class="timer-control-buttons" id="button-control-increase">+</button>
+        </div>
+    </div>
+    <div id="timer-display">
+        <p id="timer-name">Session</p>
+        <p id="timer-minutes">25</p>
+    </div>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
