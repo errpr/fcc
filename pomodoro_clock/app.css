@@ -52,8 +52,9 @@ button {
 
 .timer-control-buttons {
     flex-grow: 2;
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+    font-size: 125%;
+    width: 1em;
+    height: 1.25em;
 }
 
 #reset-button-container {
@@ -63,7 +64,7 @@ button {
 
 #reset-timer {
     font-size: 150%;
-    margin: 0;
+    height: 100%;
 }
 
 .timer-control-values {
