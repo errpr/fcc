@@ -69,6 +69,7 @@
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    cursor: pointer;
 }
 
 #timer-name, #timer-remaining {
