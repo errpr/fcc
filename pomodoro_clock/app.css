@@ -71,7 +71,7 @@
     margin-right: auto;
 }
 
-#timer-name, #timer-minutes {
+#timer-name, #timer-remaining {
     z-index: 20;
     font-size: 200%;
 }
