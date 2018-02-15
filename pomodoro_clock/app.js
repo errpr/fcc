@@ -1,10 +1,14 @@
+const TICK_RATE = 250;       //milliseconds
+const ONE_SECOND = 1000;    //milliseconds
+const ONE_MINUTE = 60 * ONE_SECOND;
+
 let state = {
     startTime: 0,
     endTime: 0,
-    timerInterval: 1 * 60 * 1000,
+    timerInterval: function() { return state.sessionInterval },
     timerName: 'Session',
-    sessionInterval: 1 * 60 * 1000,
-    breakInterval: 5 * 60 * 1000,
+    sessionInterval: 25 * ONE_MINUTE,
+    breakInterval: 5 * ONE_MINUTE,
     started: false,
     paused: false,
     timePaused: 0
@@ -20,22 +24,25 @@ const el = {
 }
 
 function updateControlsDisplay() {
-    el.sessionV.innerText = (state.sessionInterval / 60) / 1000;
-    el.breakV.innerText = (state.breakInterval / 60) / 1000;
+    el.sessionV.innerText = state.sessionInterval / ONE_MINUTE;
+    el.breakV.innerText = state.breakInterval / ONE_MINUTE;
+    if(!state.started) {
+        updateTimerDisplay()
+    }
 }
 
-function updateTimerDisplay(currentTime) {
+function updateTimerDisplay(currentTime = 0) {
     if(state.started) {
         el.tomato.style.transform = "rotate(" + calcRotation(currentTime) + "deg)";
-        let m = Math.floor(((state.endTime - currentTime) / 1000) / 60);
+        let m = Math.floor((state.endTime - currentTime) / ONE_MINUTE);
         if(m < 0) { m = 0; }
-        let s = (Math.round((state.endTime - currentTime) / 1000) % 60).toString();
+        let s = (Math.round((state.endTime - currentTime) / ONE_SECOND) % 60).toString();
         if(s.length === 1) { s = "0" + s; }
         el.timerRemaining.innerText = m + ":" + s;
     } else {
         el.timerName.innerText = state.timerName;
         el.tomato.style.transform = "";
-        const m = Math.round((state.timerInterval / 60) / 1000);
+        const m = Math.round(state.timerInterval() / ONE_MINUTE);
         el.timerRemaining.innerText = m + ":00";
     }
 }
@@ -54,30 +61,30 @@ function calcRotation(currentTime) {
 function beginTimer() {
     state.startTime = Date.now();
     state.started = true;
-    state.endTime = state.startTime + state.timerInterval;
-    setTimeout(timerCallback, 1000);
+    state.endTime = state.startTime + state.timerInterval();
+    timerTick();
 }
 
-function timerCallback() {
+function timerTick() {
     const t = Date.now();
-    if(state.paused || state.timePaused > t - 500) {
+    if(state.paused || state.timePaused > t - TICK_RATE) {
         return;
     }
     updateTimerDisplay(t);
     if(t > state.endTime) {
         timerFinished();
     } else {
-        setTimeout(timerCallback, 500);
+        setTimeout(timerTick, TICK_RATE);
     }
 }
 
 function swapTimers() {
     if(state.timerName == 'Session') {
         state.timerName = 'Break';
-        state.timerInterval = state.breakInterval;
+        state.timerInterval = function() { return state.breakInterval };
     } else {
         state.timerName = 'Session';
-        state.timerInterval = state.sessionInterval;
+        state.timerInterval = function() { return state.sessionInterval };
     }
 }
 
@@ -98,7 +105,7 @@ function unpause() {
     const pauseLength = Date.now() - state.timePaused;
     state.startTime += pauseLength;
     state.endTime += pauseLength;
-    timerCallback();
+    timerTick();
 }
 
 function handleTomatoClick() {
@@ -109,6 +116,26 @@ function handleTomatoClick() {
     } else {
         beginTimer();
     }
+}
+
+function increaseBreakTime() {
+    state.breakInterval += ONE_MINUTE;
+    updateControlsDisplay();
+}
+
+function decreaseBreakTime() {
+    state.breakInteval -= ONE_MINUTE;
+    updateControlsDisplay();
+}
+
+function increaseSessionTime() {
+    state.sessionInterval += ONE_MINUTE;
+    updateControlsDisplay();
+}
+
+function decreaseSessionTime() {
+    state.sessionInteval -= ONE_MINUTE;
+    updateControlsDisplay();
 }
 
 el.timerDisplay.addEventListener('click', handleTomatoClick);

@@ -15,15 +15,15 @@
     <div id="timer-controls">
         <div id="session-controls" class="timer-control-containers">
             <p id="session-title" class="timer-control-titles">Session Length</p>
-            <button id="session-decrease" class="timer-control-buttons">-</button>
+            <button id="session-decrease" onclick="decreaseSessionTime()" class="timer-control-buttons">-</button>
             <p class="timer-control-values" id="session-value">25</p>
-            <button id="session-increase" class="timer-control-buttons">+</button>
+            <button id="session-increase" onclick="increaseSessionTime()" class="timer-control-buttons">+</button>
         </div>
         <div class="timer-control-containers" id="break-controls">
             <p class="timer-control-titles" id="break-title">Break Length</p>
-            <button class="timer-control-buttons" id="break-decrease">-</button>
+            <button class="timer-control-buttons" onclick="decreaseBreakTime()" id="break-decrease">-</button>
             <p class="timer-control-values" id="break-value">5</p>
-            <button class="timer-control-buttons" id="break-increase">+</button>
+            <button class="timer-control-buttons" onclick="increaseBreakTime()" id="break-increase">+</button>
         </div>
     </div>
     <div id="timer-display">
