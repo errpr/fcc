@@ -67,7 +67,7 @@ function beginTimer() {
 
 function timerTick() {
     const t = Date.now();
-    if(state.paused || state.timePaused > t - TICK_RATE) {
+    if(!state.started || state.paused || state.timePaused > t - TICK_RATE) {
         return;
     }
     updateTimerDisplay(t);
@@ -89,7 +89,6 @@ function swapTimers() {
 }
 
 function timerFinished() {
-    alert(state.timerName + ' finished.');
     swapTimers();
     state.started = false;
     updateTimerDisplay();
@@ -135,6 +134,14 @@ function increaseSessionTime() {
 
 function decreaseSessionTime() {
     state.sessionInteval -= ONE_MINUTE;
+    updateControlsDisplay();
+}
+
+function resetTimer() {
+    state.endTime = 0;
+    state.startTime = 0;
+    state.started = false;
+    state.paused = false;
     updateControlsDisplay();
 }
 
