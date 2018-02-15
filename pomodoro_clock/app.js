@@ -123,7 +123,7 @@ function increaseBreakTime() {
 }
 
 function decreaseBreakTime() {
-    state.breakInteval -= ONE_MINUTE;
+    state.breakInterval -= ONE_MINUTE;
     updateControlsDisplay();
 }
 
@@ -133,7 +133,7 @@ function increaseSessionTime() {
 }
 
 function decreaseSessionTime() {
-    state.sessionInteval -= ONE_MINUTE;
+    state.sessionInterval -= ONE_MINUTE;
     updateControlsDisplay();
 }
 
