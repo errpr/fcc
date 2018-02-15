@@ -61,6 +61,11 @@ button {
     margin: 0;
 }
 
+#reset-timer {
+    font-size: 150%;
+    margin: 0;
+}
+
 .timer-control-values {
     font-size: 150%;
     flex-grow: 1;
@@ -124,5 +129,9 @@ button {
         margin-left: -225px;
         margin-top: -275px;
         padding-bottom: 50px;
+    }
+
+    #reset-timer {
+        font-size: 200%;
     }
 }
