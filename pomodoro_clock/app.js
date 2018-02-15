@@ -138,6 +138,9 @@ function decreaseSessionTime() {
 }
 
 function resetTimer() {
+    if(!state.started) {
+        swapTimers();
+    }
     state.endTime = 0;
     state.startTime = 0;
     state.started = false;
