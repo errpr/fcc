@@ -22,8 +22,8 @@ function updateControlsDisplay() {
 
 function updateTimerDisplay(currentTime) {
     el.tomato.style.transform = "rotate(" + calcRotation(currentTime) + "deg)";
-    var m = Math.floor(((state.endTime - currentTime) / 60) / 1000);
-    var s = Math.floor((state.endTime - currentTime) / 1000) % 60;
+    var m = Math.round(((state.endTime - currentTime) / 60) / 1000);
+    var s = Math.round((state.endTime - currentTime) / 1000) % 60;
     el.timerRemaining.innerText = m + ":" + s;
 }
 
