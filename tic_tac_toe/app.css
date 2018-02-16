@@ -1,3 +1,11 @@
+* {
+    font-size: 16pt;
+}
+
+h1 {
+    font-size: 200%;
+}
+
 #board-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -28,7 +36,7 @@
 .win-column {
     background-image:
         linear-gradient(
-            to right,
+            to left,
             white 50%,
             red 0
         );
@@ -74,6 +82,7 @@
 
 .board-tile {
     z-index: 15;
+    font-size: 300%;
 }
 
 #tile-0 {
