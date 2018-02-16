@@ -470,7 +470,7 @@ function resetGame() {
     }
     gameState.tiles.forEach(e => {
         e.element.innerText = "";
-        e.element.classList = "board-tile"
+        e.element.classList = "board-tile";
     });
     displaySymbolChooser();
     playerSymbol = "";
