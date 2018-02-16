@@ -16,17 +16,37 @@
 }
 
 .win-row {
-    background-color: red;
+    background-image:
+        linear-gradient(
+            to top,
+            white 50%,
+            red 0
+        );
 }
 
 .win-column {
-    background-color: green;
+    background-image:
+        linear-gradient(
+            to right,
+            white 50%,
+            red 0
+        );
 }
 
 .win-cross0 {
-    background-color: purple;
+    background-image:
+        linear-gradient(
+            to bottom left,
+            white 50%,
+            red 0
+        );
 }
 
 .win-cross1 {
-    background-color: blue;
+    background-image:
+        linear-gradient(
+            to bottom right,
+            white 50%,
+            red 0
+        );
 }
