@@ -1,5 +1,9 @@
 * {
     font-size: 16pt;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -12,22 +16,20 @@ h1 {
     grid-template-rows: 1fr 1fr 1fr;
     grid-gap: 0.5em;
     width: 75vw;
-    height: 50vw;
+    height: 75vh;
     background-color: black;
+    border: 2px solid white;
     z-index: 10;
 }
 
 .board-tile {
-    padding: 0;
-    margin: 0;
-    border: 0;
     background-color: white;
 }
 
 .win-row {
     background-image:
         linear-gradient(
-            to top,
+            to bottom,
             white 50%,
             red 0
         );
@@ -36,7 +38,7 @@ h1 {
 .win-column {
     background-image:
         linear-gradient(
-            to left,
+            to right,
             white 50%,
             red 0
         );
