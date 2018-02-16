@@ -3,7 +3,6 @@
     padding: 0;
     margin: 0;
     border: 0;
-    box-sizing: border-box;
 }
 
 h1 {
@@ -20,6 +19,7 @@ h1 {
     background-color: black;
     border: 2px solid white;
     z-index: 10;
+    padding: 0.5em;
 }
 
 .board-tile {

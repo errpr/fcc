@@ -114,11 +114,11 @@ function chooseSymbol(symbol) {
         return;
     }
     if(symbol === "X") {
-        playerSymbol = "X"
-        computerSymbol = "O"
+        playerSymbol = "X";
+        computerSymbol = "O";
     } else if(symbol === "O") {
-        playerSymbol = "O"
-        computerSymbol = "X"
+        playerSymbol = "O";
+        computerSymbol = "X";
     } else {
         return;
     }
@@ -227,7 +227,7 @@ function secondComputerTurn() {
                         return edgeTiles(columnTiles(myTile))[0];
                     }
                 } else {
-                    return edgeTiles(rowTiles(myTile))[0]
+                    return edgeTiles(rowTiles(myTile))[0];
                 }
             } else {
                 // player controls non-opposing corner
