@@ -11,12 +11,12 @@
 <body>
 <div id="root">
     <h1 id="app-title">Tic Tac Toe</h1>
-    <div id="select-symbol">
-        <p>Choose your symbol. X goes first.</p>
-        <button onclick="chooseSymbol('X')" class="symbol-button" id="choose-x">X</button>
-        <button onclick="chooseSymbol('O')" class="symbol-button" id="choose-o">O</button>
-    </div>
     <div id="board-container">
+        <div id="select-symbol">
+            <p id="select-symbol-text">Choose your symbol. X goes first.</p>
+            <button onclick="chooseSymbol('X')" class="symbol-button" id="choose-x">X</button>
+            <button onclick="chooseSymbol('O')" class="symbol-button" id="choose-o">O</button>
+        </div>
         <button onclick="chooseTile(0)" class="board-tile" id="tile-0"></button>
         <button onclick="chooseTile(1)" class="board-tile" id="tile-1"></button>
         <button onclick="chooseTile(2)" class="board-tile" id="tile-2"></button>
