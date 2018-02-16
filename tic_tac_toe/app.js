@@ -1,70 +1,111 @@
 let playerSymbol = "";
 let computerSymbol = "";
 
-const gameState = {
-    started: false,
-    symbolChosen: false,
-    playersTurn: false,
-    tiles: buildTiles()
-}
+const rows = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8]
+];
 
-const rows = function() { return [
-    [
-        gameState.tiles[0],
-        gameState.tiles[1],
-        gameState.tiles[2]
-    ],
-    [
-        gameState.tiles[3],
-        gameState.tiles[4],
-        gameState.tiles[5]
-    ],
-    [
-        gameState.tiles[6],
-        gameState.tiles[7],
-        gameState.tiles[8]
-    ]
-] }
-const columns = function() { return [
-    [
-        gameState.tiles[0],
-        gameState.tiles[3],
-        gameState.tiles[6]
-    ],
-    [
-        gameState.tiles[1],
-        gameState.tiles[4],
-        gameState.tiles[7]
-    ],
-    [
-        gameState.tiles[2],
-        gameState.tiles[5],
-        gameState.tiles[8]
-    ]
-] }
-const crosses = function() { return [
-    [
-        gameState.tiles[0],
-        gameState.tiles[4],
-        gameState.tiles[8]
-    ],
-    [
-        gameState.tiles[2],
-        gameState.tiles[4],
-        gameState.tiles[6]
-    ]
-] }
+const columns = [
+    [0,3,6],
+    [1,4,7],
+    [2,5,8]
+];
+
+const crosses = [
+    [0,4,8],
+    [2,4,6]
+];
+
+const allGroups = rows.concat(columns).concat(crosses);
+
+let gameState = {}
 
 function buildTiles() {
-    let a = [];
-    for(let i = 0; i < 9; i++){
-        a.push({
-            id: i,
-            occupiedBy: "",
-            element: document.getElementById('tile-' + i)
-        });
-    }
-    return a;
+    return [
+        {
+            id: 0,
+            column_id: 0,
+            row_id: 0,
+            cross_member: true,
+            cross_id: 0,
+            occupiedBy: '',
+            element: document.getElementById('tile-0')
+        },
+        {
+            id: 1,
+            column_id: 1,
+            row_id: 0,
+            cross_member: false,
+            cross_id: null,
+            occupiedBy: '',
+            element: document.getElementById('tile-1')
+        },
+        {
+            id: 2,
+            column_id: 2,
+            row_id: 0,
+            cross_member: true,
+            cross_id: 1,
+            occupiedBy: '',
+            element: document.getElementById('tile-2')
+        },
+        {
+            id: 3,
+            column_id: 0,
+            row_id: 1,
+            cross_member: false,
+            cross_id: null,
+            occupiedBy: '',
+            element: document.getElementById('tile-3')
+        },
+        {
+            id: 4,
+            column_id: 1,
+            row_id: 1,
+            cross_member: 'center',
+            cross_id: null,
+            occupiedBy: '',
+            element: document.getElementById('tile-4')
+        },
+        {
+            id: 5,
+            column_id: 2,
+            row_id: 1,
+            cross_member: false,
+            cross_id: null,
+            occupiedBy: '',
+            element: document.getElementById('tile-5')
+        },
+        {
+            id: 6,
+            column_id: 0,
+            row_id: 2,
+            cross_member: true,
+            cross_id: 1,
+            occupiedBy: '',
+            element: document.getElementById('tile-6')
+        },
+        {
+            id: 7,
+            column_id: 1,
+            row_id: 2,
+            cross_member: false,
+            cross_id: null,
+            occupiedBy: '',
+            element: document.getElementById('tile-7')
+        },
+        {
+            id: 8,
+            column_id: 2,
+            row_id: 2,
+            cross_member: true,
+            cross_id: 0,
+            occupiedBy: '',
+            element: document.getElementById('tile-8')
+        },
+    ]
 }
 
 function chooseSymbol(symbol) {
@@ -77,7 +118,7 @@ function chooseSymbol(symbol) {
         computerSymbol = "O"
     } else if(symbol === "O") {
         playerSymbol = "O"
-        computerSymbol = "O"
+        computerSymbol = "X"
     } else {
         return;
     }
@@ -89,7 +130,7 @@ function chooseSymbol(symbol) {
 
 function checkForDraw() {
     for(let i = 0; i < gameState.tiles.length; i++) {
-        if(gameState.tiles[i].occupiedBy == "") {
+        if(gameState.tiles[i].occupiedBy === "") {
             return false;
         }
     }
@@ -98,6 +139,10 @@ function checkForDraw() {
 
 function removeSymbolChooser() {
     document.getElementById('select-symbol').style.display = 'none';
+}
+
+function displaySymbolChooser() {
+    document.getElementById('select-symbol').style.display = 'initial';
 }
 
 function beginGame() {
@@ -111,18 +156,138 @@ function beginGame() {
     }
 }
 
+function playerTiles(a = gameState.tiles) {
+    return a.filter(e => e.occupiedBy === playerSymbol);
+}
+
+function computerTiles(a = gameState.tiles) {
+    return a.filter(e => e.occupiedBy === computerSymbol);
+}
+
+function cornerTiles(a = gameState.tiles) {
+    return a.filter(e => e.cross_member === true);
+}
+
+function edgeTiles(a = gameState.tiles) {
+    return a.filter(e => e.cross_member === false);
+}
+
+function emptyTiles(a = gameState.tiles) {
+    return a.filter(e => e.occupiedBy === "");
+}
+
+function randomTile(a = gameState.tiles) {
+    return a[Math.floor(Math.random() * a.length)];
+}
+
+function rowTiles(tile) {
+    return gameState.tiles.filter(e => tile.row_id);
+}
+
+function columnTiles(tile) {
+    return gameState.tiles.filter(e => tile.column_id);
+}
+
+function crossTiles(tile) {
+    if(tile.cross_member !== true) { return []; }
+    return gameState.tiles.filter(e => tile.cross_id);
+}
+
+function firstComputerTurn() {
+    if(gameState.computerTurns == 0) {
+        if(computerSymbol === 'X'){
+            return randomTile(emptyTiles(cornerTiles()));
+        } else {
+            if(gameState.tiles[4].occupiedBy === "") {
+                return gameState.tiles[4];
+            } else {
+                return randomTile(emptyTiles(cornerTiles()));
+            }
+        }
+    }
+    return false;
+}
+
+function secondComputerTurn() {
+    if(gameState.computerTurns == 1) {
+        if(computerSymbol === 'X'){
+            let myTile = computerTiles()[0];
+            let theirTile = playerTiles()[0];
+
+            if(playerControlsCenter()) {
+                let adjacentedge = edgeTiles(rowTiles(myTile))[0];
+                return adjacentedge;
+            } else if(playerControlsOppositeCorner()) {
+                return randomTile(emptyTiles(cornerTiles()));
+            } else if(playerControlsEdge()) {
+                if(theirTile.column_id !== myTile.column_id) {
+                    if(theirTile.row_id !== myTile.row_id) {
+                        return false;
+                    } else {
+                        return edgeTiles(columnTiles(myTile))[0];
+                    }
+                } else {
+                    return edgeTiles(rowTiles(myTile))[0]
+                }
+            } else {
+                // player controls non-opposing corner
+                if(myTile.column_id == theirTile.column_id) {
+                    return edgeTiles(rowTiles(myTile))[0];
+                } else {
+                    return edgeTiles(columnTiles(myTile))[0];
+                }
+            }
+        } else {
+            if(playerControlsCenter()) {
+                if(playerControlsOppositeCorner()){
+                    return randomTile(emptyTiles(cornerTiles()));
+                } else {
+                    return false;
+                }
+            } else {
+                result = lookForBlock();
+                if(result) {
+                    return result;
+                } else {
+                    return randomTile(emptyTiles(edgeTiles()));
+                }
+            }
+        }
+    }
+    return false;
+}
+
+function playerControlsCenter() {
+    return gameState.tiles[4].occupiedBy === playerSymbol;
+}
+
+function playerControlsOppositeCorner() {
+    let mytile = computerTiles(cornerTiles())[0];
+    let oppositecorner = crosses[mytile.cross_id].filter(e => e !== 4 && e !== mytile.id);
+    if(gameState.tiles[oppositecorner].occupiedBy === playerSymbol) {
+        return true;
+    }
+    return false;
+}
+
+function playerControlsEdge() {
+    let playerEdge = playerTiles(edgeTiles());
+    return playerEdge.length > 0;
+}
+
 function chooseTile(id) {
     if(!gameState.playersTurn) { return; }
     let t = gameState.tiles[id];
-    if(t.occupiedBy == "") {
+    if(t.occupiedBy === "") {
         t.occupiedBy = playerSymbol;
+        t.element.innerText = playerSymbol;
+        endPlayerTurn();
     }
-    t.element.innerText = playerSymbol;
-    endPlayerTurn();
 }
 
 function endPlayerTurn() {
     gameState.playersTurn = false;
+    gameState.playerTurns++;
     if(checkForDraw()) {
         drawHasOccurred();
     } else {
@@ -130,102 +295,116 @@ function endPlayerTurn() {
     }
 }
 
-function checkGroupForPlayerWin(a, winType) {
-    if( a[0].occupiedBy == playerSymbol &&
-        a[1].occupiedBy == playerSymbol &&
-        a[2].occupiedBy == playerSymbol) {
-            return true;
-        }
-    return false;
-}
-
 function computerTurn() {
-    if(lookForWin()) { return; }
-    if(lookForBlock()) { return; }
+    let result = firstComputerTurn();
+    if(result) {
+        computerMove(result);
+        return;
+    }
+
+    result = secondComputerTurn();
+    if(result) {
+        computerMove(result);
+        return;
+    }
+
+    result = lookForWin();
+    if(result) {
+        computerWinningMove(result);
+        return;
+    }
+
+    result = lookForBlock();
+    if(result) {
+        computerMove(result);
+        return;
+    }
+
+    result = lookForCenter();
+    if(result) {
+        computerMove(result);
+        return;
+    }
+
     randomMove();
 }
 
+function lookForCenter() {
+    if(gameState.tiles[4].occupiedBy === ""){
+        return gameState.tiles[4];
+    }
+    return false;
+}
+
 function checkGroupForWin(a) {
-    let mine = a.filter(e => e.occupiedBy == computerSymbol);
-    let empty = a.filter(e => e.occupiedBy == "");
+    let mine = [];
+    let empty = [];
+
+    for(var i = 0; i < a.length; i++) {
+        let e = gameState.tiles[a[i]];
+        if(e.occupiedBy == '') {
+            empty.push(e);
+        } else if(e.occupiedBy == computerSymbol) {
+            mine.push(e);
+        } else {
+            // if player has a tile in this row we can't win here
+            return false;
+        }
+    }
+
     if(mine.length == 2 && empty.length == 1) {
         return [empty[0], mine[0], mine[1]];
     }
+
     return false;
 }
 
 function lookForWin() {
-    let r = rows();
-    let c = columns();
-    let x = crosses();
-    for(let i = 0; i < r.length; i++) {
-        let result = checkGroupForWin(r[i]);
-        if(result) {
-            computerWins(result[0], result[1], result[2], 'row');
-            console.log('lookForWin found - row');
-            console.log(r[i]);
-            return true;
-        }
+    let result = false;
+
+    for(let i = 0; i < 3; i++){
+        result = checkGroupForWin(columns[i]);
+        if(result) { result.push('column'); return result; }
+        result = checkGroupForWin(rows[i]);
+        if(result) { result.push('row'); return result; }
     }
-    for(let i = 0; i < c.length; i++) {
-        let result = checkGroupForWin(c[i]);
-        if(result) {
-            computerWins(result[0], result[1], result[2], 'column');
-            console.log('lookForWin found - columnd');
-            console.log(r[i]);
-            return true;
-        }
-    }
-    for(let i = 0; i < x.length; i++) {
-        let result = checkGroupForWin(x[i]);
-        if(result) {
-            computerWins(result[0], result[1], result[2], 'cross');
-            console.log('lookForWin found - cross');
-            console.log(r[i]);
-            return true;
-        }
-    }
+
+    result = checkGroupForWin(crosses[0]);
+    if(result) { result.push('cross0'); return result; }
+    result = checkGroupForWin(crosses[1]);
+    if(result) { result.push('cross1'); return result; }
+
     return false;
 }
 
 function checkGroupForBlock(a) {
-    let theirs = a.filter(e => e.occupiedBy == playerSymbol);
-    let empty = a.filter(e => e.occupiedBy == "");
+    let theirs = [];
+    let empty = [];
+
+    for(var i = 0; i < a.length; i++) {
+        let e = gameState.tiles[a[i]];
+        if(e.occupiedBy === "") {
+            empty.push(e);
+        } else if(e.occupiedBy == playerSymbol) {
+            theirs.push(e);
+        } else {
+            // if we have a tile in this group, player can't win here
+            return false;
+        }
+    }
+
     if(theirs.length == 2 && empty.length == 1) {
         return empty[0];
     }
+
     return false;
 }
 
 function lookForBlock() {
-    let r = rows();
-    let c = columns();
-    let x = crosses();
-    for(let i = 0; i < r.length; i++) {
-        let result = checkGroupForBlock(r[i]);
+    for(let i = 0; i < allGroups.length; i++) {
+        let result = checkGroupForBlock(allGroups[i]);
         if(result) {
-            computerMove(result);
-            console.log('lookForBlock found - row');
-            console.log(r[i]);
-            return true;
-        }
-    }
-    for(let i = 0; i < c.length; i++) {
-        let result = checkGroupForBlock(c[i]);
-        if(result) {
-            computerMove(result);
-            console.log('lookForBlock found - column');
-            console.log(c[i]);
-            return true;
-        }
-    }
-    for(let i = 0; i < x.length; i++) {
-        let result = checkGroupForBlock(x[i]);
-        if(result) {
-            computerMove(result);
-            console.log('lookForBlock found - cross');
-            console.log(x[i]);
-            return true;
+            return result;
         }
     }
     return false;
@@ -234,8 +413,8 @@ function lookForBlock() {
 function randomMove() {
     let loop = true;
     while(loop) {
-        let t = gameState.tiles[Math.floor(Math.random() * 8)];
-        if(t.occupiedBy == ""){
+        let t = gameState.tiles[Math.floor(Math.random() * 9)];
+        if(t.occupiedBy === ""){
             computerMove(t);
             loop = false;
         }
@@ -247,14 +426,17 @@ function computerMove(moveTile) {
     t.occupiedBy = computerSymbol;
     t.element.innerText = computerSymbol;
     gameState.playersTurn = true;
+    gameState.computerTurns++;
     if(checkForDraw()) { drawHasOccurred(); };
 }
 
-function computerWins(moveTile, rowTile1, rowTile2, winType) {
-    console.log('win found at ');
-    console.log(moveTile);
-    let t = gameState.tiles[moveTile.id];
-    t.occupiedBy = computerSymbol;
+function computerWinningMove(args) {
+    let moveTile = args[0];
+    let rowTile1 = args[1];
+    let rowTile2 = args[2];
+    let winType = args[3];
+    gameState.tiles[moveTile.id].occupiedBy = computerSymbol;
+    gameState.computerTurns++;
     moveTile.element.innerText = computerSymbol;
     moveTile.element.classList.add('win-' + winType);
 
@@ -263,9 +445,36 @@ function computerWins(moveTile, rowTile1, rowTile2, winType) {
 
     rowTile2.element.innerText = computerSymbol;
     rowTile2.element.classList.add('win-' + winType);
+
+    gameOver('computer wins');
 }
 
 function drawHasOccurred() {
-    gameState.started = false;
-    alert('game over');
+    gameOver('draw');
 }
+
+function gameOver(reason) {
+    gameState.started = false;
+    alert('game over ' + reason);
+    setTimeout(resetGame, 1000);
+}
+
+function resetGame() {
+    gameState = {
+        started: false,
+        symbolChosen: false,
+        playersTurn: false,
+        playerTurns: 0,
+        computerTurns: 0,
+        tiles: buildTiles()
+    }
+    gameState.tiles.forEach(e => {
+        e.element.innerText = "";
+        e.element.classList = "board-tile"
+    });
+    displaySymbolChooser();
+    playerSymbol = "";
+    computerSymbol = "";
+}
+
+resetGame();
