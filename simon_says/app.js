@@ -27,6 +27,11 @@ let stepsOrder = [];
 
 /** @type {boolean} */
 let animating = false;
+/** @type {boolean} */
+let strictMode = false;
+
+/** @type {number} */
+let playerStep = 0;
 
 /** @returns {number} */
 function randomStep() {
@@ -52,6 +57,7 @@ function unhighlightButton(buttonElement) {
 
 function animateSteps(step = 0) {
     let buttonId = stepsOrder[step];
+    animating = true;
     if(buttonId === undefined || buttonId === null) {
         animating = false;
         return;
@@ -69,7 +75,6 @@ function animateSteps(step = 0) {
 function addStep() {
     stepsOrder.push(randomStep());
     document.getElementById('game-count').innerText = stepsOrder.length.toString();
-    animating = true;
     animateSteps();
 }
 
@@ -78,10 +83,64 @@ function setVolume(level) {
     sounds.map(e => e.volume = level / 100);
 }
 
-function buttonHandler() {
-    if(animating) { return; }
+function successfulClick() {
+    playerStep++;
+    if(playerStep >= 20) {
+        gameWon();
+    } else {
+        if(playerStep === stepsOrder.length) {
+            animating = true;
+            playerStep = 0;
+            setTimeout(addStep, HIGHLIGHT_DURATION);
+        }
+    }
+}
 
+function failureClick() {
+    if(strictMode) {
+        resetGame();
+    } else {
+        animateSteps();
+    }
+}
+
+function gameWon() {
+    alert("You won!");
+    resetGame();
+}
+
+function resetGame() {
+    stepsOrder = [];
+    playerStep = 0;
+    addStep();
+}
+
+/** @param {number} buttonId */
+function buttonHandler(buttonId) {
+    console.log(buttonId);
+    if(animating) { return; }
+    sounds[buttonId].play();
+    if(stepsOrder[playerStep] === buttonId) {
+        successfulClick();
+    } else {
+        animating = true;
+        setTimeout(failureClick, HIGHLIGHT_DURATION);
+    }
+}
+
+/** @param {Event} event */
+function toggleStrict(event) {
+    console.log(event);
+    strictMode = !strictMode;
+}
+
+function assignClickHandlers() {
+    buttons.map((e, i) => {
+        e.addEventListener('click', function() { buttonHandler(i) });
+    });
 }
 
 setVolume(50);
-document.getElementById("game-start").addEventListener("click", addStep);
+assignClickHandlers();
+document.getElementById("game-strict").addEventListener("change", toggleStrict);
+document.getElementById("game-start").addEventListener("click", resetGame);
