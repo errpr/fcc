@@ -5,27 +5,38 @@ const HIGHLIGHT_DURATION = 500;
 // milliseconds between highlights
 const HIGHLIGHT_GAP = 100;
 
-/** @type {number[]} */
-let stepsOrder = [];
-
 /** @type {Array<HTMLElement>} */
-let buttons = [
+const buttons = [
     document.getElementById('green-button'),
     document.getElementById('red-button'),
     document.getElementById('yellow-button'),
     document.getElementById('blue-button')
 ]
 
+/** @type {Array<HTMLAudioElement>} */
+//@ts-ignore
+const sounds = [
+    document.getElementById('sound1'), 
+    document.getElementById('sound2'),
+    document.getElementById('sound3'),
+    document.getElementById('sound4')
+]
+
+/** @type {number[]} */
+let stepsOrder = [];
+
 /** @returns {number} */
 function randomStep() {
     return Math.floor(Math.random() * 4);
 }
 
-/** @param {HTMLElement} buttonElement 
+/** @param {number} buttonId 
  * @param {number} duration
 */
-function highlightButton(buttonElement, duration) {
+function highlightButton(buttonId, duration) {
+    let buttonElement = buttons[buttonId];
     buttonElement.classList.add('button-lit');
+    sounds[buttonId].play();
     setTimeout(function() { 
         unhighlightButton(buttonElement);
     }, duration)
@@ -43,7 +54,7 @@ function animateSteps(step = 0) {
     }
 
     highlightButton(
-        buttons[buttonId], 
+        buttonId, 
         HIGHLIGHT_DURATION);
 
     setTimeout(function() {
@@ -56,4 +67,10 @@ function addStep() {
     animateSteps();
 }
 
+/** @param {number} level */
+function setVolume(level) {
+    sounds.map(e => e.volume = level / 100);
+}
+
+setVolume(50);
 document.getElementById("game-start").addEventListener("click", addStep);

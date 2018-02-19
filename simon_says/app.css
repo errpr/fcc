@@ -110,6 +110,13 @@ body {
 #game-controls-container {
     margin-top: 1em;
     display: flex;
-    flex-direction: row;
+    flex-direction: row wrap;
     justify-content: space-around;
+}
+
+#sound-volume {
+    margin: 1em;
+    text-align: center;
+    vertical-align: middle;
+    width: 90%;
 }
