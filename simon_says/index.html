@@ -17,6 +17,24 @@
 <audio id="sound4" preload="auto" src="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"></audio>
 
 <div id="root">
+    <div id="game-buttons-container">
+        <button class="game-button" id="green-button"></button>
+        <button class="game-button" id="red-button"></button>
+        <button class="game-button" id="yellow-button"></button>
+        <button class="game-button" id="blue-button"></button>
+        <button id="game-start" class="controls-button">Start</button>
+    </div>
+    <div id="game-controls-container">
+        <div id="game-count-container">
+            Count
+            <span id="game-count">0</span>
+        </div>
+        
+        <label for="game-strict">
+            <input name="game-strict" id="game-strict" type="checkbox" class="controls-button">
+            Strict
+        </label>
+    </div>
 </div>
 
 <script src="app.js"></script>

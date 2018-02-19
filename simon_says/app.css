@@ -1,0 +1,115 @@
+* {
+    font-size: 16px;
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(120,120,120)
+}
+
+#title {
+    text-align: center;
+    margin: 1em;
+}
+
+#game-buttons-container {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    width: 100vw;
+    max-width: 800px;
+    height: 100vw;
+    max-height: 800px;
+    margin: auto;
+}
+
+#green-button {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(60, 148, 60);
+    border: 6vw solid rgb(48,48,48);
+    border-bottom: 3vw solid rgb(48,48,48);
+    border-right: 3vw solid rgb(48,48,48);
+    border-top-left-radius: 100%;
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 1;
+}
+
+#green-button.button-lit {
+    background-color: rgb(60, 255, 60);
+}
+
+#red-button {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(148, 60, 60);
+    border: 6vw solid rgb(48,48,48);
+    border-bottom: 3vw solid rgb(48,48,48);
+    border-left: 3vw solid rgb(48,48,48);
+    border-top-right-radius: 100%;
+    grid-column: 2 / span 1;
+    grid-row: 1 / span 1;
+}
+
+#red-button.button-lit {
+    background-color: rgb(255, 60, 60);
+}
+
+#blue-button {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(60, 60, 148);
+    border: 6vw solid rgb(48,48,48);
+    border-top: 3vw solid rgb(48,48,48);
+    border-left: 3vw solid rgb(48,48,48);
+    border-bottom-right-radius: 100%;
+    grid-column: 2 / span 1;
+    grid-row: 2 / span 1;
+}
+
+#blue-button.button-lit {
+    background-color: rgb(0, 76, 255);
+}
+
+#yellow-button {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(163, 163, 50);
+    border: 6vw solid rgb(48,48,48);
+    border-top: 3vw solid rgb(48,48,48);
+    border-right: 3vw solid rgb(48,48,48);
+    border-bottom-left-radius: 100%;
+    grid-column: 1 / span 1;
+    grid-row: 2 / span 1;
+}
+
+#yellow-button.button-lit {
+    background-color: rgb(255, 255, 0);
+}
+
+.game-buttons {
+    z-index: 15;
+}
+
+#game-start {
+    position: absolute;
+    z-index: 20;
+    width: 50%;
+    height: 50%;
+    background-color: rgb(200,200,200);
+    border: 6vw solid rgb(48,48,48);
+    border-radius: 100%;
+    top: 25%;
+    left: 25%;
+}
+
+#game-controls-container {
+    margin-top: 1em;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
