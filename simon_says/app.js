@@ -25,6 +25,9 @@ const sounds = [
 /** @type {number[]} */
 let stepsOrder = [];
 
+/** @type {boolean} */
+let animating = false;
+
 /** @returns {number} */
 function randomStep() {
     return Math.floor(Math.random() * 4);
@@ -49,7 +52,8 @@ function unhighlightButton(buttonElement) {
 
 function animateSteps(step = 0) {
     let buttonId = stepsOrder[step];
-    if(buttonId === undefined || buttonId === null) { 
+    if(buttonId === undefined || buttonId === null) {
+        animating = false;
         return;
     }
 
@@ -64,12 +68,19 @@ function animateSteps(step = 0) {
 
 function addStep() {
     stepsOrder.push(randomStep());
+    document.getElementById('game-count').innerText = stepsOrder.length.toString();
+    animating = true;
     animateSteps();
 }
 
 /** @param {number} level */
 function setVolume(level) {
     sounds.map(e => e.volume = level / 100);
+}
+
+function buttonHandler() {
+    if(animating) { return; }
+
 }
 
 setVolume(50);
