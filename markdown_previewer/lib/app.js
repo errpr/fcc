@@ -17,7 +17,7 @@ var App = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
         _this.state = {
-            text: ""
+            text: "# Welcome"
         };
 
         _this.handleChange = function (e) {
@@ -29,6 +29,11 @@ var App = function (_React$Component) {
     }
 
     _createClass(App, [{
+        key: "componentDidMount",
+        value: function componentDidMount() {
+            this.refs.display.innerHTML = marked(this.state.text);
+        }
+    }, {
         key: "componentDidUpdate",
         value: function componentDidUpdate() {
             this.refs.display.innerHTML = marked(this.state.text);
@@ -40,17 +45,21 @@ var App = function (_React$Component) {
                 "div",
                 { id: "app-container" },
                 React.createElement(
-                    "h1",
+                    "h3",
                     null,
                     "Markdown Previewer"
                 ),
                 React.createElement(
                     "div",
                     { id: "editor-container" },
-                    React.createElement("textarea", { name: "editing-area",
-                        id: "editing-area",
-                        className: "halves",
-                        onChange: this.handleChange }),
+                    React.createElement(
+                        "textarea",
+                        { name: "editing-area",
+                            id: "editing-area",
+                            className: "halves",
+                            onChange: this.handleChange },
+                        "# Welcome"
+                    ),
                     React.createElement("div", { id: "display-area",
                         className: "halves",
                         ref: "display" })
