@@ -2,23 +2,35 @@
   margin: 0;
   padding: 0;
   font-size: 16pt;
-  font-family: Arial, Helvetica, sans-serif; }
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
+  word-wrap: break-word; }
 
 h1 {
-  font-size: 300%;
-  font-weight: bold; }
+  font-size: 200%; }
 
 h2 {
-  font-size: 250%;
-  font-weight: bold; }
+  font-size: 150%; }
 
 h3 {
-  font-size: 200%;
-  font-weight: bold; }
+  font-size: 125%; }
 
 h4 {
-  font-size: 150%;
-  font-weight: bold; }
+  font-size: 100%; }
+
+h5 {
+  font-size: 90%; }
+
+ol, ul {
+  padding-left: 1.5em; }
+
+pre {
+  font-size: 80%; }
+
+blockquote {
+  border-left: 2px solid #6a737d;
+  color: #6a737d;
+  padding: 0.5em; }
 
 #app-container {
   min-height: 100vh; }
@@ -26,11 +38,13 @@ h4 {
 #editor-container {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   width: 100vw; }
 
 .halves {
   min-height: 80vh;
-  width: 50%; }
+  width: 50%;
+  padding: 0.5em; }
 
 #editing-area {
   resize: none;
