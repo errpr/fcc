@@ -28,8 +28,8 @@ class App extends React.Component {
                     <textarea   name="editing-area" 
                                 id="editing-area"
                                 className="halves"
-                                onChange={this.handleChange}>
-                                # Welcome
+                                onChange={this.handleChange}
+                                value="# Welcome">
                     </textarea>
                     <div id="display-area"
                          className="halves"

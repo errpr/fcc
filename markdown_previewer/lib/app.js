@@ -52,14 +52,11 @@ var App = function (_React$Component) {
                 React.createElement(
                     "div",
                     { id: "editor-container" },
-                    React.createElement(
-                        "textarea",
-                        { name: "editing-area",
-                            id: "editing-area",
-                            className: "halves",
-                            onChange: this.handleChange },
-                        "# Welcome"
-                    ),
+                    React.createElement("textarea", { name: "editing-area",
+                        id: "editing-area",
+                        className: "halves",
+                        onChange: this.handleChange,
+                        value: "# Welcome" }),
                     React.createElement("div", { id: "display-area",
                         className: "halves",
                         ref: "display" })
