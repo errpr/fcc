@@ -56,7 +56,7 @@ var App = function (_React$Component) {
                         id: "editing-area",
                         className: "halves",
                         onChange: this.handleChange,
-                        value: "# Welcome" }),
+                        defaultValue: "# Welcome" }),
                     React.createElement("div", { id: "display-area",
                         className: "halves",
                         ref: "display" })
