@@ -11,7 +11,7 @@ $well-bg: rgb(210,210,210)
 
 h1, h2, h3, h4, h5
     font-weight: bold
-    padding-top: 1em
+    margin-top: 0.5em
 
 h1
     font-size: 200%
@@ -28,8 +28,12 @@ h4
 h5
     font-size: 90%
 
+p
+    margin-bottom: 1em
+
 ol, ul
     padding-left: 1.5em
+    margin-bottom: 1em
 
 code, pre
     font-family: monospace
@@ -37,7 +41,6 @@ code, pre
     padding: 0.2em
 
 pre, table
-    margin-top: 1em
     font-size: 80%
 
 pre
@@ -53,10 +56,6 @@ blockquote
     border-left: 2px solid $dim-color
     color: $dim-color
     padding: 0.5em
-
-p
-    :before
-        content: '&nbsp;'
 
 #app-container
     min-height: 100vh
