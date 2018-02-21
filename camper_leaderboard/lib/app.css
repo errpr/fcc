@@ -1,17 +1,51 @@
-root {
-  background-color: gold; }
+* {
+  font-size: 16pt;
+  padding: 0;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif; }
+
+body {
+  background-color: rebeccapurple; }
+
+.main-table {
+  background-color: white;
+  margin: auto;
+  width: 100%;
+  max-width: 800px;
+  border: 0;
+  padding: 0; }
 
 th {
-  background-color: tomato; }
+  background-color: Navy;
+  color: white; }
+
+td {
+  text-align: center; }
 
 .selected {
   cursor: default;
   text-decoration: underline; }
-  .selected ::before {
-    content: "u2193"; }
 
 .selectable {
   cursor: pointer;
   text-decoration: underline; }
+
+.avatarpic {
+  height: 2em;
+  width: 2em;
+  vertical-align: middle;
+  margin-right: 1em; }
+
+#app-title {
+  min-height: 2em;
+  background-color: rebeccapurple;
+  padding-top: 0.5em;
+  padding-left: 0.5em; }
+
+#app-title-text {
+  color: white; }
+
+.camper-name-cell {
+  text-align: left; }
 
 /*# sourceMappingURL=app.css.map */
