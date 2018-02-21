@@ -1,4 +1,17 @@
 root {
   background-color: gold; }
 
+th {
+  background-color: tomato; }
+
+.selected {
+  cursor: default;
+  text-decoration: underline; }
+  .selected ::before {
+    content: "u2193"; }
+
+.selectable {
+  cursor: pointer;
+  text-decoration: underline; }
+
 /*# sourceMappingURL=app.css.map */

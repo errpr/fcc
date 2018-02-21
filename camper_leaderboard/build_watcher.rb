@@ -19,7 +19,7 @@ loop do
     new_jsx_digest = Digest::MD5.hexdigest(File.read('./src/app.jsx'))
     if new_jsx_digest != jsx_digest
         log.info "Building jsx"
-        Kernel.system('babel', 'src', '-d lib')
+        Kernel.system('yarn', 'build')
         jsx_digest = new_jsx_digest
     end
 
