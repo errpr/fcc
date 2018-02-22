@@ -1,2 +1,46 @@
+$color-red-border: rgb(250,170,60)
+$color-yellow-card: rgb(230,230,60)
+    
+*
+    padding: 0
+    margin: 0
+    box-sizing: border-box
+    font-size: 16pt
+    font-family: Arial, Helvetica, sans-serif
+    border: 0
+
 #root
     background-color: white
+
+.recipe-card
+    width: 100vw
+    max-width: 500px
+    background-color: $color-yellow-card
+    margin-left: 1%
+
+.recipe-name
+    height: 2em
+    border-bottom: 2px solid $color-red-border
+    padding: 0.5em
+
+.recipe-ingredient
+    display: flex
+    flex-flow: row nowrap
+    div
+        font-size: 80%
+        border-bottom: 2px solid $color-red-border
+
+.ingredient-amount
+    display: inline-block
+    width: 25%
+    height: 2em
+    text-align: right
+    padding-right: 1em
+    border-right: 2px solid $color-red-border
+
+.ingredient-item
+    display: inline-block
+    width: 75%
+    height: 2em
+    text-align: left
+    padding-left: 1em

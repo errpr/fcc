@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -11,16 +11,17 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function RecipeList(props) {
     var recipeItems = props.recipes.map(function (e, i) {
         return React.createElement(
-            'li',
-            { onClick: props.select,
-                'data-index': i,
+            "li",
+            { className: "recipe-item",
+                onClick: props.select,
+                "data-index": i,
                 key: i },
             e.name
         );
     });
     return React.createElement(
-        'ul',
-        null,
+        "ul",
+        { className: "recipe-list" },
         recipeItems
     );
 }
@@ -35,13 +36,43 @@ var CurrentRecipe = function (_React$Component) {
     }
 
     _createClass(CurrentRecipe, [{
-        key: 'render',
+        key: "render",
         value: function render() {
+            var ingredients = this.props.recipe.ingredients.map(function (e, i) {
+                return React.createElement(
+                    "div",
+                    { key: i, className: "recipe-ingredient" },
+                    React.createElement(
+                        "div",
+                        { className: "ingredient-amount" },
+                        e.amount
+                    ),
+                    React.createElement(
+                        "div",
+                        { className: "ingredient-item" },
+                        e.item
+                    )
+                );
+            });
             return React.createElement(
-                'div',
-                null,
-                JSON.stringify(this.props.recipe),
-                ')'
+                "div",
+                { className: "recipe-card" },
+                React.createElement(
+                    "h3",
+                    { className: "recipe-name" },
+                    this.props.recipe.name
+                ),
+                React.createElement(
+                    "div",
+                    null,
+                    ingredients,
+                    React.createElement(
+                        "div",
+                        { className: "recipe-ingredient" },
+                        React.createElement("div", { className: "ingredient-amount" }),
+                        React.createElement("div", { className: "ingredient-item" })
+                    )
+                )
             );
         }
     }]);
@@ -61,6 +92,9 @@ var App = function (_React$Component2) {
             recipes: [{
                 name: 'Steven\'s Red Beans & Rice',
                 ingredients: [{ amount: '2 cans', item: 'red beans' }, { amount: '2 packages', item: 'Uncle Ben\'s 90 second white rice' }, { amount: '1 package', item: 'smoked sausage' }, { amount: '3/4', item: 'onion diced' }, { amount: '3/4', item: 'bell pepper diced' }, { amount: '3 dashes', item: 'Tony\'s Cajun Seasoning' }]
+            }, {
+                name: 'Steven\'s Mac n Cheese',
+                ingredients: [{ amount: '1 package', item: 'macaroni pasta' }, { amount: '1 package', item: 'cream cheese' }, { amount: '1/2 package', item: 'sharp cheddar' }, { amount: '1/2 package', item: 'mild cheddar' }, { amount: '2 tblsp', item: 'salt' }, { amount: '1/8 gallon', item: 'milk' }]
             }],
             selectedRecipe: 0
         };
@@ -72,20 +106,15 @@ var App = function (_React$Component2) {
     }
 
     _createClass(App, [{
-        key: 'render',
+        key: "render",
         value: function render() {
             return React.createElement(
-                'div',
-                { id: 'app-container' },
+                "div",
+                { id: "app-container" },
                 React.createElement(RecipeList, {
                     recipes: this.state.recipes,
                     select: this.selectRecipeHandler }),
-                React.createElement(CurrentRecipe, { recipe: this.state.recipes[this.state.selectedRecipe] }),
-                React.createElement(
-                    'pre',
-                    null,
-                    JSON.stringify(this.state, null, 2)
-                )
+                React.createElement(CurrentRecipe, { recipe: this.state.recipes[this.state.selectedRecipe] })
             );
         }
     }]);
