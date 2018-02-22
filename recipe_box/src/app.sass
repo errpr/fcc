@@ -26,6 +26,11 @@ $color-yellow-card: rgb(230,230,60)
 .recipe-ingredient
     display: flex
     flex-flow: row nowrap
+    input
+        font-size: inherit
+        width: 100%
+        background-color: inherit
+        border-bottom: 1px solid black
     div
         font-size: 80%
         border-bottom: 2px solid $color-red-border
@@ -44,3 +49,9 @@ $color-yellow-card: rgb(230,230,60)
     height: 2em
     text-align: left
     padding-left: 1em
+
+.visible
+    display: initial
+
+.invisible
+    display: none

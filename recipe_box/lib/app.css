@@ -23,6 +23,11 @@
 .recipe-ingredient {
   display: flex;
   flex-flow: row nowrap; }
+  .recipe-ingredient input {
+    font-size: inherit;
+    width: 100%;
+    background-color: inherit;
+    border-bottom: 1px solid black; }
   .recipe-ingredient div {
     font-size: 80%;
     border-bottom: 2px solid #faaa3c; }
@@ -41,5 +46,11 @@
   height: 2em;
   text-align: left;
   padding-left: 1em; }
+
+.visible {
+  display: initial; }
+
+.invisible {
+  display: none; }
 
 /*# sourceMappingURL=app.css.map */

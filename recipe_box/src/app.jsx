@@ -19,6 +19,14 @@ class IngredientLine extends React.Component {
             editingAmountValue: props.amount,
             editingItemValue: props.item
         }
+
+        this.updateAmount = (amount) => {
+            this.props.updateIngredient(amount, this.props.item);
+        }
+
+        this.updateItem = (item) => {
+            this.props.updateIngredient(this.props.amount, item);
+        }
         
         this.dblclickAmount = (e) => {
             this.setState({editingAmount: true});
@@ -27,47 +35,75 @@ class IngredientLine extends React.Component {
         this.dblclickItem = (e) => {
             this.setState({editingItem: true});
         }
-    
+        
+        this.handleChange = (e) => {
+            if(e.target.name === "edit-amount") {
+                this.setState({ editingAmountValue: e.target.value });
+            } else {
+                this.setState({ editingItemValue: e.target.value });
+            }
+        }
+
+        this.handleBlur = (e) => {
+            if(e.target.name === "edit-amount") {
+                this.updateAmount(this.state.editingAmountValue);
+                this.setState({ editingAmount: false });
+            } else {
+                this.updateItem(this.state.editingItemValue);
+                this.setState({ editingItem: false });
+            }
+        }
     }
 
 
 
     render() {
-
-        let amountSection = <div className="ingredient-amount" 
-                                 onDoubleClick={this.dblclickAmount}>{this.props.amount}</div>;
-        if(this.state.editingAmount){
-            amountSection = <div className="ingredient-amount">
-                                <input name="edit-amount" 
-                                       className="edit-amount" 
-                                       onChange={this.handleChange} 
-                                       onBlur={this.handleBlur} 
-                                       value={this.state.editingAmountValue} />
-                            </div>;
-        }
-        
-        let itemSection = <div className="ingredient-item" 
-                                 onDoubleClick={this.dblclickItem}>{this.props.item}</div>;
-        if(this.state.editingItem){
-            itemSection = <div className="ingredient-item">
-                                <input name="edit-item" 
-                                       className="edit-item" 
-                                       onChange={this.handleChange} 
-                                       onBlur={this.handleBlur}
-                                       value={this.state.editingItemValue} />
-                            </div>;
-        }
-
         return(
             <div className="recipe-ingredient">
-                {amountSection}
-                {itemSection}
+                <div className={"ingredient-amount" + (!this.state.editingAmount ? " visible" : " invisible")} 
+                     onDoubleClick={this.dblclickAmount}>
+                     {this.props.amount}
+                </div>
+                <div className={"ingredient-amount" + (this.state.editingAmount ? " visible" : " invisible")}>
+                    <input name="edit-amount" 
+                            className="edit-amount"
+                            onChange={this.handleChange} 
+                            onBlur={this.handleBlur} 
+                            value={this.state.editingAmountValue} />
+                </div>
+
+                <div className={"ingredient-item" + (!this.state.editingItem ? " visible" : " invisible")}
+                     onDoubleClick={this.dblclickItem}>
+                     {this.props.item}
+                </div>
+                <div className={"ingredient-item" + (this.state.editingItem ? " visible" : " invisible")}>
+                    <input name="edit-item" 
+                           className="edit-item"  
+                           onChange={this.handleChange} 
+                           onBlur={this.handleBlur}
+                           value={this.state.editingItemValue} />
+                </div>
             </div>
         );
     }
 }
 
 class CurrentRecipe extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.updateIngredient = (ingredientIndex) => {
+            return function(amount, item) {
+                let new_ingredient = this.props.recipe.ingredients;
+                new_ingredient[ingredientIndex] = { amount, item }
+                this.props.updateRecipe({
+                    ...this.props.recipe,
+                    ingredients: new_ingredient
+                })
+            }.bind(this);
+        }
+    }
+
     render() {
         let ingredients = this.props
                               .recipe
@@ -75,7 +111,8 @@ class CurrentRecipe extends React.Component {
                               .map((e, i) => { 
                                   return(<IngredientLine key={i}
                                                          amount={e.amount}
-                                                         item={e.item} />); });
+                                                         item={e.item} 
+                                                         updateIngredient={this.updateIngredient(i)} />); });
         return(
             <div className="recipe-card">
                 <h3 className="recipe-name">
@@ -126,7 +163,19 @@ class App extends React.Component {
         this.selectRecipeHandler = (e) => {
             this.setState({ selectedRecipe: e.target.getAttribute('data-index') });
         }
+
+        this.updateRecipe = (recipeIndex) => {
+            return function(recipeData) {
+                this.setState(prevState => {
+                    let new_recipes = prevState.recipes.slice();
+                    new_recipes[recipeIndex] = recipeData;
+                    return { ...prevState, recipes: new_recipes }
+                });
+            }.bind(this);
+        }
     }
+
+    
 
     render() {
         return(
@@ -134,7 +183,9 @@ class App extends React.Component {
                 <RecipeList 
                     recipes={this.state.recipes} 
                     select={this.selectRecipeHandler} />
-                <CurrentRecipe recipe={this.state.recipes[this.state.selectedRecipe]} />
+                <CurrentRecipe 
+                    recipe={this.state.recipes[this.state.selectedRecipe]}
+                    updateRecipe={this.updateRecipe(this.state.selectedRecipe)} />
             </div>
         );
     }
