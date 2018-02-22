@@ -1,6 +1,8 @@
-$color-red-border: rgb(250,170,60)
-$color-yellow-card: rgb(230,230,60)
-    
+$color-card-bg: rgb(230,230,60)
+$color-card-stripes: rgb(250,150,60)
+$color-paper-bg: rgb(220,230,240)
+$color-paper-stripes: rgb(60,200,230)
+
 *
     padding: 0
     margin: 0
@@ -11,20 +13,34 @@ $color-yellow-card: rgb(230,230,60)
 
 #root
     background-color: white
+    max-width: 800px
+
+.recipe-list
+    margin: 1em
+    max-width: 700px
+    padding-left: 2em
+    background-color: $color-paper-bg
+    box-shadow: 3px 3px 6px grey
+
+.recipe-item
+    padding-left: 2em
+    border-left: 2px solid $color-paper-stripes
+    border-bottom: 2px solid $color-paper-stripes
+    h1
+        font-size: 200%
 
 .recipe-card
-    position: absolute
+    position: fixed
     left: 50%
-    top: 50%
-    margin-left: -25%
-    margin-top: -25%
+    top: 30%
+    margin-left: -160px
     width: 320px
-    background-color: $color-yellow-card
+    background-color: $color-card-bg
     box-shadow: 5px 5px 3px grey
 
 .recipe-name
     height: 2em
-    border-bottom: 2px solid $color-red-border
+    border-bottom: 2px solid $color-card-stripes
     padding: 0.5em
 
 .recipe-ingredient
@@ -38,7 +54,8 @@ $color-yellow-card: rgb(230,230,60)
         border-bottom: 1px solid black
     div
         font-size: 80%
-        border-bottom: 2px solid $color-red-border
+        border-bottom: 2px solid $color-card-stripes
+        overflow: hidden
 
 .ingredient-amount
     display: inline-block
@@ -46,7 +63,7 @@ $color-yellow-card: rgb(230,230,60)
     height: 2em
     text-align: right
     padding-right: 1em
-    border-right: 2px solid $color-red-border
+    border-right: 2px solid $color-card-stripes
 
 .ingredient-item
     display: inline-block
