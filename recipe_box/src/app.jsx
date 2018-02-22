@@ -10,16 +10,72 @@ function RecipeList(props) {
     );
 }
 
+class IngredientLine extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            editingAmount: false,
+            editingItem: false,
+            editingAmountValue: props.amount,
+            editingItemValue: props.item
+        }
+        
+        this.dblclickAmount = (e) => {
+            this.setState({editingAmount: true});
+        }
+
+        this.dblclickItem = (e) => {
+            this.setState({editingItem: true});
+        }
+    
+    }
+
+
+
+    render() {
+
+        let amountSection = <div className="ingredient-amount" 
+                                 onDoubleClick={this.dblclickAmount}>{this.props.amount}</div>;
+        if(this.state.editingAmount){
+            amountSection = <div className="ingredient-amount">
+                                <input name="edit-amount" 
+                                       className="edit-amount" 
+                                       onChange={this.handleChange} 
+                                       onBlur={this.handleBlur} 
+                                       value={this.state.editingAmountValue} />
+                            </div>;
+        }
+        
+        let itemSection = <div className="ingredient-item" 
+                                 onDoubleClick={this.dblclickItem}>{this.props.item}</div>;
+        if(this.state.editingItem){
+            itemSection = <div className="ingredient-item">
+                                <input name="edit-item" 
+                                       className="edit-item" 
+                                       onChange={this.handleChange} 
+                                       onBlur={this.handleBlur}
+                                       value={this.state.editingItemValue} />
+                            </div>;
+        }
+
+        return(
+            <div className="recipe-ingredient">
+                {amountSection}
+                {itemSection}
+            </div>
+        );
+    }
+}
+
 class CurrentRecipe extends React.Component {
     render() {
         let ingredients = this.props
                               .recipe
                               .ingredients
                               .map((e, i) => { 
-                                  return(<div key={i} className="recipe-ingredient">
-                                    <div className="ingredient-amount">{e.amount}</div>
-                                    <div className="ingredient-item">{e.item}</div>
-                                  </div>) } );
+                                  return(<IngredientLine key={i}
+                                                         amount={e.amount}
+                                                         item={e.item} />); });
         return(
             <div className="recipe-card">
                 <h3 className="recipe-name">

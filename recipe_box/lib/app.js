@@ -26,8 +26,86 @@ function RecipeList(props) {
     );
 }
 
-var CurrentRecipe = function (_React$Component) {
-    _inherits(CurrentRecipe, _React$Component);
+var IngredientLine = function (_React$Component) {
+    _inherits(IngredientLine, _React$Component);
+
+    function IngredientLine(props) {
+        _classCallCheck(this, IngredientLine);
+
+        var _this = _possibleConstructorReturn(this, (IngredientLine.__proto__ || Object.getPrototypeOf(IngredientLine)).call(this, props));
+
+        _this.state = {
+            editingAmount: false,
+            editingItem: false,
+            editingAmountValue: props.amount,
+            editingItemValue: props.item
+        };
+
+        _this.dblclickAmount = function (e) {
+            _this.setState({ editingAmount: true });
+        };
+
+        _this.dblclickItem = function (e) {
+            _this.setState({ editingItem: true });
+        };
+
+        return _this;
+    }
+
+    _createClass(IngredientLine, [{
+        key: "render",
+        value: function render() {
+
+            var amountSection = React.createElement(
+                "div",
+                { className: "ingredient-amount",
+                    onDoubleClick: this.dblclickAmount },
+                this.props.amount
+            );
+            if (this.state.editingAmount) {
+                amountSection = React.createElement(
+                    "div",
+                    { className: "ingredient-amount" },
+                    React.createElement("input", { name: "edit-amount",
+                        className: "edit-amount",
+                        onChange: this.handleChange,
+                        onBlur: this.handleBlur,
+                        value: this.state.editingAmountValue })
+                );
+            }
+
+            var itemSection = React.createElement(
+                "div",
+                { className: "ingredient-item",
+                    onDoubleClick: this.dblclickItem },
+                this.props.item
+            );
+            if (this.state.editingItem) {
+                itemSection = React.createElement(
+                    "div",
+                    { className: "ingredient-item" },
+                    React.createElement("input", { name: "edit-item",
+                        className: "edit-item",
+                        onChange: this.handleChange,
+                        onBlur: this.handleBlur,
+                        value: this.state.editingItemValue })
+                );
+            }
+
+            return React.createElement(
+                "div",
+                { className: "recipe-ingredient" },
+                amountSection,
+                itemSection
+            );
+        }
+    }]);
+
+    return IngredientLine;
+}(React.Component);
+
+var CurrentRecipe = function (_React$Component2) {
+    _inherits(CurrentRecipe, _React$Component2);
 
     function CurrentRecipe() {
         _classCallCheck(this, CurrentRecipe);
@@ -39,20 +117,9 @@ var CurrentRecipe = function (_React$Component) {
         key: "render",
         value: function render() {
             var ingredients = this.props.recipe.ingredients.map(function (e, i) {
-                return React.createElement(
-                    "div",
-                    { key: i, className: "recipe-ingredient" },
-                    React.createElement(
-                        "div",
-                        { className: "ingredient-amount" },
-                        e.amount
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "ingredient-item" },
-                        e.item
-                    )
-                );
+                return React.createElement(IngredientLine, { key: i,
+                    amount: e.amount,
+                    item: e.item });
             });
             return React.createElement(
                 "div",
@@ -80,15 +147,15 @@ var CurrentRecipe = function (_React$Component) {
     return CurrentRecipe;
 }(React.Component);
 
-var App = function (_React$Component2) {
-    _inherits(App, _React$Component2);
+var App = function (_React$Component3) {
+    _inherits(App, _React$Component3);
 
     function App(props) {
         _classCallCheck(this, App);
 
-        var _this2 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+        var _this3 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-        _this2.state = {
+        _this3.state = {
             recipes: [{
                 name: 'Steven\'s Red Beans & Rice',
                 ingredients: [{ amount: '2 cans', item: 'red beans' }, { amount: '2 packages', item: 'Uncle Ben\'s 90 second white rice' }, { amount: '1 package', item: 'smoked sausage' }, { amount: '3/4', item: 'onion diced' }, { amount: '3/4', item: 'bell pepper diced' }, { amount: '3 dashes', item: 'Tony\'s Cajun Seasoning' }]
@@ -99,10 +166,10 @@ var App = function (_React$Component2) {
             selectedRecipe: 0
         };
 
-        _this2.selectRecipeHandler = function (e) {
-            _this2.setState({ selectedRecipe: e.target.getAttribute('data-index') });
+        _this3.selectRecipeHandler = function (e) {
+            _this3.setState({ selectedRecipe: e.target.getAttribute('data-index') });
         };
-        return _this2;
+        return _this3;
     }
 
     _createClass(App, [{
