@@ -4,15 +4,17 @@ function RecipeList(props) {
                                                       onClick={props.select}
                                                       data-index={i} 
                                                       key={i}>{e.name}</li>);
-    let emptyLine = <li className="recipe-item" onClick={props.addRecipe}></li>;
-    for(let i = 0; i < 30 - recipeItems.length; i++){
-        recipeItems.push(emptyLine);
+    
+    let emptyLine = (i) => <li key={i} className="recipe-item" onDoubleClick={props.addRecipe}></li>;
+    let j = recipeItems.length;
+    for(let i = 0; i < 15 - j; i++){
+        recipeItems.push(emptyLine("blank" + i));
     }
     return(
         <ul className="recipe-list" onClick={props.handleClick}>
             <li className="recipe-item"><h1>Recipes</h1></li>
             {recipeItems}
-            {emptyLine}
+            {emptyLine("blank-last")}
         </ul>
     );
 }
@@ -26,7 +28,7 @@ class IngredientLine extends React.Component {
             editingItem: false,
             editingAmountValue: props.amount,
             editingItemValue: props.item
-        }
+        };
 
         this.updateAmount = (amount) => {
             this.props.updateIngredient(amount, this.props.item);
@@ -52,6 +54,44 @@ class IngredientLine extends React.Component {
             }
         }
 
+        this.handleAmountKeyDown = (e) => {
+            switch(e.key) {
+                case("Backspace"): {
+                    if(e.target.value === "") {
+                        if(this.state.editingItemValue === "") {
+                            // delete entire ingredient on backspace of empty line
+                            this.setState({editingAmount: false, editingItem: false});
+                            this.props.deleteIngredient();
+                        }
+                    }
+                    break;
+                }
+                case("Tab"): {
+                    e.preventDefault();
+                    this.setState({editingAmount: false, editingItem: true});
+                    e.target.blur();
+                    setTimeout(() => this.editItem.focus(), 100);
+                } break;
+                case("Enter"): {
+                    e.target.blur();
+                } break;
+            }
+        }
+
+        this.handleItemKeyDown = (e) => {
+            switch(e.key) {
+                case("Backspace"): {
+                    if(e.target.value === "") {
+                        this.setState({editingItem: false, editingAmount: true});
+                        this.editAmount.focus();
+                    }
+                }
+                case("Enter"): {
+                    e.target.blur();
+                }
+            }
+        }
+
         this.handleBlur = (e) => {
             if(e.target.name === "edit-amount") {
                 this.updateAmount(this.state.editingAmountValue);
@@ -63,8 +103,6 @@ class IngredientLine extends React.Component {
         }
     }
 
-
-
     render() {
         return(
             <div className="recipe-ingredient">
@@ -73,11 +111,13 @@ class IngredientLine extends React.Component {
                      {this.props.amount}
                 </div>
                 <div className={"ingredient-amount" + (this.state.editingAmount ? "" : " invisible")}>
-                    <input name="edit-amount" 
+                    <input name="edit-amount"
+                           ref={(input) => { this.editAmount = input; }} 
                            type="text"
                            className="edit-amount"
                            onChange={this.handleChange} 
-                           onBlur={this.handleBlur} 
+                           onBlur={this.handleBlur}
+                           onKeyDown={this.handleAmountKeyDown} 
                            value={this.state.editingAmountValue} />
                 </div>
 
@@ -87,6 +127,7 @@ class IngredientLine extends React.Component {
                 </div>
                 <div className={"ingredient-item" + (this.state.editingItem ? "" : " invisible")}>
                     <input name="edit-item"
+                           ref={(input) => { this.editItem = input; }}
                            type="text"
                            className="edit-item"  
                            onChange={this.handleChange} 
@@ -106,28 +147,34 @@ class CurrentRecipe extends React.Component {
         this.state = {
             nameValue: props.recipe.name,
             editingName: false
-        }
+        };
 
         this.updateName = (newName) => {
             if(!newName) {
                 this.setState({ nameValue: props.recipe.name });
                 return;
             }
-            this.props.updateRecipe({
+            this.updateRecipe({
                 ...this.props.recipe,
                 name: newName
-            })
-        }
+            });
+        };
 
         this.updateIngredient = (ingredientIndex) => {
             return function(amount, item) {
                 let new_ingredient = this.props.recipe.ingredients;
-                new_ingredient[ingredientIndex] = { amount, item }
-                this.props.updateRecipe({
+                new_ingredient[ingredientIndex] = { amount, item };
+                this.updateRecipe({
                     ...this.props.recipe,
                     ingredients: new_ingredient
-                })
+                });
             }.bind(this);
+        }
+
+        this.handleNameKeyDown = (e) => {
+            if(e.key == "Enter") {
+                e.target.blur();
+            }
         }
 
         this.handleNameDblClick = (e) => {
@@ -144,16 +191,50 @@ class CurrentRecipe extends React.Component {
         }
     }
 
+    updateRecipe(newRecipe) {
+        this.props.updateRecipe(this.props.recipeIndex)(newRecipe);
+    }
+    
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.recipe != this.props.recipe) {
+            this.setState({ nameValue: this.props.recipe.name });
+        }
+        if( this.state.nameValue === "" 
+            && this.state.editingName === false
+            && this.props.recipe.ingredients.length < 1) {
+            this.setState({ editingName: true });
+            setTimeout(() => this.editName.focus(), 100);
+        }
+    }
+
     render() {
+        let ingredientLine = (e, i) => {
+            return <IngredientLine 
+                        key={this.props.recipe.name + i}
+                        blank={false}
+                        amount={e.amount}
+                        item={e.item} 
+                        updateIngredient={this.updateIngredient(i)} />;
+        }
         let ingredients = this.props
                               .recipe
                               .ingredients
-                              .map((e, i) => { return(
-                                <IngredientLine key={this.props.recipe.name + i}
-                                                amount={e.amount}
-                                                item={e.item} 
-                                                updateIngredient={this.updateIngredient(i)} />
-                              ); });
+                              .map(ingredientLine);
+
+        let blankLine = (i) => {
+            return <IngredientLine 
+                        key={this.props.recipe.name + i}
+                        blank={true}
+                        amount={''}
+                        item={''}
+                        updateIngredient={this.updateIngredient(i)} />;
+        }
+
+        let j = ingredients.length;
+        const MIN_CARD_LINES = 6
+        for(let i = 0; i < (MIN_CARD_LINES - j); i++) {
+            ingredients.push(blankLine(ingredients.length));
+        }
         return(
             <div className={"recipe-card" + (this.props.visible ? '' : ' invisible')}>
                 <h3 className={"recipe-name" + (!this.state.editingName ? '' : ' invisible')}
@@ -161,16 +242,15 @@ class CurrentRecipe extends React.Component {
                     {this.props.recipe.name}
                 </h3>
                 <input  className={"recipe-name" + (this.state.editingName ? '' : ' invisible')}
-                        type="text" 
+                        type="text"
+                        ref={(input) => { this.editName = input; }}
                         onChange={this.handleNameChange}
-                        onBlur={this.handleNameBlur} 
+                        onBlur={this.handleNameBlur}
+                        onKeyDown={this.handleNameKeyDown} 
                         value={this.state.nameValue} />
                 <div>
                     {ingredients}
-                    <div className="recipe-ingredient">
-                        <div className="ingredient-amount"></div>
-                        <div className="ingredient-item"></div>
-                    </div>
+                    {blankLine(ingredients.length)}
                 </div>
             </div>
         );
@@ -230,9 +310,34 @@ class App extends React.Component {
                 this.setState({cardVisible: false});
             }
         }
+
+        this.addRecipe = (e) => {
+            this.setState(prevState => {
+                return  {   
+                            ...prevState, 
+                            recipes: [ 
+                                ...prevState.recipes, 
+                                { name: '', ingredients: [] }
+                            ],
+                            selectedRecipe: prevState.recipes.length,
+                            cardVisible: true
+                        }
+            });
+        }
     }
 
-    
+    componentDidMount() {
+        let localRecipes = JSON.parse(localStorage.getItem("errpr-recipes"));
+        if(localRecipes) {
+            this.setState({ recipes: localRecipes });
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        if(prevState.recipes != this.state.recipes) {
+            localStorage.setItem("errpr-recipes", JSON.stringify(this.state.recipes));
+        }
+    }
 
     render() {
         return(
@@ -240,11 +345,13 @@ class App extends React.Component {
                 <RecipeList 
                     recipes={this.state.recipes} 
                     select={this.selectRecipeHandler}
-                    handleClick={this.handleRecipeListClick} />
+                    handleClick={this.handleRecipeListClick}
+                    addRecipe={this.addRecipe} />
                 <CurrentRecipe 
                     visible={this.state.cardVisible}
                     recipe={this.state.recipes[this.state.selectedRecipe]}
-                    updateRecipe={this.updateRecipe(this.state.selectedRecipe)} />
+                    recipeIndex={this.state.selectedRecipe}
+                    updateRecipe={this.updateRecipe} />
             </div>
         );
     }

@@ -36,7 +36,10 @@
 .recipe-name {
   height: 2em;
   border-bottom: 2px solid #fa963c;
-  padding: 0.5em; }
+  padding: 0.5em;
+  font-weight: bold;
+  width: 100%;
+  background-color: #e6e63c; }
 
 .recipe-ingredient {
   display: flex;
