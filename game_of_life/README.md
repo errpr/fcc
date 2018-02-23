@@ -1,1 +1,1 @@
-Conway's Game of Life in React.
+Conway's Game of Life implementation.
