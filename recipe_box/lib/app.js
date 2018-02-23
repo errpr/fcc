@@ -13,23 +13,36 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 //@ts-check
+
+var MIN_RECIPE_LINES = 14;
+var MIN_CARD_LINES = 6;
+
 function RecipeList(props) {
     var recipeItems = props.recipes.map(function (e, i) {
         return React.createElement(
             "li",
-            { className: "recipe-item",
-                onClick: props.select,
-                "data-index": i,
-                key: i },
-            e.name
+            { className: "recipe-item", key: i },
+            React.createElement(
+                "span",
+                { onClick: props.select, "data-index": i },
+                e.name
+            ),
+            React.createElement(
+                "button",
+                { className: "delete-recipe-button",
+                    "data-index": i,
+                    onClick: props.deleteRecipe },
+                "X"
+            )
         );
     });
 
     var emptyLine = function emptyLine(i) {
         return React.createElement("li", { key: i, className: "recipe-item", onDoubleClick: props.addRecipe });
     };
+
     var j = recipeItems.length;
-    for (var i = 0; i < 15 - j; i++) {
+    for (var i = 0; i < MIN_RECIPE_LINES - j; i++) {
         recipeItems.push(emptyLine("blank" + i));
     }
     return React.createElement(
@@ -66,6 +79,20 @@ var IngredientLine = function (_React$Component) {
             editingItemValue: props.item
         };
 
+        _this.focusItem = function () {
+            _this.setState({ editingItem: true, editingAmount: false });
+            setTimeout(function () {
+                _this.editItem.focus();
+            }, 100);
+        };
+
+        _this.focusAmount = function () {
+            _this.setState({ editingItem: false, editingAmount: true });
+            setTimeout(function () {
+                _this.editAmount.focus();
+            }, 100);
+        };
+
         _this.updateAmount = function (amount) {
             _this.props.updateIngredient(amount, _this.props.item);
         };
@@ -75,11 +102,13 @@ var IngredientLine = function (_React$Component) {
         };
 
         _this.dblclickAmount = function (e) {
-            _this.setState({ editingAmount: true });
+            e.preventDefault();
+            _this.focusAmount();
         };
 
         _this.dblclickItem = function (e) {
-            _this.setState({ editingItem: true });
+            e.preventDefault();
+            _this.focusItem();
         };
 
         _this.handleChange = function (e) {
@@ -96,25 +125,22 @@ var IngredientLine = function (_React$Component) {
                     {
                         if (e.target.value === "") {
                             if (_this.state.editingItemValue === "") {
-                                // delete entire ingredient on backspace of empty line
+                                e.preventDefault();
                                 _this.setState({ editingAmount: false, editingItem: false });
-                                _this.props.deleteIngredient();
+                                e.target.blur();
                             }
                         }
-                        break;
-                    }
+                    }break;
                 case "Tab":
                     {
                         e.preventDefault();
-                        _this.setState({ editingAmount: false, editingItem: true });
                         e.target.blur();
-                        setTimeout(function () {
-                            return _this.editItem.focus();
-                        }, 100);
+                        _this.focusItem();
                     }break;
                 case "Enter":
                     {
                         e.target.blur();
+                        _this.focusItem();
                     }break;
             }
         };
@@ -123,15 +149,15 @@ var IngredientLine = function (_React$Component) {
             switch (e.key) {
                 case "Backspace":
                     {
-                        if (e.target.value === "") {
-                            _this.setState({ editingItem: false, editingAmount: true });
-                            _this.editAmount.focus();
+                        if (_this.state.editingItemValue === "") {
+                            e.preventDefault();
+                            _this.focusAmount();
                         }
-                    }
+                    }break;
                 case "Enter":
                     {
                         e.target.blur();
-                    }
+                    }break;
             }
         };
 
@@ -192,6 +218,7 @@ var IngredientLine = function (_React$Component) {
                         className: "edit-item",
                         onChange: this.handleChange,
                         onBlur: this.handleBlur,
+                        onKeyDown: this.handleItemKeyDown,
                         value: this.state.editingItemValue })
                 )
             );
@@ -218,22 +245,28 @@ var CurrentRecipe = function (_React$Component2) {
         };
 
         _this3.updateName = function (newName) {
-            if (!newName) {
-                _this3.setState({ nameValue: props.recipe.name });
-                return;
-            }
-            _this3.updateRecipe(_extends({}, _this3.props.recipe, {
+            _this3.props.updateRecipe(_this3.props.recipeIndex, _extends({}, _this3.props.recipe, {
                 name: newName
             }));
         };
 
         _this3.updateIngredient = function (ingredientIndex) {
             return function (amount, item) {
-                var new_ingredient = this.props.recipe.ingredients;
-                new_ingredient[ingredientIndex] = { amount: amount, item: item };
-                this.updateRecipe(_extends({}, this.props.recipe, {
-                    ingredients: new_ingredient
+                var new_ingredients = this.props.recipe.ingredients;
+
+                if (ingredientIndex > new_ingredients.length) {
+                    ingredientIndex = new_ingredients.length;
+                };
+                if (amount === "" && item === "") {
+                    new_ingredients.splice(ingredientIndex, 1);
+                } else {
+                    new_ingredients[ingredientIndex] = { amount: amount, item: item };
+                }
+
+                this.props.updateRecipe(this.props.recipeIndex, _extends({}, this.props.recipe, {
+                    ingredients: new_ingredients
                 }));
+                this.forceUpdate();
             }.bind(_this3);
         };
 
@@ -244,6 +277,7 @@ var CurrentRecipe = function (_React$Component2) {
         };
 
         _this3.handleNameDblClick = function (e) {
+            e.preventDefault();
             _this3.setState({ editingName: true });
         };
 
@@ -259,51 +293,38 @@ var CurrentRecipe = function (_React$Component2) {
     }
 
     _createClass(CurrentRecipe, [{
-        key: "updateRecipe",
-        value: function updateRecipe(newRecipe) {
-            this.props.updateRecipe(this.props.recipeIndex)(newRecipe);
-        }
-    }, {
         key: "componentDidUpdate",
         value: function componentDidUpdate(prevProps, prevState) {
-            var _this4 = this;
-
             if (prevProps.recipe != this.props.recipe) {
                 this.setState({ nameValue: this.props.recipe.name });
-            }
-            if (this.state.nameValue === "" && this.state.editingName === false && this.props.recipe.ingredients.length < 1) {
-                this.setState({ editingName: true });
-                setTimeout(function () {
-                    return _this4.editName.focus();
-                }, 100);
             }
         }
     }, {
         key: "render",
         value: function render() {
-            var _this5 = this;
+            var _this4 = this;
 
             var ingredientLine = function ingredientLine(e, i) {
                 return React.createElement(IngredientLine, {
-                    key: _this5.props.recipe.name + i,
+                    key: _this4.props.recipe.name + i,
                     blank: false,
                     amount: e.amount,
                     item: e.item,
-                    updateIngredient: _this5.updateIngredient(i) });
+                    updateIngredient: _this4.updateIngredient(i) });
             };
             var ingredients = this.props.recipe.ingredients.map(ingredientLine);
 
             var blankLine = function blankLine(i) {
                 return React.createElement(IngredientLine, {
-                    key: _this5.props.recipe.name + i,
+                    key: _this4.props.recipe.name + i,
                     blank: true,
                     amount: '',
                     item: '',
-                    updateIngredient: _this5.updateIngredient(i) });
+                    updateIngredient: _this4.updateIngredient(i) });
             };
 
             var j = ingredients.length;
-            var MIN_CARD_LINES = 6;
+
             for (var i = 0; i < MIN_CARD_LINES - j; i++) {
                 ingredients.push(blankLine(ingredients.length));
             }
@@ -319,7 +340,7 @@ var CurrentRecipe = function (_React$Component2) {
                 React.createElement("input", { className: "recipe-name" + (this.state.editingName ? '' : ' invisible'),
                     type: "text",
                     ref: function ref(input) {
-                        _this5.editName = input;
+                        _this4.editName = input;
                     },
                     onChange: this.handleNameChange,
                     onBlur: this.handleNameBlur,
@@ -347,9 +368,9 @@ var App = function (_React$Component3) {
     function App(props) {
         _classCallCheck(this, App);
 
-        var _this6 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+        var _this5 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-        _this6.state = {
+        _this5.state = {
             recipes: [{
                 name: 'Steven\'s Red Beans & Rice',
                 ingredients: [{ amount: '2 cans', item: 'red beans' }, { amount: '2 packages', item: 'Uncle Ben\'s 90 second white rice' }, { amount: '1 package', item: 'smoked sausage' }, { amount: '3/4', item: 'onion diced' }, { amount: '3/4', item: 'bell pepper diced' }, { amount: '3 dashes', item: 'Tony\'s Cajun Seasoning' }, { amount: '1 tblsp', item: 'chili pepper powdered' }, { amount: '1 tblsp', item: 'cayenne pepper powdered' }]
@@ -361,36 +382,52 @@ var App = function (_React$Component3) {
             cardVisible: false
         };
 
-        _this6.selectRecipeHandler = function (e) {
-            _this6.setState({ selectedRecipe: e.target.getAttribute('data-index'), cardVisible: true });
+        _this5.selectRecipeHandler = function (e) {
+            _this5.setState({ selectedRecipe: e.target.getAttribute('data-index'), cardVisible: true });
         };
 
-        _this6.updateRecipe = function (recipeIndex) {
-            return function (recipeData) {
-                this.setState(function (prevState) {
-                    var new_recipes = prevState.recipes.slice();
-                    new_recipes[recipeIndex] = recipeData;
-                    return _extends({}, prevState, { recipes: new_recipes });
-                });
-            }.bind(_this6);
+        _this5.updateRecipe = function (recipeIndex, recipeData) {
+            _this5.setState(function (prevState) {
+                var new_recipes = prevState.recipes.slice();
+                new_recipes[recipeIndex] = recipeData;
+                if (recipeData.name === "") {
+                    new_recipes[recipeIndex].name = "Recipe " + (1 + Number(recipeIndex));
+                }
+                return _extends({}, prevState, { recipes: new_recipes });
+            });
         };
 
-        _this6.handleRecipeListClick = function (e) {
-            if (_this6.state.cardVisible) {
-                _this6.setState({ cardVisible: false });
+        _this5.handleRecipeListClick = function (e) {
+            if (_this5.state.cardVisible) {
+                _this5.setState({ cardVisible: false });
             }
         };
 
-        _this6.addRecipe = function (e) {
-            _this6.setState(function (prevState) {
+        _this5.addRecipe = function (e) {
+            _this5.setState(function (prevState) {
                 return _extends({}, prevState, {
-                    recipes: [].concat(_toConsumableArray(prevState.recipes), [{ name: '', ingredients: [] }]),
+                    recipes: [].concat(_toConsumableArray(prevState.recipes), [{ name: String.fromCharCode(0x200b) + 'Recipe ' + (prevState.recipes.length + 1), ingredients: [] }]),
                     selectedRecipe: prevState.recipes.length,
                     cardVisible: true
                 });
             });
         };
-        return _this6;
+
+        _this5.deleteRecipe = function (e) {
+            var i = e.target.getAttribute("data-index");
+            _this5.setState(function (prevState) {
+                var newRecipes = prevState.recipes.slice();
+                newRecipes.splice(i, 1);
+                if (newRecipes.length < 1) {
+                    newRecipes = [{ name: String.fromCharCode(0x200b) + "Recipe 1", ingredients: [] }];
+                }
+                return _extends({}, prevState, {
+                    recipes: newRecipes,
+                    selectedRecipe: 0
+                });
+            });
+        };
+        return _this5;
     }
 
     _createClass(App, [{
@@ -418,7 +455,8 @@ var App = function (_React$Component3) {
                     recipes: this.state.recipes,
                     select: this.selectRecipeHandler,
                     handleClick: this.handleRecipeListClick,
-                    addRecipe: this.addRecipe }),
+                    addRecipe: this.addRecipe,
+                    deleteRecipe: this.deleteRecipe }),
                 React.createElement(CurrentRecipe, {
                     visible: this.state.cardVisible,
                     recipe: this.state.recipes[this.state.selectedRecipe],
