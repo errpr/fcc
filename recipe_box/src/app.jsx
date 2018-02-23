@@ -344,7 +344,7 @@ class App extends React.Component {
                             ...prevState, 
                             recipes: [ 
                                 ...prevState.recipes, 
-                                { name: String.fromCharCode(0x200b) + 'Recipe ' + (prevState.recipes.length + 1), ingredients: [] }
+                                { name: 'Recipe ' + (prevState.recipes.length + 1), ingredients: [] }
                             ],
                             selectedRecipe: prevState.recipes.length,
                             cardVisible: true
@@ -358,7 +358,7 @@ class App extends React.Component {
                 let newRecipes = prevState.recipes.slice();
                 newRecipes.splice(i, 1);
                 if(newRecipes.length < 1) {
-                    newRecipes = [{ name: String.fromCharCode(0x200b) + "Recipe 1", ingredients: [] }];
+                    newRecipes = [{ name: "Recipe 1", ingredients: [] }];
                 }
                 return  {   
                     ...prevState, 
