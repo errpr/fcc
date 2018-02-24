@@ -1,9 +1,11 @@
+const TICK_DELAY = 250;
+
 function Cell(props) {
     return(
         <div onClick={props.cellClick}
              data-index-i={props.index[0]}
              data-index-j={props.index[1]}
-             className={"cell cell" + (props.status === 2 ? "-alive" : "-dead" )}>
+             className={"cell cell" + (props.status === 1 ? "-alive" : "-dead" )}>
         </div>);
 }
 
@@ -12,7 +14,7 @@ function CellRow(props) {
         return <Cell key={`${props.i}${j}`} 
                      index={[props.i, j]} 
                      status={e} 
-                     cellClick={props.cellClick} /> 
+                     cellClick={props.cellClick} />; 
     });
     return(
         <div className="cell-row">
@@ -27,7 +29,7 @@ function CellGrid(props) {
                     cellClick={props.cellClick}
                     key={i} 
                     i={i} 
-                    cells={row} />
+                    cells={row} />;
     });
     return(
         <div className="cell-grid">
@@ -40,65 +42,72 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            cells: this.createCells(30,30)
+            cells: this.createCells(30,30),
+            running: false,
+            runInterval: undefined,
+            generationCount: 0
         };
-        this.onClick = this.onClick.bind(this);
+        this.nextCells = this.state.cells.slice();
+
+        // ES6 ladies and gentlemen
+        this.updateCells = this.updateCells.bind(this);
+        this.runClick = this.runClick.bind(this);
+        this.stepClick = this.stepClick.bind(this);
         this.cellClick = this.cellClick.bind(this);
+        this.beginRunning = this.beginRunning.bind(this);
+        this.endRunning = this.endRunning.bind(this);
     }
 
     updateCells() {
-        let nextCells = [];
         for(let i = 0; i < this.state.cells.length; i++) {
-            nextCells.push([]);
             for(let j = 0; j < this.state.cells[i].length; j++) {
-                let neighbors = [];
+                let neighbors_count = 0;
                 if(i > 0) {
                     if(j > 0) {
-                        neighbors.push(this.state.cells[i-1][j-1]);
+                        neighbors_count += this.state.cells[i-1][j-1];
                     }
-                    neighbors.push(this.state.cells[i-1][j]);
+                    neighbors_count += this.state.cells[i-1][j];
                     if(j < this.state.cells[i].length - 1) {
-                        neighbors.push(this.state.cells[i-1][j+1]);
+                        neighbors_count += this.state.cells[i-1][j+1];
                     }
                 }
                 if(j > 0) {
-                    neighbors.push(this.state.cells[i][j-1]);
+                    neighbors_count += this.state.cells[i][j-1];
                 }
                 if(j < this.state.cells[i].length - 1) {
-                    neighbors.push(this.state.cells[i][j+1]);
+                    neighbors_count += this.state.cells[i][j+1];
                 }
                 if(i < this.state.cells.length - 1) {
                     if(j > 0) {
-                        neighbors.push(this.state.cells[i+1][j-1]);
+                        neighbors_count += this.state.cells[i+1][j-1];
                     }
-                    neighbors.push(this.state.cells[i+1][j]);
+                    neighbors_count += this.state.cells[i+1][j];
                     if(j < this.state.cells[i].length - 1) {
-                        neighbors.push(this.state.cells[i+1][j+1]);
+                        neighbors_count += this.state.cells[i+1][j+1];
                     }
                 }
-                let neighbor_count = neighbors.reduce((acc, ele) => { return ele === 2 ? acc + 1 : acc }, 0);
 
-                if(this.state.cells[i][j] === 1) {
+                if(this.state.cells[i][j] === 0) {
                     // it's dead jim
-                    if(neighbor_count === 3) {
+                    if(neighbors_count === 3) {
                         // it's respawned jim
-                        nextCells[i].push(2);
+                        this.nextCells[i][j] = 1;
                     } else {
-                        nextCells[i].push(1);
+                        this.nextCells[i][j] = 0;
                     }
                 } else {
                     // it's alive
-                    if(neighbor_count < 2) {
-                        nextCells[i].push(1);
-                    } else if(neighbor_count < 4) {
-                        nextCells[i].push(2);
+                    if(neighbors_count < 2) {
+                        this.nextCells[i][j] = 0;
+                    } else if(neighbors_count < 4) {
+                        this.nextCells[i][j] = 1;
                     } else {
-                        nextCells[i].push(1);
+                        this.nextCells[i][j] = 0;
                     }
                 }
             }
         }
-        this.setState({ cells: nextCells});
+        this.setState({ cells: this.nextCells, generationCount: this.state.generationCount + 1 });
     }
 
     randomizeCells() {
@@ -106,7 +115,7 @@ class App extends React.Component {
         for(let i = 0; i < this.state.cells.length; i++) {
             nextCells.push([])
             for(let j = 0; j < this.state.cells[i].length; j++) {
-                nextCells[i].push(Math.random() > 0.7 ? 2 : 1);
+                nextCells[i].push(Math.random() > 0.7 ? 1 : 0);
             }
         }
         this.setState({ cells: nextCells });
@@ -123,9 +132,19 @@ class App extends React.Component {
         return cells;
     }
 
+    beginRunning() {
+        this.updateCells();
+        let runInterval = setInterval(this.updateCells, TICK_DELAY);
+        this.setState({ runInterval });
+    }
+
+    endRunning() {
+        clearInterval(this.state.runInterval);
+    }
+
     // event handlers
 
-    onClick(e) {
+    stepClick(e) {
         this.updateCells();
     }
 
@@ -133,23 +152,38 @@ class App extends React.Component {
         let i = e.target.getAttribute("data-index-i");
         let j = e.target.getAttribute("data-index-j");
         let newCells = this.state.cells.slice();
-        newCells[i][j] = (newCells[i][j] === 2 ? 1 : 2);
-        this.setState({ cells: newCells });
+        newCells[i][j] = (newCells[i][j] === 1 ? 0 : 1);
+        this.setState({ cells: newCells, running: false });
     }
 
-    // react lifecycle stuff
+    runClick(e) {
+        this.setState({ running: !this.state.running });
+    }
+
+    // lifecycle stuff
 
     componentDidMount() {
         this.randomizeCells();
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if(!prevState.running && this.state.running) {
+            this.beginRunning();
+        }
+        if(prevState.running && !this.state.running) {
+            this.endRunning();
+        }
     }
 
     render() {
 
         return(
             <div className="app-container">
-                <h1 onClick={this.onClick}>App</h1>
+                <h1>Conway Twitty's Game-o-Life</h1>
                 <CellGrid cells={this.state.cells}
                           cellClick={this.cellClick} />
+                <button onClick={this.stepClick}>Step</button>
+                <button onClick={this.runClick}>{this.state.running ? "Pause" : "Run"}</button>
             </div>
         );
     }

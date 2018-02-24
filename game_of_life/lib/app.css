@@ -3,10 +3,11 @@
   padding: 0;
   margin: 0;
   border: 0;
-  box-sizing: border-box; }
+  box-sizing: border-box;
+  text-align: center; }
 
 #root {
-  background-color: grey;
+  background-color: white;
   max-width: 800px;
   width: 100vw; }
 
