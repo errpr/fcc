@@ -1,9 +1,19 @@
 function Cell(props) {
-    return(<div className={"cell cell" + (props.status === 2 ? "-alive" : "-dead" )}></div>);
+    return(
+        <div onClick={props.cellClick}
+             data-index-i={props.index[0]}
+             data-index-j={props.index[1]}
+             className={"cell cell" + (props.status === 2 ? "-alive" : "-dead" )}>
+        </div>);
 }
 
 function CellRow(props) {
-    let cells = props.cells.map(e => <Cell status={e} />);
+    let cells = props.cells.map((e, j) => { 
+        return <Cell key={`${props.i}${j}`} 
+                     index={[props.i, j]} 
+                     status={e} 
+                     cellClick={props.cellClick} /> 
+    });
     return(
         <div className="cell-row">
             {cells}
@@ -12,7 +22,13 @@ function CellRow(props) {
 }
 
 function CellGrid(props) {
-    let cellRows = props.cells.map(row => <CellRow cells={row} />);
+    let cellRows = props.cells.map((row, i) => {
+        return <CellRow 
+                    cellClick={props.cellClick}
+                    key={i} 
+                    i={i} 
+                    cells={row} />
+    });
     return(
         <div className="cell-grid">
             {cellRows}
@@ -27,6 +43,7 @@ class App extends React.Component {
             cells: this.createCells(30,30)
         };
         this.onClick = this.onClick.bind(this);
+        this.cellClick = this.cellClick.bind(this);
     }
 
     updateCells() {
@@ -73,7 +90,7 @@ class App extends React.Component {
                     // it's alive
                     if(neighbor_count < 2) {
                         nextCells[i].push(1);
-                    } else if(neighbor_count > 4) {
+                    } else if(neighbor_count < 4) {
                         nextCells[i].push(2);
                     } else {
                         nextCells[i].push(1);
@@ -89,7 +106,7 @@ class App extends React.Component {
         for(let i = 0; i < this.state.cells.length; i++) {
             nextCells.push([])
             for(let j = 0; j < this.state.cells[i].length; j++) {
-                nextCells[i].push(Math.random() > 0.5 ? 1 : 2);
+                nextCells[i].push(Math.random() > 0.7 ? 2 : 1);
             }
         }
         this.setState({ cells: nextCells });
@@ -112,6 +129,14 @@ class App extends React.Component {
         this.updateCells();
     }
 
+    cellClick(e) {
+        let i = e.target.getAttribute("data-index-i");
+        let j = e.target.getAttribute("data-index-j");
+        let newCells = this.state.cells.slice();
+        newCells[i][j] = (newCells[i][j] === 2 ? 1 : 2);
+        this.setState({ cells: newCells });
+    }
+
     // react lifecycle stuff
 
     componentDidMount() {
@@ -123,7 +148,8 @@ class App extends React.Component {
         return(
             <div className="app-container">
                 <h1 onClick={this.onClick}>App</h1>
-                <CellGrid cells={this.state.cells} />
+                <CellGrid cells={this.state.cells}
+                          cellClick={this.cellClick} />
             </div>
         );
     }

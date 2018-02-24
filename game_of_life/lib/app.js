@@ -9,12 +9,18 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function Cell(props) {
-    return React.createElement("div", { className: "cell cell" + (props.status === 2 ? "-alive" : "-dead") });
+    return React.createElement("div", { onClick: props.cellClick,
+        "data-index-i": props.index[0],
+        "data-index-j": props.index[1],
+        className: "cell cell" + (props.status === 2 ? "-alive" : "-dead") });
 }
 
 function CellRow(props) {
-    var cells = props.cells.map(function (e) {
-        return React.createElement(Cell, { status: e });
+    var cells = props.cells.map(function (e, j) {
+        return React.createElement(Cell, { key: "" + props.i + j,
+            index: [props.i, j],
+            status: e,
+            cellClick: props.cellClick });
     });
     return React.createElement(
         "div",
@@ -24,8 +30,12 @@ function CellRow(props) {
 }
 
 function CellGrid(props) {
-    var cellRows = props.cells.map(function (row) {
-        return React.createElement(CellRow, { cells: row });
+    var cellRows = props.cells.map(function (row, i) {
+        return React.createElement(CellRow, {
+            cellClick: props.cellClick,
+            key: i,
+            i: i,
+            cells: row });
     });
     return React.createElement(
         "div",
@@ -46,6 +56,7 @@ var App = function (_React$Component) {
             cells: _this.createCells(30, 30)
         };
         _this.onClick = _this.onClick.bind(_this);
+        _this.cellClick = _this.cellClick.bind(_this);
         return _this;
     }
 
@@ -97,7 +108,7 @@ var App = function (_React$Component) {
                         // it's alive
                         if (neighbor_count < 2) {
                             nextCells[i].push(1);
-                        } else if (neighbor_count > 4) {
+                        } else if (neighbor_count < 4) {
                             nextCells[i].push(2);
                         } else {
                             nextCells[i].push(1);
@@ -114,7 +125,7 @@ var App = function (_React$Component) {
             for (var i = 0; i < this.state.cells.length; i++) {
                 nextCells.push([]);
                 for (var j = 0; j < this.state.cells[i].length; j++) {
-                    nextCells[i].push(Math.random() > 0.5 ? 1 : 2);
+                    nextCells[i].push(Math.random() > 0.7 ? 2 : 1);
                 }
             }
             this.setState({ cells: nextCells });
@@ -139,6 +150,15 @@ var App = function (_React$Component) {
         value: function onClick(e) {
             this.updateCells();
         }
+    }, {
+        key: "cellClick",
+        value: function cellClick(e) {
+            var i = e.target.getAttribute("data-index-i");
+            var j = e.target.getAttribute("data-index-j");
+            var newCells = this.state.cells.slice();
+            newCells[i][j] = newCells[i][j] === 2 ? 1 : 2;
+            this.setState({ cells: newCells });
+        }
 
         // react lifecycle stuff
 
@@ -159,7 +179,8 @@ var App = function (_React$Component) {
                     { onClick: this.onClick },
                     "App"
                 ),
-                React.createElement(CellGrid, { cells: this.state.cells })
+                React.createElement(CellGrid, { cells: this.state.cells,
+                    cellClick: this.cellClick })
             );
         }
     }]);

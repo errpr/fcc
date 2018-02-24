@@ -1,10 +1,26 @@
+* {
+  font-size: 16pt;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  box-sizing: border-box; }
+
 #root {
   background-color: grey; }
+
+.cell-grid {
+  display: flex;
+  flex-flow: column nowrap; }
+
+.cell-row {
+  display: flex;
+  flex-flow: row nowrap; }
 
 .cell {
   display: inline-block;
   width: 10px;
-  height: 10px; }
+  height: 10px;
+  border: 1px solid grey; }
 
 .cell-alive {
   background-color: green; }
