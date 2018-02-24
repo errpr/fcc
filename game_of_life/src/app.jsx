@@ -38,10 +38,26 @@ class App extends React.Component {
                     }
                 }
                 let neighbor_count = neighbors.reduce((acc, ele) => { return ele === 2 ? acc + 1 : acc }, 0);
-                nextCells[i].push(neighbor_count);
+
+                if(this.state.cells[i][j] === 1) {
+                    // it's dead jim
+                    if(neighbor_count === 3) {
+                        // it's respawned jim
+                        nextCells[i].push(2);
+                    }
+                } else {
+                    // it's alive
+                    if(neighbor_count < 2) {
+                        nextCells[i].push(1);
+                    } else if(neighbor_count > 4) {
+                        nextCells[i].push(2);
+                    } else {
+                        nextCells[i].push(1);
+                    }
+                }
             }
         }
-        console.log(nextCells);
+        this.setState({ cells: nextCells});
     }
 
     randomizeCells() {
