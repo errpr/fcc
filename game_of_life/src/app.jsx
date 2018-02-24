@@ -114,7 +114,7 @@ class App extends React.Component {
     }
 
     clearCells() {
-        this.setState({ cells: this.createCells(GRID_HEIGHT, GRID_WIDTH) })
+        this.setState({ cells: this.createCells(GRID_HEIGHT, GRID_WIDTH), running: false, generationCount: 0 })
     }
 
     randomizeCells() {
