@@ -1,4 +1,15 @@
 #root {
   background-color: grey; }
 
+.cell {
+  display: inline-block;
+  width: 10px;
+  height: 10px; }
+
+.cell-alive {
+  background-color: green; }
+
+.cell-dead {
+  background-color: white; }
+
 /*# sourceMappingURL=app.css.map */

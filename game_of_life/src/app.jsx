@@ -1,3 +1,25 @@
+function Cell(props) {
+    return(<div className={"cell cell" + (props.status === 2 ? "-alive" : "-dead" )}></div>);
+}
+
+function CellRow(props) {
+    let cells = props.cells.map(e => <Cell status={e} />);
+    return(
+        <div className="cell-row">
+            {cells}
+        </div>
+    );
+}
+
+function CellGrid(props) {
+    let cellRows = props.cells.map(row => <CellRow cells={row} />);
+    return(
+        <div className="cell-grid">
+            {cellRows}
+        </div>
+    );
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -44,6 +66,8 @@ class App extends React.Component {
                     if(neighbor_count === 3) {
                         // it's respawned jim
                         nextCells[i].push(2);
+                    } else {
+                        nextCells[i].push(1);
                     }
                 } else {
                     // it's alive
@@ -95,7 +119,13 @@ class App extends React.Component {
     }
 
     render() {
-        return(<h1 onClick={this.onClick}>App</h1>);
+
+        return(
+            <div className="app-container">
+                <h1 onClick={this.onClick}>App</h1>
+                <CellGrid cells={this.state.cells} />
+            </div>
+        );
     }
 }
 ReactDOM.render(<App />, document.getElementById('root'));

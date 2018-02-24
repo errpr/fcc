@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -7,6 +7,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function Cell(props) {
+    return React.createElement("div", { className: "cell cell" + (props.status === 2 ? "-alive" : "-dead") });
+}
+
+function CellRow(props) {
+    var cells = props.cells.map(function (e) {
+        return React.createElement(Cell, { status: e });
+    });
+    return React.createElement(
+        "div",
+        { className: "cell-row" },
+        cells
+    );
+}
+
+function CellGrid(props) {
+    var cellRows = props.cells.map(function (row) {
+        return React.createElement(CellRow, { cells: row });
+    });
+    return React.createElement(
+        "div",
+        { className: "cell-grid" },
+        cellRows
+    );
+}
 
 var App = function (_React$Component) {
     _inherits(App, _React$Component);
@@ -24,7 +50,7 @@ var App = function (_React$Component) {
     }
 
     _createClass(App, [{
-        key: 'updateCells',
+        key: "updateCells",
         value: function updateCells() {
             var nextCells = [];
             for (var i = 0; i < this.state.cells.length; i++) {
@@ -64,6 +90,8 @@ var App = function (_React$Component) {
                         if (neighbor_count === 3) {
                             // it's respawned jim
                             nextCells[i].push(2);
+                        } else {
+                            nextCells[i].push(1);
                         }
                     } else {
                         // it's alive
@@ -80,7 +108,7 @@ var App = function (_React$Component) {
             this.setState({ cells: nextCells });
         }
     }, {
-        key: 'randomizeCells',
+        key: "randomizeCells",
         value: function randomizeCells() {
             var nextCells = [];
             for (var i = 0; i < this.state.cells.length; i++) {
@@ -92,7 +120,7 @@ var App = function (_React$Component) {
             this.setState({ cells: nextCells });
         }
     }, {
-        key: 'createCells',
+        key: "createCells",
         value: function createCells(height, width) {
             var cells = [];
             for (var i = 0; i < height; i++) {
@@ -107,7 +135,7 @@ var App = function (_React$Component) {
         // event handlers
 
     }, {
-        key: 'onClick',
+        key: "onClick",
         value: function onClick(e) {
             this.updateCells();
         }
@@ -115,17 +143,23 @@ var App = function (_React$Component) {
         // react lifecycle stuff
 
     }, {
-        key: 'componentDidMount',
+        key: "componentDidMount",
         value: function componentDidMount() {
             this.randomizeCells();
         }
     }, {
-        key: 'render',
+        key: "render",
         value: function render() {
+
             return React.createElement(
-                'h1',
-                { onClick: this.onClick },
-                'App'
+                "div",
+                { className: "app-container" },
+                React.createElement(
+                    "h1",
+                    { onClick: this.onClick },
+                    "App"
+                ),
+                React.createElement(CellGrid, { cells: this.state.cells })
             );
         }
     }]);
