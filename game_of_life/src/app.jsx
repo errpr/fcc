@@ -1,4 +1,6 @@
 const TICK_DELAY = 250;
+const GRID_WIDTH = 30;
+const GRID_HEIGHT = 30;
 
 function Cell(props) {
     return(
@@ -42,7 +44,7 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            cells: this.createCells(30,30),
+            cells: this.createCells(GRID_HEIGHT, GRID_WIDTH),
             running: false,
             runInterval: undefined,
             generationCount: 0
@@ -54,6 +56,7 @@ class App extends React.Component {
         this.runClick = this.runClick.bind(this);
         this.stepClick = this.stepClick.bind(this);
         this.cellClick = this.cellClick.bind(this);
+        this.clearClick = this.clearClick.bind(this);
         this.beginRunning = this.beginRunning.bind(this);
         this.endRunning = this.endRunning.bind(this);
     }
@@ -110,6 +113,10 @@ class App extends React.Component {
         this.setState({ cells: this.nextCells, generationCount: this.state.generationCount + 1 });
     }
 
+    clearCells() {
+        this.setState({ cells: this.createCells(GRID_HEIGHT, GRID_WIDTH) })
+    }
+
     randomizeCells() {
         let nextCells = [];
         for(let i = 0; i < this.state.cells.length; i++) {
@@ -126,7 +133,7 @@ class App extends React.Component {
         for(let i = 0; i < height; i++) {
             cells.push([])
             for(let j = 0; j < width; j++) {
-                cells[i].push(1);
+                cells[i].push(0);
             }
         }
         return cells;
@@ -160,6 +167,10 @@ class App extends React.Component {
         this.setState({ running: !this.state.running });
     }
 
+    clearClick(e) {
+        this.clearCells();
+    }
+
     // lifecycle stuff
 
     componentDidMount() {
@@ -182,8 +193,10 @@ class App extends React.Component {
                 <h1>Conway Twitty's Game-o-Life</h1>
                 <CellGrid cells={this.state.cells}
                           cellClick={this.cellClick} />
-                <button onClick={this.stepClick}>Step</button>
-                <button onClick={this.runClick}>{this.state.running ? "Pause" : "Run"}</button>
+                <button className="app-controls" onClick={this.clearClick}>Clear</button>
+                <button className="app-controls" onClick={this.stepClick}>Step</button>
+                <button className="app-controls" onClick={this.runClick}>{this.state.running ? "Pause" : "Run"}</button>
+                <div className="gen-display">Generation {this.state.generationCount}</div>
             </div>
         );
     }

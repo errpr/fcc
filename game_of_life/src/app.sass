@@ -6,21 +6,27 @@
     box-sizing: border-box
     text-align: center
 
-#root
+.app-container
     background-color: white
     max-width: 800px
     width: 100vw
+    margin-left: auto
+    margin-right: auto
 
 .cell-grid
     display: flex
     flex-flow: column nowrap
     max-height: 800px
     height: 100vw
+    background-image: url("http://error.diodeware.com/fcc/twitty.png")
+    background-repeat: no-repeat
+    background-size: auto 100%
 
 .cell-row
     display: flex
     flex-grow: 1
     flex-flow: row nowrap
+    background: none
 
 .cell
     display: inline-block
@@ -30,7 +36,12 @@
     border: 1px solid grey
 
 .cell-alive
-    background-color: green
+    background-color: rgba(0,0,0,0.4)
 
 .cell-dead
-    background-color: white
+    background-color: rgba(255,255,255,0.4)
+
+.app-controls
+    padding: 0.5em
+    margin: 0.5em
+    border: 1px solid black

@@ -9,6 +9,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var TICK_DELAY = 250;
+var GRID_WIDTH = 30;
+var GRID_HEIGHT = 30;
 
 function Cell(props) {
     return React.createElement("div", { onClick: props.cellClick,
@@ -55,7 +57,7 @@ var App = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
         _this.state = {
-            cells: _this.createCells(30, 30),
+            cells: _this.createCells(GRID_HEIGHT, GRID_WIDTH),
             running: false,
             runInterval: undefined,
             generationCount: 0
@@ -67,6 +69,7 @@ var App = function (_React$Component) {
         _this.runClick = _this.runClick.bind(_this);
         _this.stepClick = _this.stepClick.bind(_this);
         _this.cellClick = _this.cellClick.bind(_this);
+        _this.clearClick = _this.clearClick.bind(_this);
         _this.beginRunning = _this.beginRunning.bind(_this);
         _this.endRunning = _this.endRunning.bind(_this);
         return _this;
@@ -126,6 +129,11 @@ var App = function (_React$Component) {
             this.setState({ cells: this.nextCells, generationCount: this.state.generationCount + 1 });
         }
     }, {
+        key: "clearCells",
+        value: function clearCells() {
+            this.setState({ cells: this.createCells(GRID_HEIGHT, GRID_WIDTH) });
+        }
+    }, {
         key: "randomizeCells",
         value: function randomizeCells() {
             var nextCells = [];
@@ -144,7 +152,7 @@ var App = function (_React$Component) {
             for (var i = 0; i < height; i++) {
                 cells.push([]);
                 for (var j = 0; j < width; j++) {
-                    cells[i].push(1);
+                    cells[i].push(0);
                 }
             }
             return cells;
@@ -183,6 +191,11 @@ var App = function (_React$Component) {
         value: function runClick(e) {
             this.setState({ running: !this.state.running });
         }
+    }, {
+        key: "clearClick",
+        value: function clearClick(e) {
+            this.clearCells();
+        }
 
         // lifecycle stuff
 
@@ -217,13 +230,24 @@ var App = function (_React$Component) {
                     cellClick: this.cellClick }),
                 React.createElement(
                     "button",
-                    { onClick: this.stepClick },
+                    { className: "app-controls", onClick: this.clearClick },
+                    "Clear"
+                ),
+                React.createElement(
+                    "button",
+                    { className: "app-controls", onClick: this.stepClick },
                     "Step"
                 ),
                 React.createElement(
                     "button",
-                    { onClick: this.runClick },
+                    { className: "app-controls", onClick: this.runClick },
                     this.state.running ? "Pause" : "Run"
+                ),
+                React.createElement(
+                    "div",
+                    { className: "gen-display" },
+                    "Generation ",
+                    this.state.generationCount
                 )
             );
         }
