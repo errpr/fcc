@@ -11,18 +11,104 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var App = function (_React$Component) {
     _inherits(App, _React$Component);
 
-    function App() {
+    function App(props) {
         _classCallCheck(this, App);
 
-        return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+        var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+
+        _this.state = {
+            cells: _this.createCells(30, 30)
+        };
+        _this.onClick = _this.onClick.bind(_this);
+        return _this;
     }
 
     _createClass(App, [{
+        key: 'updateCells',
+        value: function updateCells() {
+            var nextCells = [];
+            for (var i = 0; i < this.state.cells.length; i++) {
+                nextCells.push([]);
+                for (var j = 0; j < this.state.cells[i].length; j++) {
+                    var neighbors = [];
+                    if (i > 0) {
+                        if (j > 0) {
+                            neighbors.push(this.state.cells[i - 1][j - 1]);
+                        }
+                        neighbors.push(this.state.cells[i - 1][j]);
+                        if (j < this.state.cells[i].length - 1) {
+                            neighbors.push(this.state.cells[i - 1][j + 1]);
+                        }
+                    }
+                    if (j > 0) {
+                        neighbors.push(this.state.cells[i][j - 1]);
+                    }
+                    if (j < this.state.cells[i].length - 1) {
+                        neighbors.push(this.state.cells[i][j + 1]);
+                    }
+                    if (i < this.state.cells.length - 1) {
+                        if (j > 0) {
+                            neighbors.push(this.state.cells[i + 1][j - 1]);
+                        }
+                        neighbors.push(this.state.cells[i + 1][j]);
+                        if (j < this.state.cells[i].length - 1) {
+                            neighbors.push(this.state.cells[i + 1][j + 1]);
+                        }
+                    }
+                    var neighbor_count = neighbors.reduce(function (acc, ele) {
+                        return ele === 2 ? acc + 1 : acc;
+                    }, 0);
+                    nextCells[i].push(neighbor_count);
+                }
+            }
+            console.log(nextCells);
+        }
+    }, {
+        key: 'randomizeCells',
+        value: function randomizeCells() {
+            var nextCells = [];
+            for (var i = 0; i < this.state.cells.length; i++) {
+                nextCells.push([]);
+                for (var j = 0; j < this.state.cells[i].length; j++) {
+                    nextCells[i].push(Math.random() > 0.5 ? 1 : 2);
+                }
+            }
+            this.setState({ cells: nextCells });
+        }
+    }, {
+        key: 'createCells',
+        value: function createCells(height, width) {
+            var cells = [];
+            for (var i = 0; i < height; i++) {
+                cells.push([]);
+                for (var j = 0; j < width; j++) {
+                    cells[i].push(1);
+                }
+            }
+            return cells;
+        }
+
+        // event handlers
+
+    }, {
+        key: 'onClick',
+        value: function onClick(e) {
+            this.updateCells();
+        }
+
+        // react lifecycle stuff
+
+    }, {
+        key: 'componentDidMount',
+        value: function componentDidMount() {
+            this.randomizeCells();
+        }
+    }, {
         key: 'render',
         value: function render() {
             return React.createElement(
                 'h1',
-                null,
+                { onClick: this.onClick },
                 'App'
             );
         }
