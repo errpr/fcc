@@ -6,20 +6,26 @@
   box-sizing: border-box; }
 
 #root {
-  background-color: grey; }
+  background-color: grey;
+  max-width: 800px;
+  width: 100vw; }
 
 .cell-grid {
   display: flex;
-  flex-flow: column nowrap; }
+  flex-flow: column nowrap;
+  max-height: 800px;
+  height: 100vw; }
 
 .cell-row {
   display: flex;
+  flex-grow: 1;
   flex-flow: row nowrap; }
 
 .cell {
   display: inline-block;
+  flex-grow: 1;
   width: 10px;
-  height: 10px;
+  height: 100%;
   border: 1px solid grey; }
 
 .cell-alive {
