@@ -5,6 +5,7 @@ const map = generateMap();
 const TILE_VISIBILITY = 12;
 
 const TRANSITION_SPEED = 250
+
 /** @returns {number[][]}   */
 function generateMap() {
     let m = [];
@@ -150,6 +151,7 @@ class App extends React.Component {
                 <button className="control-btn" onClick={this.moveUp}>Up</button>
                 <button className="control-btn" onClick={this.moveDown}>Down</button>
                 <div id="tile-viewport">
+                    <div className="character-sprite"></div>
                     <TileGrid tiles={this.state.tiles} />
                 </div>
             </div>

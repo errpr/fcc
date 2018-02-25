@@ -15,6 +15,7 @@ var map = generateMap();
 var TILE_VISIBILITY = 12;
 
 var TRANSITION_SPEED = 250;
+
 /** @returns {number[][]}   */
 function generateMap() {
     var m = [];
@@ -196,6 +197,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     "div",
                     { id: "tile-viewport" },
+                    React.createElement("div", { className: "character-sprite" }),
                     React.createElement(TileGrid, { tiles: this.state.tiles })
                 )
             );
