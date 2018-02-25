@@ -8,11 +8,11 @@ const TRANSITION_SPEED = 250;
 
 /** @returns {number[][]}   */
 function generateMap() {
-    let m = [];
+    let m = Array(MAP_HEIGHT);
     for(let i = 0; i < MAP_HEIGHT; i++) {
-        m.push([]);
+        m[i] = Array(MAP_WIDTH);
         for(let j = 0; j < MAP_WIDTH; j++) {
-            m[i].push(Math.floor(Math.random() * 4));
+            m[i][j] = Math.floor(Math.random() * 4);
         }
     }
     return m;
@@ -21,7 +21,7 @@ function generateMap() {
 /** 
  * @param {number} x
  * @param {number} y
- * @returns {number[][]}  
+ * @returns {number[][]}
  */
 function getVisibleTiles(x, y) {
     let x1 = Math.floor(x - (TILE_VISIBILITY / 2));
@@ -149,6 +149,7 @@ class App extends React.Component {
     }
 
     registerKeys() {
+        // spamming move causes a small graphics glitch, so we listen for keyup instead of keydown
         document.addEventListener("keyup", this.handleKeys);
     }
 
@@ -163,12 +164,14 @@ class App extends React.Component {
         return(
             <div id="app-container">
                 <button className="control-btn" onClick={this.moveLeft}>left</button>
-                <button className="control-btn" onClick={this.moveRight}>Right</button>
                 <button className="control-btn" onClick={this.moveUp}>Up</button>
                 <button className="control-btn" onClick={this.moveDown}>Down</button>
+                <button className="control-btn" onClick={this.moveRight}>Right</button>
                 <div id="tile-viewport">
                     <div className="character-sprite"></div>
                     <TileGrid tiles={this.state.tiles} />
+                    <div id="lighting-gradient-horizontal"></div>
+                    <div id="lighting-gradient-vertical"></div>
                 </div>
             </div>
         );

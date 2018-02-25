@@ -3,6 +3,9 @@
   border: 0;
   margin: 0; }
 
+body {
+  background-color: black; }
+
 #root {
   position: relative; }
 
@@ -12,7 +15,26 @@
   max-width: 800px;
   height: 100vw;
   max-height: 800px;
-  overflow: hidden; }
+  overflow: hidden;
+  z-index: 10; }
+
+#lighting-gradient-horizontal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  background-image: linear-gradient(to right, black, rgba(0, 0, 0, 0.1), black); }
+
+#lighting-gradient-vertical {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 19;
+  background-image: linear-gradient(to top, black, rgba(0, 0, 0, 0), black); }
 
 .tile {
   width: 50px;

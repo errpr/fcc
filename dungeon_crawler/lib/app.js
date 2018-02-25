@@ -18,11 +18,11 @@ var TRANSITION_SPEED = 250;
 
 /** @returns {number[][]}   */
 function generateMap() {
-    var m = [];
+    var m = Array(MAP_HEIGHT);
     for (var i = 0; i < MAP_HEIGHT; i++) {
-        m.push([]);
+        m[i] = Array(MAP_WIDTH);
         for (var j = 0; j < MAP_WIDTH; j++) {
-            m[i].push(Math.floor(Math.random() * 4));
+            m[i][j] = Math.floor(Math.random() * 4);
         }
     }
     return m;
@@ -31,7 +31,7 @@ function generateMap() {
 /** 
  * @param {number} x
  * @param {number} y
- * @returns {number[][]}  
+ * @returns {number[][]}
  */
 function getVisibleTiles(x, y) {
     var x1 = Math.floor(x - TILE_VISIBILITY / 2);
@@ -181,6 +181,7 @@ var App = function (_React$Component) {
     _createClass(App, [{
         key: "registerKeys",
         value: function registerKeys() {
+            // spamming move causes a small graphics glitch, so we listen for keyup instead of keydown
             document.addEventListener("keyup", this.handleKeys);
         }
     }, {
@@ -202,11 +203,6 @@ var App = function (_React$Component) {
                 ),
                 React.createElement(
                     "button",
-                    { className: "control-btn", onClick: this.moveRight },
-                    "Right"
-                ),
-                React.createElement(
-                    "button",
                     { className: "control-btn", onClick: this.moveUp },
                     "Up"
                 ),
@@ -216,10 +212,17 @@ var App = function (_React$Component) {
                     "Down"
                 ),
                 React.createElement(
+                    "button",
+                    { className: "control-btn", onClick: this.moveRight },
+                    "Right"
+                ),
+                React.createElement(
                     "div",
                     { id: "tile-viewport" },
                     React.createElement("div", { className: "character-sprite" }),
-                    React.createElement(TileGrid, { tiles: this.state.tiles })
+                    React.createElement(TileGrid, { tiles: this.state.tiles }),
+                    React.createElement("div", { id: "lighting-gradient-horizontal" }),
+                    React.createElement("div", { id: "lighting-gradient-vertical" })
                 )
             );
         }
