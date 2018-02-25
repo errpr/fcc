@@ -1,0 +1,81 @@
+* {
+  padding: 0;
+  border: 0;
+  margin: 0; }
+
+#root {
+  position: relative; }
+
+#tile-viewport {
+  position: relative;
+  width: 100vw;
+  max-width: 800px;
+  height: 100vw;
+  max-height: 800px;
+  overflow: hidden; }
+
+.tile {
+  width: 50px;
+  flex-grow: 1;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%; }
+
+.tile-grid {
+  height: 120%;
+  width: 120%;
+  margin-top: -10%;
+  margin-left: -10%;
+  display: flex;
+  flex-flow: column nowrap; }
+
+.tile-row {
+  height: 50px;
+  display: flex;
+  flex-grow: 1;
+  flex-flow: row nowrap; }
+
+.tile-0 {
+  background-image: url("floor-tile0.png"); }
+
+.tile-1 {
+  background-image: url("floor-tile1.png"); }
+
+.tile-2 {
+  background-image: url("floor-tile2.png"); }
+
+.tile-3 {
+  background-image: url("floor-tile3.png"); }
+
+.character-sprite {
+  background-image: url("http://error.diodeware.com/fcc/twitty.png");
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 50px;
+  width: 50px; }
+
+.translate-left {
+  margin-left: -20%;
+  transition: margin-left 2s ease; }
+
+.translate-right {
+  margin-left: 0%;
+  transition: margin-left 2s ease; }
+
+.translate-up {
+  margin-top: -20%;
+  transition: margin-top 2s ease; }
+
+.translate-down {
+  margin-top: 0%;
+  transition: margin-top 2s ease; }
+
+.control-btn {
+  padding: 1em;
+  margin: 1em;
+  border: 1px solid black; }
+
+/*# sourceMappingURL=app.css.map */
