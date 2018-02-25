@@ -4,6 +4,7 @@ const map = generateMap();
 
 const TILE_VISIBILITY = 12;
 
+const TRANSITION_SPEED = 250
 /** @returns {number[][]}   */
 function generateMap() {
     let m = [];
@@ -88,7 +89,7 @@ class App extends React.Component {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         }
 
         this.moveRight = () => {
@@ -103,7 +104,7 @@ class App extends React.Component {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         }
 
         this.moveUp = () => {
@@ -118,7 +119,7 @@ class App extends React.Component {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         }
 
         this.moveDown = () => {
@@ -133,7 +134,7 @@ class App extends React.Component {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         }
     }
 

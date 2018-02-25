@@ -14,6 +14,7 @@ var map = generateMap();
 
 var TILE_VISIBILITY = 12;
 
+var TRANSITION_SPEED = 250;
 /** @returns {number[][]}   */
 function generateMap() {
     var m = [];
@@ -105,7 +106,7 @@ var App = function (_React$Component) {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         };
 
         _this.moveRight = function () {
@@ -122,7 +123,7 @@ var App = function (_React$Component) {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         };
 
         _this.moveUp = function () {
@@ -139,7 +140,7 @@ var App = function (_React$Component) {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         };
 
         _this.moveDown = function () {
@@ -156,7 +157,7 @@ var App = function (_React$Component) {
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
-            }, 2000);
+            }, TRANSITION_SPEED);
         };
         return _this;
     }

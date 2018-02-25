@@ -59,19 +59,19 @@
 
 .translate-left {
   margin-left: -20%;
-  transition: margin-left 2s ease; }
+  transition: margin-left 0.25s ease; }
 
 .translate-right {
   margin-left: 0%;
-  transition: margin-left 2s ease; }
+  transition: margin-left 0.25s ease; }
 
 .translate-up {
   margin-top: -20%;
-  transition: margin-top 2s ease; }
+  transition: margin-top 0.25s ease; }
 
 .translate-down {
   margin-top: 0%;
-  transition: margin-top 2s ease; }
+  transition: margin-top 0.25s ease; }
 
 .control-btn {
   padding: 1em;
