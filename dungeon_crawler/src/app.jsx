@@ -2,9 +2,9 @@ const MAP_HEIGHT = 300;
 const MAP_WIDTH = 300;
 const map = generateMap();
 
-const TILE_VISIBILITY = 12;
+const TILE_VISIBILITY = 11;
 
-const TRANSITION_SPEED = 250
+const TRANSITION_SPEED = 250;
 
 /** @returns {number[][]}   */
 function generateMap() {
@@ -24,11 +24,10 @@ function generateMap() {
  * @returns {number[][]}  
  */
 function getVisibleTiles(x, y) {
-    let x1 = x - (TILE_VISIBILITY / 2);
-    let x2 = x + (TILE_VISIBILITY / 2);
-    let y1 = y - (TILE_VISIBILITY / 2);
-    let y2 = y + (TILE_VISIBILITY / 2);
-
+    let x1 = Math.floor(x - (TILE_VISIBILITY / 2));
+    let x2 = Math.floor(x + (TILE_VISIBILITY / 2));
+    let y1 = Math.floor(y - (TILE_VISIBILITY / 2));
+    let y2 = Math.floor(y + (TILE_VISIBILITY / 2));
     let t = [];
 
     for(let i = y1; i < y2; i++) {
@@ -137,10 +136,27 @@ class App extends React.Component {
                 document.getElementById("tile-grid").classList = "tile-grid";
             }, TRANSITION_SPEED);
         }
+
+        this.handleKeys = (e) => {
+            if(this.state.moving) { return; }
+            switch(e.key) {
+                case("ArrowDown"): e.preventDefault(); this.moveDown(); break;
+                case("ArrowLeft"): e.preventDefault(); this.moveLeft(); break;
+                case("ArrowUp"): e.preventDefault(); this.moveUp(); break;
+                case("ArrowRight"): e.preventDefault(); this.moveRight(); break;
+            }
+        }
     }
+
+    registerKeys() {
+        document.addEventListener("keyup", this.handleKeys);
+    }
+
+    
 
     componentWillMount() {
         this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y) });
+        this.registerKeys();
     }
     
     render() {
@@ -158,4 +174,5 @@ class App extends React.Component {
         );
     }
 }
+
 ReactDOM.render(<App />, document.getElementById('root'));
