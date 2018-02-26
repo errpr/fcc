@@ -1,10 +1,29 @@
-const MAP_HEIGHT = 300;
-const MAP_WIDTH = 300;
-const map = generateMap();
-const entityMap = generateEntityMap();
 const TILE_VISIBILITY = 11;
 
 const TRANSITION_SPEED = 250;
+
+let roomMap = Array(11).fill().map(e => Array(11).fill(0));
+let rooms = [{},{
+    id: 1,
+    x: 5,
+    y: 5,
+    height: 10,
+    width: 10,
+    doors: {
+        right: 0
+    },
+    walls: {
+        right: 2,
+        left: 1,
+        up: 1,
+        down: 1
+    },
+    tiles: [[0]],
+    entities: [[0]]
+}];
+let currentRoomId = 1;
+rooms[1].tiles = generateRoomTiles(rooms[1]);
+rooms[1].entities = generateRoomEntities(rooms[1]);
 
 /*
 Tile ids
@@ -18,16 +37,12 @@ Tile ids
 7 - wall corner tile
 8 - horizontally running wall tile
 9 - vertically running wall tile
-*/
 
-/*
 Walls ids
 0 - no wall
 1 - wall
 2 - wall with door
-*/
 
-/*
 mock up of room data structure that would have doors on the left and right walls
 Room = {
     id: 2 // index in the rooms array,
@@ -44,169 +59,107 @@ Room = {
 }
 */
 
-/** @returns {number[][]}   */
-function generateMap() {
-    let m = Array(MAP_HEIGHT);
-    for(let i = 0; i < MAP_HEIGHT; i++) {
-        m[i] = Array(MAP_WIDTH);
-        for(let j = 0; j < MAP_WIDTH; j++) {
-            m[i][j] = floorTile();
+// /** @returns {number[][]}   */
+// function generateMap() {
+//     let m = Array(MAP_HEIGHT);
+//     for(let i = 0; i < MAP_HEIGHT; i++) {
+//         m[i] = Array(MAP_WIDTH);
+//         for(let j = 0; j < MAP_WIDTH; j++) {
+//             m[i][j] = floorTile();
+//         }
+//     }
+//     return m;
+// }
+
+/** @param {Object} room 
+ * @param {number} room.height
+ * @param {number} room.width
+ * @returns {number[][]}   */
+function generateRoomEntities(room) {
+    let m = Array(room.height).fill(0);
+    for(let i = 1; i < room.height - 1; i++) {
+        m[i] = Array(room.width).fill(0);
+        for(let j = 1; j < room.width - 1; j++) {
+            m[i][j] = (Math.random() > 0.8) ? 2 : 0;
         }
     }
     return m;
 }
 
-function generateEntityMap() {
-    let m = Array(MAP_HEIGHT);
-    for(let i = 0; i < MAP_HEIGHT; i++) {
-        m[i] = Array(MAP_WIDTH);
-        for(let j = 0; j < MAP_WIDTH; j++) {
-            m[i][j] = (Math.random() > 0.8) ? 1 : 0;
-        }
-    }
-    return m;
+function enterNewDoor(doorId, room_x, room_y) {
+
 }
 
-function generateMapNew() {
-    let rooms = []
-    let boss_spawned = false;
-    let i = 0;
-    while(!boss_spawned) {
-        boss_spawned = Math.random() * 20 < i;
-    }
-}
-
+/** @returns {number} */
 function floorTile() {
     return Math.floor(Math.random() * 4);
 }
 
 /**
- * @param {number} height
- * @param {number} width
- * @param {Object} walls
- * @param {number} walls.left
- * @param {number} walls.right
- * @param {number} walls.up
- * @param {number} wall.down
- * @param {boolean} boss_room
+ * @param {Object} room
+ * @param {number} room.height
+ * @param {number} room.width
+ * @param {Object} room.walls
+ * @param {number} room.walls.up
+ * @param {number} room.walls.down
+ * @param {number} room.walls.left
+ * @param {number} room.walls.right
  * @returns {number[][]}
  */
-function generateRoom(height, width, walls, boss_room) {
+function generateRoomTiles(room) {
+    let height = room.height;
+    let width = room.width;
     let m = Array(height);
+
     for(let i = 0; i < height; i++) {
         m[i] = Array(width);
-        for(let j = 0; j < width; j++) {
+        m[i][0] = 9;
+        m[i][width - 1] = 9;
+
+        for(let j = 1; j < width - 1; j++) {
             if(i == 0) {
-                // top row
-                if(j == 0) {
-                    // top left corner
-                    if(walls.left != 0 && walls.up != 0) {
-                        m[i][j] = 7; continue;// wall corner
-                    }
-                    if(walls.left != 0) {
-                        m[i][j] = 9; continue;// vertical wall
-                    }
-                    if(walls.up != 0) {
-                        m[i][j] = 8; continue;// horizontal wall
-                    }
-                    m[i][j] = floorTile(); continue;
-                }
-
-                if(j == width - 1) {
-                    // top right corner
-                    if(walls.right != 0 && walls.up != 0) {
-                        m[i][j] = 7; continue;// wall corner
-                    }
-                    if(walls.right != 0) {
-                        m[i][j] = 9; continue;// vertical wall
-                    }
-                    if(walls.up != 0) {
-                        m[i][j] = 8; continue;// horizontal wall
-                    }
-                    m[i][j] = floorTile(); continue;
-                }
-
-                if(walls.up != 0) {
-                    if(j == Math.floor(width / 2) && walls.up == 2) {
-                        m[i][j] = 4; continue;// door
-                    }
-                    m[i][j] = 8; continue;// horizontal wall
-                }
-
-                m[i][j] = floorTile(); continue;
-            } // end if top row
-
-            if(i == height - 1) {
-                // bottom row
-                if(j == 0) {
-                    // bottom left corner
-                    if(walls.left != 0 && walls.down !=0) {
-                        m[i][j] = 7; continue; // wall corner
-                    }
-                    if(walls.left != 0) {
-                        m[i][j] = 9; continue; // vertical wall
-                    }
-                    if(walls.down != 0) {
-                        m[i][j] = 8; continue; // horizontal wall
-                    }
-
-                    m[i][j] = floorTile(); continue; 
-                }
-
-                if(j == width - 1) {
-                    // bottom right corner
-                    if(walls.right != 0 && walls.down !=0) {
-                        m[i][j] = 7; continue; //corner wall
-                    }
-                    if(walls.right != 0) {
-                        m[i][j] = 9; continue; // vertical wall
-                    }
-                    if(walls.down !=0) {
-                        m[i][j] = 8; continue; // horizontal wall
-                    }
-
-                    m[i][j] = floorTile(); continue;
-                }
-
-                if(walls.down != 0) {
-                    if(j == Math.floor(width / 2) && walls.down == 2) {
-                        m[i][j] = 4; continue; // door
-                    }
-                    m[i][j] = 8; continue; // horizontal wall
-                }
-            } // end if bottom row
-
-            if(j == 0) {
-                //left edge
-                if(walls.left != 0) {
-                    if(i == Math.floor(height / 2) && walls.left == 2) {
-                        m[i][j] = 4; continue; // door
-                    }
-                    m[i][j] = 9; continue; // vertical wall
-                }
+                m[i][j] = 8;
+            } else if(i == height - 1) {
+                m[i][j] = 8;
+            } else {
+                m[i][j] = floorTile();
             }
-
-            if(j == width - 1) {
-                //right edge
-                if(walls.right != 0) {
-                    if(i == Math.floor(height / 2) && walls.right == 2) {
-                        m[i][j] = 4; continue; // door
-                    }
-                }
-            }
-
-            m[i][j] = floorTile(); continue;
         }
     }
+
+    // put in doors
+    if(room.walls.left == 2) {
+        m[Math.floor(height / 2)][0] = 4;
+    }
+    if(room.walls.right == 2) {
+        m[Math.floor(height / 2)][width - 1] = 4;
+    }
+    if(room.walls.up == 2) {
+        m[0][Math.floor(width / 2)] = 4;
+    }
+    if(room.walls.down == 2) {
+        m[height - 1][Math.floor(width / 2)] = 4;
+    }
+    
+    // put in corners
+    m[0][0] = 7; 
+    m[0][width - 1] = 7;
+    m[height - 1][0] = 7;
+    m[height - 1][width - 1] = 7;
+
     return m;
 }
 
 /** 
  * @param {number} x
  * @param {number} y
+ * @param {Object} room
+ * @param {number} room.height
+ * @param {number} room.width
+ * @param {number[][]} room.tiles
  * @returns {number[][]}
  */
-function getVisibleTiles(x, y) {
+function getVisibleTiles(x, y, room) {
     let x1 = Math.floor(x - (TILE_VISIBILITY / 2));
     let x2 = Math.floor(x + (TILE_VISIBILITY / 2));
     let y1 = Math.floor(y - (TILE_VISIBILITY / 2));
@@ -216,18 +169,27 @@ function getVisibleTiles(x, y) {
     for(let i = y1; i < y2; i++) {
         t.push([]);
         for(let j = x1; j < x2; j++) {
-            if(i < 0 || j < 0 || i > MAP_HEIGHT - 1 || j > MAP_WIDTH - 1) {
+            if(i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
                 t[i - y1].push(0);
                 continue;
             }
-            t[i - y1].push(map[i][j]);
+            t[i - y1].push(room.tiles[i][j]);
         }
     }
     
     return t;
 }
 
-function getVisibleEntities(x, y) {
+/** 
+ * @param {number} x
+ * @param {number} y
+ * @param {Object} room
+ * @param {number} room.height
+ * @param {number} room.width
+ * @param {number[][]} room.entities
+ * @returns {number[][]}
+ */
+function getVisibleEntities(x, y, room) {
     let x1 = Math.floor(x - (TILE_VISIBILITY / 2));
     let x2 = Math.floor(x + (TILE_VISIBILITY / 2));
     let y1 = Math.floor(y - (TILE_VISIBILITY / 2));
@@ -237,11 +199,11 @@ function getVisibleEntities(x, y) {
     for(let i = y1; i < y2; i++) {
         t.push([]);
         for(let j = x1; j < x2; j++) {
-            if(i < 0 || j < 0 || i > MAP_HEIGHT - 1 || j > MAP_WIDTH - 1) {
+            if(i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
                 t[i - y1].push(0);
                 continue;
             }
-            t[i - y1].push(entityMap[i][j]);
+            t[i - y1].push(room.entities[i][j]);
         }
     }
     
@@ -307,11 +269,11 @@ class App extends React.Component {
             tiles: [[1]],
             entityTiles: [[0]],
             player: {
-                x: 150,
-                y: 150
+                x: 5,
+                y: 5
             },
             moving: false,
-            facing: 'l'
+            facing: 'l',
         }
 
         this.moveLeft = () => {
@@ -323,8 +285,8 @@ class App extends React.Component {
                 let p = this.state.player;
                 this.setState({ 
                     player: { x: p.x-1, y: p.y },
-                    tiles: getVisibleTiles(p.x-1, p.y),
-                    entityTiles: getVisibleEntities(p.x-1, p.y),
+                    tiles: getVisibleTiles(p.x-1, p.y, rooms[currentRoomId]),
+                    entityTiles: getVisibleEntities(p.x-1, p.y, rooms[currentRoomId]),
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
@@ -341,8 +303,8 @@ class App extends React.Component {
                 let p = this.state.player;
                 this.setState({ 
                     player: { x: p.x+1, y: p.y },
-                    tiles: getVisibleTiles(p.x+1, p.y),
-                    entityTiles: getVisibleEntities(p.x+1, p.y),
+                    tiles: getVisibleTiles(p.x+1, p.y, rooms[currentRoomId]),
+                    entityTiles: getVisibleEntities(p.x+1, p.y, rooms[currentRoomId]),
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
@@ -359,8 +321,8 @@ class App extends React.Component {
                 let p = this.state.player;
                 this.setState({ 
                     player: { x: p.x, y: p.y-1 },
-                    tiles: getVisibleTiles(p.x, p.y-1),
-                    entityTiles: getVisibleEntities(p.x, p.y-1),
+                    tiles: getVisibleTiles(p.x, p.y-1, rooms[currentRoomId]),
+                    entityTiles: getVisibleEntities(p.x, p.y-1, rooms[currentRoomId]),
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
@@ -377,8 +339,8 @@ class App extends React.Component {
                 let p = this.state.player;
                 this.setState({ 
                     player: { x: p.x, y: p.y+1 },
-                    tiles: getVisibleTiles(p.x, p.y+1),
-                    entityTiles: getVisibleEntities(p.x, p.y+1),
+                    tiles: getVisibleTiles(p.x, p.y+1, rooms[currentRoomId]),
+                    entityTiles: getVisibleEntities(p.x, p.y+1, rooms[currentRoomId]),
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
@@ -409,8 +371,8 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y),
-                        entityTiles: getVisibleEntities(this.state.player.x, this.state.player.y) });
+        this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y, rooms[currentRoomId]),
+                        entityTiles: getVisibleEntities(this.state.player.x, this.state.player.y, rooms[currentRoomId]) });
         this.registerKeys();
     }
     
