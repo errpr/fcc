@@ -131,7 +131,7 @@ body
     flex-flow: row nowrap 
 
 .character-sprite  
-    background-image: url("http://error.diodeware.com/fcc/twitty.png") 
+    background-image: url("player-stand-l.png") 
     background-repeat: no-repeat 
     background-size: auto 100% 
     position: absolute 
@@ -140,7 +140,17 @@ body
     margin-top: -5%
     margin-left: -5%
     height: 10%
-    width: 10% 
+    width: 10%
+
+.facing-left
+    background-image: url("player-stand-l.png")
+.facing-left.moving
+    background-image: url("player-move-l.png")
+
+.facing-right
+    background-image: url("player-stand-r.png")
+.facing-right.moving
+    background-image: url("player-move-r.png")
 
 .translate-left  
     margin-left: -22.5% 

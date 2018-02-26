@@ -309,7 +309,9 @@ class App extends React.Component {
             player: {
                 x: 150,
                 y: 150
-            }
+            },
+            moving: false,
+            facing: 'l'
         }
 
         this.moveLeft = () => {
@@ -383,8 +385,14 @@ class App extends React.Component {
                 document.getElementById("entity-grid").classList = "entity-grid";
             }, TRANSITION_SPEED);
         }
+        this.handleKeyDowns = (e) => {
+            switch(e.key) {
+                case("ArrowLeft"): e.preventDefault(); this.setState({ facing: 'l' }); break;
+                case("ArrowRight"): e.preventDefault(); this.setState({ facing: 'r' }); break;
+            }
+        }
 
-        this.handleKeys = (e) => {
+        this.handleKeyUps = (e) => {
             if(this.state.moving) { return; }
             switch(e.key) {
                 case("ArrowDown"): e.preventDefault(); this.moveDown(); break;
@@ -396,12 +404,13 @@ class App extends React.Component {
     }
 
     registerKeys() {
-        // spamming move causes a small graphics glitch, so we listen for keyup instead of keydown
-        document.addEventListener("keyup", this.handleKeys);
+        document.addEventListener("keyup", this.handleKeyUps);
+        document.addEventListener("keydown", this.handleKeyDowns);
     }
 
     componentWillMount() {
-        this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y) });
+        this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y),
+                        entityTiles: getVisibleEntities(this.state.player.x, this.state.player.y) });
         this.registerKeys();
     }
     
@@ -413,7 +422,9 @@ class App extends React.Component {
                 <button className="control-btn" onClick={this.moveDown}>Down</button>
                 <button className="control-btn" onClick={this.moveRight}>Right</button>
                 <div id="tile-viewport">
-                    <div className="character-sprite"></div>
+                    <div className={"character-sprite" + 
+                                    (this.state.facing == 'l' ? ' facing-left' : ' facing-right') +
+                                    (this.state.moving ? ' moving' : '')}></div>
                     <TileGrid tiles={this.state.tiles} />
                     <EntityGrid entities={this.state.entityTiles} />
                     <div id="lighting-gradient-horizontal"></div>

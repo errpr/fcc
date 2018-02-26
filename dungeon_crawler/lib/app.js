@@ -324,7 +324,9 @@ var App = function (_React$Component) {
             player: {
                 x: 150,
                 y: 150
-            }
+            },
+            moving: false,
+            facing: 'l'
         };
 
         _this.moveLeft = function () {
@@ -406,8 +408,16 @@ var App = function (_React$Component) {
                 document.getElementById("entity-grid").classList = "entity-grid";
             }, TRANSITION_SPEED);
         };
+        _this.handleKeyDowns = function (e) {
+            switch (e.key) {
+                case "ArrowLeft":
+                    e.preventDefault();_this.setState({ facing: 'l' });break;
+                case "ArrowRight":
+                    e.preventDefault();_this.setState({ facing: 'r' });break;
+            }
+        };
 
-        _this.handleKeys = function (e) {
+        _this.handleKeyUps = function (e) {
             if (_this.state.moving) {
                 return;
             }
@@ -428,13 +438,14 @@ var App = function (_React$Component) {
     _createClass(App, [{
         key: "registerKeys",
         value: function registerKeys() {
-            // spamming move causes a small graphics glitch, so we listen for keyup instead of keydown
-            document.addEventListener("keyup", this.handleKeys);
+            document.addEventListener("keyup", this.handleKeyUps);
+            document.addEventListener("keydown", this.handleKeyDowns);
         }
     }, {
         key: "componentWillMount",
         value: function componentWillMount() {
-            this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y) });
+            this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y),
+                entityTiles: getVisibleEntities(this.state.player.x, this.state.player.y) });
             this.registerKeys();
         }
     }, {
@@ -466,7 +477,7 @@ var App = function (_React$Component) {
                 React.createElement(
                     "div",
                     { id: "tile-viewport" },
-                    React.createElement("div", { className: "character-sprite" }),
+                    React.createElement("div", { className: "character-sprite" + (this.state.facing == 'l' ? ' facing-left' : ' facing-right') + (this.state.moving ? ' moving' : '') }),
                     React.createElement(TileGrid, { tiles: this.state.tiles }),
                     React.createElement(EntityGrid, { entities: this.state.entityTiles }),
                     React.createElement("div", { id: "lighting-gradient-horizontal" }),
