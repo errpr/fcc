@@ -180,7 +180,7 @@ function getVisibleTiles(x, y, room) {
         t.push([]);
         for (var j = x1; j < x2; j++) {
             if (i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
-                t[i - y1].push(0);
+                t[i - y1].push(5);
                 continue;
             }
             t[i - y1].push(room.tiles[i][j]);

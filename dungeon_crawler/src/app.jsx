@@ -1,30 +1,4 @@
-const TILE_VISIBILITY = 11;
-
-const TRANSITION_SPEED = 250;
-
-let roomMap = Array(11).fill().map(e => Array(11).fill(0));
-let rooms = [{},{
-    id: 1,
-    x: 5,
-    y: 5,
-    height: 10,
-    width: 10,
-    doors: {
-        right: 0
-    },
-    walls: {
-        right: 2,
-        left: 1,
-        up: 1,
-        down: 1
-    },
-    tiles: [[0]],
-    entities: [[0]]
-}];
-let currentRoomId = 1;
-rooms[1].tiles = generateRoomTiles(rooms[1]);
-rooms[1].entities = generateRoomEntities(rooms[1]);
-
+//@ts-check
 /*
 Tile ids
 0 - floor tile 0
@@ -39,37 +13,39 @@ Tile ids
 9 - vertically running wall tile
 
 Walls ids
-0 - no wall
+0 - unused
 1 - wall
 2 - wall with door
 
-mock up of room data structure that would have doors on the left and right walls
-Room = {
-    id: 2 // index in the rooms array,
-    doors: { // ids of rooms doors lead to
-        left: 1,
-        right: 0 // 0 means spawn a new room when we go through the door
-    },
-    walls: {
-        left: 2,
-        right: 2,
-        down: 1,
-        up: 1
-    }
-}
 */
 
-// /** @returns {number[][]}   */
-// function generateMap() {
-//     let m = Array(MAP_HEIGHT);
-//     for(let i = 0; i < MAP_HEIGHT; i++) {
-//         m[i] = Array(MAP_WIDTH);
-//         for(let j = 0; j < MAP_WIDTH; j++) {
-//             m[i][j] = floorTile();
-//         }
-//     }
-//     return m;
-// }
+const TILE_VISIBILITY = 11;
+
+const TRANSITION_SPEED = 250;
+
+let roomMap = Array(11).fill(null).map(e => Array(11).fill(0));
+roomMap[5][5] = 1;
+let rooms = [null,{
+    id: 1,
+    x: 5,
+    y: 5,
+    height: 10,
+    width: 10,
+    doors: {
+        right: 0 // I dont think this is necessary with the roomMap
+    },
+    walls: {
+        right: 2,
+        left: 1,
+        up: 1,
+        down: 1
+    },
+    tiles: [[0]],
+    entities: [[0]]
+}];
+let currentRoomId = 1;
+rooms[1].tiles = generateRoomTiles(rooms[1]);
+rooms[1].entities = generateRoomEntities(rooms[1]);
 
 /** @param {Object} room 
  * @param {number} room.height
@@ -86,7 +62,18 @@ function generateRoomEntities(room) {
     return m;
 }
 
-function enterNewDoor(doorId, room_x, room_y) {
+
+/** @param {string} directionEntered the direction player traveled to hit the door
+ *  @param {Object} prevRoom the room player was in when they hit the door
+ */
+function enterNewDoor(directionEntered, prevRoom) {
+
+}
+
+/** @param {string} directionEntered the direction player traveled to hit the door
+ *  @param {Object} newRoom the room we are now entering
+ */
+function changeRoom(directionEntered, newRoom) {
 
 }
 
@@ -170,7 +157,7 @@ function getVisibleTiles(x, y, room) {
         t.push([]);
         for(let j = x1; j < x2; j++) {
             if(i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
-                t[i - y1].push(0);
+                t[i - y1].push(5);
                 continue;
             }
             t[i - y1].push(room.tiles[i][j]);
@@ -262,6 +249,14 @@ function TileGrid(props) {
     );
 }
 
+function checkCollision(direction) {
+    return false;
+}
+
+function interact(direction) {
+    return false;
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -273,80 +268,60 @@ class App extends React.Component {
                 y: 5
             },
             moving: false,
+            aiming: false,
+            ignoreNextMove: false,
             facing: 'l',
         }
 
-        this.moveLeft = () => {
+        this.move = (direction) => {
             if(this.state.moving) { return; }
+            if(this.state.ignoreNextMove) { return; }
+            if(checkCollision(direction)) {
+                interact(direction);
+                return;
+            }
             this.setState({ moving: true });
-            document.getElementById("tile-grid").classList.add("translate-right");
-            document.getElementById("entity-grid").classList.add("translate-right");
+            let opposite;
+            let newX = this.state.player.x;
+            let newY = this.state.player.y;
+            switch(direction) {
+                case("left"): opposite = "right"; newX = newX-1; break;
+                case("right"): opposite = "left"; newX = newX+1; break;
+                case("up"): opposite = "down"; newY = newY-1; break;
+                case("down"): opposite = "up"; newY = newY+1; break;
+            }
+            document.getElementById("tile-grid").classList.add("translate-" + opposite);
+            document.getElementById("entity-grid").classList.add("translate-" + opposite);
+
             setTimeout(() => {
                 let p = this.state.player;
                 this.setState({ 
-                    player: { x: p.x-1, y: p.y },
-                    tiles: getVisibleTiles(p.x-1, p.y, rooms[currentRoomId]),
-                    entityTiles: getVisibleEntities(p.x-1, p.y, rooms[currentRoomId]),
+                    player: { x: newX, y: newY },
+                    tiles: getVisibleTiles(newX, newY, rooms[currentRoomId]),
+                    entityTiles: getVisibleEntities(newX, newY, rooms[currentRoomId]),
                     moving: false
                 });
                 document.getElementById("tile-grid").classList = "tile-grid";
                 document.getElementById("entity-grid").classList = "entity-grid";
             }, TRANSITION_SPEED);
+        }
+
+        this.moveLeft = () => {
+            this.move("left");
         }
 
         this.moveRight = () => {
-            if(this.state.moving) { return; }
-            this.setState({ moving: true });
-            document.getElementById("tile-grid").classList.add("translate-left");
-            document.getElementById("entity-grid").classList.add("translate-left");
-            setTimeout(() => {
-                let p = this.state.player;
-                this.setState({ 
-                    player: { x: p.x+1, y: p.y },
-                    tiles: getVisibleTiles(p.x+1, p.y, rooms[currentRoomId]),
-                    entityTiles: getVisibleEntities(p.x+1, p.y, rooms[currentRoomId]),
-                    moving: false
-                });
-                document.getElementById("tile-grid").classList = "tile-grid";
-                document.getElementById("entity-grid").classList = "entity-grid";
-            }, TRANSITION_SPEED);
+            this.move("right");
         }
 
         this.moveUp = () => {
-            if(this.state.moving) { return; }
-            this.setState({ moving: true });
-            document.getElementById("tile-grid").classList.add("translate-down");
-            document.getElementById("entity-grid").classList.add("translate-down");
-            setTimeout(() => {
-                let p = this.state.player;
-                this.setState({ 
-                    player: { x: p.x, y: p.y-1 },
-                    tiles: getVisibleTiles(p.x, p.y-1, rooms[currentRoomId]),
-                    entityTiles: getVisibleEntities(p.x, p.y-1, rooms[currentRoomId]),
-                    moving: false
-                });
-                document.getElementById("tile-grid").classList = "tile-grid";
-                document.getElementById("entity-grid").classList = "entity-grid";
-            }, TRANSITION_SPEED);
+            this.move("up");
         }
 
         this.moveDown = () => {
-            if(this.state.moving) { return; }
-            this.setState({ moving: true });
-            document.getElementById("tile-grid").classList.add("translate-up");
-            document.getElementById("entity-grid").classList.add("translate-up");
-            setTimeout(() => {
-                let p = this.state.player;
-                this.setState({ 
-                    player: { x: p.x, y: p.y+1 },
-                    tiles: getVisibleTiles(p.x, p.y+1, rooms[currentRoomId]),
-                    entityTiles: getVisibleEntities(p.x, p.y+1, rooms[currentRoomId]),
-                    moving: false
-                });
-                document.getElementById("tile-grid").classList = "tile-grid";
-                document.getElementById("entity-grid").classList = "entity-grid";
-            }, TRANSITION_SPEED);
+            this.move("down");
         }
+        
         this.handleKeyDowns = (e) => {
             switch(e.key) {
                 case("ArrowLeft"): e.preventDefault(); this.setState({ facing: 'l' }); break;
