@@ -1,80 +1,181 @@
 //@ts-check
-/*
-Tile ids
-0 - floor tile 0
-1 - floor tile 1
-2 - floor tile 2
-3 - floor tile 3
-4 - door tile
-5 - blackness
-6 - unused
-7 - wall corner tile
-8 - horizontally running wall tile
-9 - vertically running wall tile
-
-Walls ids
-0 - unused
-1 - wall
-2 - wall with door
-
-*/
 
 const TILE_VISIBILITY = 11;
 
-const TRANSITION_SPEED = 250;
+const TRANSITION_SPEED = 260;
 
+class Entity {
+    /** @param {number} t */
+    constructor(t) {
+        this.facing = Math.random() > 0.5 ? 'r' : 'l';
+        this.type = t;
+        this.hp = 0;
+        this.attack = 0;
+        switch(t) {
+            case(1): this.hp = 1; this.attack = 1; break;
+            case(2): this.hp = 5; this.attack = 5; break;  
+        }
+    }
+
+    /** @param {number} amount */
+    takeDamage(amount) {
+        console.log(amount);
+        this.hp = this.hp - amount;
+        if(this.hp <= 0) {
+            this.type = this.spawnLoot();
+        }
+    }
+
+    spawnLoot() {
+        let drop = Math.floor(Math.random() * 10);
+        switch(drop) {
+            case(0): return 3; // dmg up
+            case(1): return 4; // hp up
+            default: return 0; // nada
+        }
+    }
+
+    kill() {
+        this.type = 0;
+    }
+}
+
+class Room {
+    constructor(x, y, height, width, walls, id = rooms.length, boss_room = false) {
+        this.x = x;
+        this.y = y;
+        this.height = height;
+        this.width = width;
+        this.walls = walls;
+        this.id = id;
+        this.tiles = [[0]];
+        this.entities = [[]];
+    }
+}
+
+/** @type {number[][]} */
 let roomMap = Array(11).fill(null).map(e => Array(11).fill(0));
 roomMap[5][5] = 1;
-let rooms = [null,{
-    id: 1,
-    x: 5,
-    y: 5,
-    height: 10,
-    width: 10,
-    doors: {
-        right: 0 // I dont think this is necessary with the roomMap
-    },
-    walls: {
-        right: 2,
-        left: 1,
-        up: 1,
-        down: 1
-    },
-    tiles: [[0]],
-    entities: [[0]]
-}];
+
+/** @type {Room[]} */
+let rooms = [new Room(0,0,0,0,{},0)];
+rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1}, 1));
 let currentRoomId = 1;
 rooms[1].tiles = generateRoomTiles(rooms[1]);
 rooms[1].entities = generateRoomEntities(rooms[1]);
 
-/** @param {Object} room 
- * @param {number} room.height
- * @param {number} room.width
- * @returns {number[][]}   */
+/** @param {Room} room
+ * @returns {Entity[][]}   */
 function generateRoomEntities(room) {
     let m = Array(room.height).fill(0);
     for(let i = 1; i < room.height - 1; i++) {
         m[i] = Array(room.width).fill(0);
         for(let j = 1; j < room.width - 1; j++) {
-            m[i][j] = (Math.random() > 0.8) ? 2 : 0;
+            if( (i == Math.floor(room.height / 2) && j == 1) ||
+                (i == Math.floor(room.height / 2) && j == room.width - 2) ||
+                (i == 1 && j == Math.floor(room.width / 2)) ||
+                (i == room.height - 2 && j == Math.floor(room.width / 2))) {
+                //dont spawn enemy in front of door
+                m[i][j] = 0;
+                continue;
+            }
+            //should probably switch to perlin noise
+            m[i][j] = (Math.random() > 0.85) ? new Entity(1) : 0;
         }
     }
     return m;
 }
 
+function matchNeighboringDoors(x, y, walls) {
+    let w = walls;
+    let leftRoom = roomMap[y][x-1];
+    let rightRoom = roomMap[y][x+1];
+    let upRoom = roomMap[y-1][x];
+    let downRoom = roomMap[y+1][x];
+    if(leftRoom > 0 && rooms[leftRoom].walls.right == 2) {
+        w.left = 2;
+    }
+    if(rightRoom > 0 && rooms[rightRoom].walls.left == 2) {
+        w.right = 2;
+    }
+    if(upRoom > 0 && rooms[upRoom].walls.down == 2) {
+        w.up = 2;
+    }
+    if(downRoom > 0 && rooms[downRoom].walls.up == 2) {
+        w.down = 2;
+    }
+
+    return w;
+}
+
+// this algorithm is borked and spawns too many doors, but my brain is tired
+function createAdditionalDoors(walls) {
+    let doorsToPlace = 2 + Math.floor(Math.random() * 2);
+    let w = ["left", "right", "up", "down"];
+    for (let i = w.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [w[i], w[j]] = [w[j], w[i]];
+    }
+    let i = 0;
+    while(doorsToPlace > 0) {
+        let wallToCheck = walls[w[i]];
+        if(wallToCheck == 2) {
+            doorsToPlace--;
+        } else {
+            walls[w[i]] = 2;
+            doorsToPlace--;
+        }
+        if(i > 4) {
+            console.log("Somethings wrong with door placement.");
+            break;
+        }
+        i++;
+    }
+    return walls;
+}
+
+function createRoom(directionEntered, prevRoom) {
+    let newX = prevRoom.x;
+    let newY = prevRoom.y;
+    let walls = { left: 1, right: 1, up: 1, down: 1};
+    switch(directionEntered) {
+        case("right"): newX++; break;
+        case("left"): newX--; break;
+        case("up"): newY--; break;
+        case("down"): newY++; break;
+    }
+
+    walls = matchNeighboringDoors(newX, newY, walls);
+
+    walls = createAdditionalDoors(walls);
+
+    let id = rooms.length;
+    let newRoom = new Room( newX,
+                            newY,
+                            Math.floor(Math.random() * 10) + 6, 
+                            Math.floor(Math.random() * 10) + 6,
+                            walls,
+                            id );
+    roomMap[newY][newX] = id;
+    newRoom.tiles = generateRoomTiles(newRoom);
+    newRoom.entities = generateRoomEntities(newRoom);
+    rooms.push(newRoom);
+    return newRoom;
+}
+
 
 /** @param {string} directionEntered the direction player traveled to hit the door
- *  @param {Object} prevRoom the room player was in when they hit the door
- */
+ *  @param {Object} prevRoom the room player was in when they hit the door */
 function enterNewDoor(directionEntered, prevRoom) {
-
+    let newRoom = createRoom(directionEntered, prevRoom);
+    changeRoom(directionEntered, newRoom);
+    return newRoom.id;
 }
 
 /** @param {string} directionEntered the direction player traveled to hit the door
- *  @param {Object} newRoom the room we are now entering
- */
+ *  @param {Object} newRoom the room we are now entering */
 function changeRoom(directionEntered, newRoom) {
-
+    currentRoomId = newRoom.id;
 }
 
 /** @returns {number} */
@@ -83,14 +184,7 @@ function floorTile() {
 }
 
 /**
- * @param {Object} room
- * @param {number} room.height
- * @param {number} room.width
- * @param {Object} room.walls
- * @param {number} room.walls.up
- * @param {number} room.walls.down
- * @param {number} room.walls.left
- * @param {number} room.walls.right
+ * @param {Room} room
  * @returns {number[][]}
  */
 function generateRoomTiles(room) {
@@ -100,14 +194,14 @@ function generateRoomTiles(room) {
 
     for(let i = 0; i < height; i++) {
         m[i] = Array(width);
-        m[i][0] = 9;
+        m[i][0] = 8;
         m[i][width - 1] = 9;
 
         for(let j = 1; j < width - 1; j++) {
             if(i == 0) {
-                m[i][j] = 8;
+                m[i][j] = 6;
             } else if(i == height - 1) {
-                m[i][j] = 8;
+                m[i][j] = 7;
             } else {
                 m[i][j] = floorTile();
             }
@@ -116,23 +210,23 @@ function generateRoomTiles(room) {
 
     // put in doors
     if(room.walls.left == 2) {
-        m[Math.floor(height / 2)][0] = 4;
+        m[Math.floor(height / 2)][0] = 14;
     }
     if(room.walls.right == 2) {
-        m[Math.floor(height / 2)][width - 1] = 4;
+        m[Math.floor(height / 2)][width - 1] = 17;
     }
     if(room.walls.up == 2) {
-        m[0][Math.floor(width / 2)] = 4;
+        m[0][Math.floor(width / 2)] = 15;
     }
     if(room.walls.down == 2) {
-        m[height - 1][Math.floor(width / 2)] = 4;
+        m[height - 1][Math.floor(width / 2)] = 16;
     }
     
     // put in corners
-    m[0][0] = 7; 
-    m[0][width - 1] = 7;
-    m[height - 1][0] = 7;
-    m[height - 1][width - 1] = 7;
+    m[0][0] = 10; 
+    m[0][width - 1] = 11;
+    m[height - 1][0] = 12;
+    m[height - 1][width - 1] = 13;
 
     return m;
 }
@@ -140,17 +234,14 @@ function generateRoomTiles(room) {
 /** 
  * @param {number} x
  * @param {number} y
- * @param {Object} room
- * @param {number} room.height
- * @param {number} room.width
- * @param {number[][]} room.tiles
+ * @param {Room} room
  * @returns {number[][]}
  */
 function getVisibleTiles(x, y, room) {
-    let x1 = Math.floor(x - (TILE_VISIBILITY / 2));
-    let x2 = Math.floor(x + (TILE_VISIBILITY / 2));
-    let y1 = Math.floor(y - (TILE_VISIBILITY / 2));
-    let y2 = Math.floor(y + (TILE_VISIBILITY / 2));
+    let x1 = Math.floor(x - (TILE_VISIBILITY / 2)) + 1;
+    let x2 = Math.floor(x + (TILE_VISIBILITY / 2)) + 1;
+    let y1 = Math.floor(y - (TILE_VISIBILITY / 2)) + 1;
+    let y2 = Math.floor(y + (TILE_VISIBILITY / 2)) + 1;
     let t = [];
 
     for(let i = y1; i < y2; i++) {
@@ -170,17 +261,14 @@ function getVisibleTiles(x, y, room) {
 /** 
  * @param {number} x
  * @param {number} y
- * @param {Object} room
- * @param {number} room.height
- * @param {number} room.width
- * @param {number[][]} room.entities
+ * @param {Room} room
  * @returns {number[][]}
  */
 function getVisibleEntities(x, y, room) {
-    let x1 = Math.floor(x - (TILE_VISIBILITY / 2));
-    let x2 = Math.floor(x + (TILE_VISIBILITY / 2));
-    let y1 = Math.floor(y - (TILE_VISIBILITY / 2));
-    let y2 = Math.floor(y + (TILE_VISIBILITY / 2));
+    let x1 = Math.floor(x - (TILE_VISIBILITY / 2)) + 1;
+    let x2 = Math.floor(x + (TILE_VISIBILITY / 2)) + 1;
+    let y1 = Math.floor(y - (TILE_VISIBILITY / 2)) + 1;
+    let y2 = Math.floor(y + (TILE_VISIBILITY / 2)) + 1;
     let t = [];
 
     for(let i = y1; i < y2; i++) {
@@ -197,13 +285,22 @@ function getVisibleEntities(x, y, room) {
     return t;
 }
 
+/*
+    Begin React stuff 
+*/
+
 function EntityCell(props) {
-    return <div className={"entity entity-" + props.entity}></div>;
+    let e = props.entity;
+    if(e == 0 || e.type == 0) {
+        return <div className="entity entity-0"></div>;
+    } else {
+        return <div className={"entity entity-" + e.type + " facing-" + e.facing}></div>;
+    }
 }
 
 function EntityRow(props) {
     let entityCells = props.entities.map((e, j) => {
-        return <EntityCell key={`${props.i}${j}`} entity={e ? e : 0} />; 
+        return <EntityCell key={`${props.i}${j}`} entity={e ? e : 0 } />; 
     });
     return(
         <div className="entity-row">
@@ -249,12 +346,36 @@ function TileGrid(props) {
     );
 }
 
-function checkCollision(direction) {
-    return false;
-}
+class UserInterface extends React.Component {
+    constructor(props) {
+        super(props);
 
-function interact(direction) {
-    return false;
+        this.moveLeft = (e) => {
+            this.props.moveHandler("left");
+        }
+        this.moveRight = (e) => {
+            this.props.moveHandler("right");
+        }
+        this.moveUp = (e) => {
+            this.props.moveHandler("up");
+        }
+        this.moveDown = (e) => {
+            this.props.moveHandler("down");
+        }
+    }
+
+    render() {
+        return(
+            <div id="ui-overlay">
+                <button onClick={this.moveLeft} className="move-button" id="move-button-left" > </button>
+                <button onClick={this.moveRight} className="move-button" id="move-button-right" ></button>
+                <button onClick={this.moveUp} className="move-button" id="move-button-up" ></button>
+                <button onClick={this.moveDown} className="move-button" id="move-button-down" ></button>
+                <p className="ui-text" id="ui-player-hp">HP:{this.props.player.hp}</p>
+                <p className="ui-text" id="ui-player-weapon">ATK:{this.props.player.weaponDamage}</p>
+            </div>
+        );
+    }
 }
 
 class App extends React.Component {
@@ -262,10 +383,12 @@ class App extends React.Component {
         super(props);
         this.state = {
             tiles: [[1]],
-            entityTiles: [[0]],
+            entities: [[0]],
             player: {
-                x: 5,
-                y: 5
+                x: 1,
+                y: 5,
+                hp: 30,
+                weaponDamage: 1
             },
             moving: false,
             aiming: false,
@@ -273,55 +396,8 @@ class App extends React.Component {
             facing: 'l',
         }
 
-        this.move = (direction) => {
-            if(this.state.moving) { return; }
-            if(this.state.ignoreNextMove) { return; }
-            if(checkCollision(direction)) {
-                interact(direction);
-                return;
-            }
-            this.setState({ moving: true });
-            let opposite;
-            let newX = this.state.player.x;
-            let newY = this.state.player.y;
-            switch(direction) {
-                case("left"): opposite = "right"; newX = newX-1; break;
-                case("right"): opposite = "left"; newX = newX+1; break;
-                case("up"): opposite = "down"; newY = newY-1; break;
-                case("down"): opposite = "up"; newY = newY+1; break;
-            }
-            document.getElementById("tile-grid").classList.add("translate-" + opposite);
-            document.getElementById("entity-grid").classList.add("translate-" + opposite);
+        this.move = this.move.bind(this);
 
-            setTimeout(() => {
-                let p = this.state.player;
-                this.setState({ 
-                    player: { x: newX, y: newY },
-                    tiles: getVisibleTiles(newX, newY, rooms[currentRoomId]),
-                    entityTiles: getVisibleEntities(newX, newY, rooms[currentRoomId]),
-                    moving: false
-                });
-                document.getElementById("tile-grid").classList = "tile-grid";
-                document.getElementById("entity-grid").classList = "entity-grid";
-            }, TRANSITION_SPEED);
-        }
-
-        this.moveLeft = () => {
-            this.move("left");
-        }
-
-        this.moveRight = () => {
-            this.move("right");
-        }
-
-        this.moveUp = () => {
-            this.move("up");
-        }
-
-        this.moveDown = () => {
-            this.move("down");
-        }
-        
         this.handleKeyDowns = (e) => {
             switch(e.key) {
                 case("ArrowLeft"): e.preventDefault(); this.setState({ facing: 'l' }); break;
@@ -332,12 +408,160 @@ class App extends React.Component {
         this.handleKeyUps = (e) => {
             if(this.state.moving) { return; }
             switch(e.key) {
-                case("ArrowDown"): e.preventDefault(); this.moveDown(); break;
-                case("ArrowLeft"): e.preventDefault(); this.moveLeft(); break;
-                case("ArrowUp"): e.preventDefault(); this.moveUp(); break;
-                case("ArrowRight"): e.preventDefault(); this.moveRight(); break;
+                case("ArrowDown"): e.preventDefault(); this.move("down"); break;
+                case("ArrowLeft"): e.preventDefault(); this.move("left"); break;
+                case("ArrowUp"): e.preventDefault(); this.move("up"); break;
+                case("ArrowRight"): e.preventDefault(); this.move("right"); break;
             }
         }
+    }
+
+    playerDeath() {
+        console.log("you died");
+    }
+
+    /** @param {number} amount */
+    takeDamage(amount) {
+        let nextHp = this.state.player.hp - amount;
+        if(nextHp <= 0) {
+            this.playerDeath();
+        } else {
+            document.getElementById("tile-viewport").classList.add("damage");
+            setTimeout(() => document.getElementById("tile-viewport").classList.remove("damage"), TRANSITION_SPEED);
+            this.setState(prevState => {
+                return { player: { ...prevState.player, hp: nextHp } };
+            });
+        }
+    }
+
+    /** @param {Entity} enemyEntity */
+    fightEnemy(enemyEntity) {
+        enemyEntity.takeDamage(this.state.player.weaponDamage);
+        this.takeDamage(enemyEntity.attack);
+    }
+
+    consumeFood(foodEntity) {
+        foodEntity.kill();
+        let hp = this.state.player.hp + 3;
+        this.setState(prevState => { return { player: { ...prevState.player, hp: hp} } });
+    }
+
+    consumeUpgrade(upgradeEntity) {
+        upgradeEntity.kill();
+        let d = this.state.player.weaponDamage + 1;
+        this.setState(prevState => { return { player: { ...prevState.player, weaponDamage: d} } });
+    }
+
+    animateRoomChange(direction, newRoom) {
+        let newX;
+        let newY;
+        switch(direction) {
+            case("left"): newX = newRoom.width - 2; newY = Math.floor(newRoom.height / 2); break;
+            case("right"): newX = 1; newY = Math.floor(newRoom.height / 2); break;
+            case("up"): newX = Math.floor(newRoom.width / 2); newY = newRoom.height - 2; break;
+            case("down"): newX = Math.floor(newRoom.width / 2); newY = 1; break;
+        }       
+        this.setState(prevState => { return {
+            tiles: getVisibleTiles(newX, newY, newRoom),
+            entities: getVisibleEntities(newX, newY, newRoom),
+            player: { ...prevState.player, x: newX, y: newY }
+        }});
+    }
+
+    enterDoor(direction) {
+        let prevRoom = rooms[currentRoomId];
+        let newRoomX = prevRoom.x;
+        let newRoomY = prevRoom.y;
+        switch(direction) {
+            case("left"): newRoomX--; break;
+            case("right"): newRoomX++; break;
+            case("up"): newRoomY--; break;
+            case("down"): newRoomY++; break;
+        }
+        let nextRoomId = roomMap[newRoomY][newRoomX];
+        if(nextRoomId == 0) {
+            nextRoomId = enterNewDoor(direction, prevRoom);
+            this.animateRoomChange(direction, rooms[nextRoomId]);
+        } else {
+            changeRoom(direction, rooms[nextRoomId]);
+            this.animateRoomChange(direction, rooms[nextRoomId]);
+        }
+    }
+
+    /** @param {string} type
+     *  @param {number} x
+     *  @param {number} y */
+    interact(type, x, y, direction) {
+        switch(type) {
+            case("enemy"): this.fightEnemy(rooms[currentRoomId].entities[y][x]); break;
+            case("door"): this.enterDoor(direction);
+            case("upgrade"): this.consumeUpgrade(rooms[currentRoomId].entities[y][x]); break;
+            case("food"): this.consumeFood(rooms[currentRoomId].entities[y][x]); break;
+        }
+        return false;
+    }
+
+    /** @param {string} direction */
+    move(direction) {
+        if(this.state.moving) { return; }
+        if(this.state.ignoreNextMove) { return; }
+        let opposite;
+        let newX = this.state.player.x;
+        let newY = this.state.player.y;
+        let newF = this.state.facing;
+        switch(direction) {
+            case("left"): opposite = "right"; newX--; newF = "l"; break;
+            case("right"): opposite = "left"; newX++; newF = "r"; break;
+            case("up"): opposite = "down"; newY--; break;
+            case("down"): opposite = "up"; newY++; break;
+        }
+        let collision = this.checkCollision(newX, newY);
+        if(collision) {
+            console.log(collision);
+            this.interact(collision, newX, newY, direction);
+            if(collision == "enemy" || collision == "wall" || collision == "door") {
+                return;
+            }
+        }
+        this.setState({ moving: true, facing: newF });
+        
+        document.getElementById("tile-grid").classList.add("translate-" + opposite);
+        document.getElementById("entity-grid").classList.add("translate-" + opposite);
+
+        setTimeout(() => {
+            let p = this.state.player;
+            this.setState(prevState => { return {
+                ...prevState, 
+                player: { ...prevState.player, x: newX, y: newY },
+                tiles: getVisibleTiles(newX, newY, rooms[currentRoomId]),
+                entities: getVisibleEntities(newX, newY, rooms[currentRoomId]),
+                moving: false
+            }; });
+            document.getElementById("tile-grid").className = "tile-grid";
+            document.getElementById("entity-grid").className = "entity-grid";
+        }, TRANSITION_SPEED);
+    }
+
+    checkCollision(x, y) {
+        let room = rooms[currentRoomId];
+        let tile = room.tiles[y][x];
+        let entity = room.entities[y][x];
+        if(tile == 6 || tile == 7 || tile == 8 || tile == 9){
+            return "wall";
+        }
+        if(tile == 14 || tile == 15 || tile == 16 || tile == 17) {
+            return "door";
+        }
+        if(entity.type == 3) {
+            return "upgrade";
+        }
+        if(entity.type == 4) {
+            return "food";
+        }
+        if(entity.type == 1 || entity.type == 2) {
+            return "enemy";
+        }
+        return false;
     }
 
     registerKeys() {
@@ -347,29 +571,27 @@ class App extends React.Component {
 
     componentWillMount() {
         this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y, rooms[currentRoomId]),
-                        entityTiles: getVisibleEntities(this.state.player.x, this.state.player.y, rooms[currentRoomId]) });
+                        entities: getVisibleEntities(this.state.player.x, this.state.player.y, rooms[currentRoomId]) });
         this.registerKeys();
     }
     
     render() {
         return(
             <div id="app-container">
-                <button className="control-btn" onClick={this.moveLeft}>left</button>
-                <button className="control-btn" onClick={this.moveUp}>Up</button>
-                <button className="control-btn" onClick={this.moveDown}>Down</button>
-                <button className="control-btn" onClick={this.moveRight}>Right</button>
                 <div id="tile-viewport">
                     <div className={"character-sprite" + 
                                     (this.state.facing == 'l' ? ' facing-left' : ' facing-right') +
                                     (this.state.moving ? ' moving' : '')}></div>
                     <TileGrid tiles={this.state.tiles} />
-                    <EntityGrid entities={this.state.entityTiles} />
+                    <EntityGrid entities={this.state.entities} />
                     <div id="lighting-gradient-horizontal"></div>
                     <div id="lighting-gradient-vertical"></div>
+                    <UserInterface moveHandler={this.move} player={this.state.player} />
                 </div>
             </div>
         );
     }
 }
 
+//@ts-ignore
 ReactDOM.render(<App />, document.getElementById('root'));

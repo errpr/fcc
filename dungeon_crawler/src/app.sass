@@ -76,32 +76,65 @@ body
 .tile-3
     background-image: url("floor-tile3.png")
 
-.tile-4
-    background-image: url("door-tile.png")
-
 .tile-5
     background: black
 
+.tile-6
+    background-image: url("wall-tile-h-u.png")
+
 .tile-7
-    background-image: url("wall-tile-c.png")
+    background-image: url("wall-tile-h-d.png")
 
 .tile-8
-    background-image: url("wall-tile-h.png")
+    background-image: url("wall-tile-v-l.png")
 
 .tile-9
-    background-image: url("wall-tile-v.png")
+    background-image: url("wall-tile-v-r.png")
+
+.tile-10
+    background-image: url("wall-tile-c1.png")
+
+.tile-11
+    background-image: url("wall-tile-c2.png")
+
+.tile-12
+    background-image: url("wall-tile-c3.png")
+
+.tile-13
+    background-image: url("wall-tile-c4.png")
+
+.tile-14
+    background-image: url("door-tile-l.png")
+
+.tile-15
+    background-image: url("door-tile-u.png")
+
+.tile-16
+    background-image: url("door-tile-d.png")
+
+.tile-17
+    background-image: url("door-tile-r.png")
 
 .entity-0
     background: none
 
 .entity-1
-    background: url("zombie.png")
+    background-image: url("zombie-l.png")
+
+.entity-1.facing-l
+    background-image: url("zombie-l.png")
+
+.entity-1.facing-r
+    background-image: url("zombie-r.png")
 
 .entity-2
-    background: url("boss.png")
+    background-image: url("boss.png")
 
 .entity-3
-    background: url("weapon-upgrade.png")
+    background-image: url("weapon-upgrade.png")
+
+.entity-4
+    background-image: url("food.png")
 
 .entity  
     width: 50px 
@@ -168,7 +201,96 @@ body
     margin-top: -0.25%
     transition: margin-top $transition-speed ease
 
-.control-btn
+@keyframes shake
+    0%
+        transform: translate(1px, 1px) rotate(0deg)
+    10% 
+        transform: translate(-1px, -2px) rotate(-1deg)
+    20% 
+        transform: translate(-3px, 0px) rotate(1deg)
+    30% 
+        transform: translate(3px, 2px) rotate(0deg)
+    40% 
+        transform: translate(1px, -1px) rotate(1deg)
+    50% 
+        transform: translate(-1px, 2px) rotate(-1deg)
+    60% 
+        transform: translate(-3px, 1px) rotate(0deg)
+    70% 
+        transform: translate(3px, 1px) rotate(-1deg)
+    80% 
+        transform: translate(-1px, -1px) rotate(1deg)
+    90% 
+        transform: translate(1px, 2px) rotate(0deg)
+    100% 
+        transform: translate(1px, -2px) rotate(-1deg)
+
+.damage
+    animation: shake $transition-speed
+    animation-iteration-count: infinite
+
+#ui-overlay
+    position: absolute
+    left: 0
+    top: 0
+    height: 100%
+    width: 100%
+    background: none
+    z-index: 30
+
+.move-button
     padding: 1em
     margin: 1em
     border: 1px solid black
+    z-index: 31
+    position: absolute
+    width: 20px
+    height: 20px
+    background: none
+    background-repeat: no-repeat
+    opacity: 0.5
+
+#move-button-left
+    left: 0
+    top: 50%
+    margin-top: -10px
+    background-image: url("button-left.png")
+    background-size:  auto 100%
+
+#move-button-right
+    right: 0
+    top: 50%
+    margin-top: -10px
+    background-image: url("button-right.png")
+    background-size:  auto 100%
+
+#move-button-up
+    top: 0
+    left: 50%
+    margin-left: -10px
+    background-image: url("button-up.png")
+    background-size:  auto 100%
+
+#move-button-down
+    bottom: 0
+    left: 50%
+    margin-left: -10px
+    background-image: url("button-down.png")
+    background-size:  auto 100%
+
+.ui-text
+    position: absolute
+    z-index: 32
+    font-family: "Lucida Console", Monaco, monospace
+    font-size: 200%
+    color: white
+    background: none
+
+#ui-player-hp
+    left: 0
+    bottom: 2vw
+
+#ui-player-weapon
+    right: 0
+    bottom: 2vw
+    text-align: right
