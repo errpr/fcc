@@ -69,6 +69,59 @@ body {
 .tile-3 {
   background-image: url("floor-tile3.png"); }
 
+.tile-4 {
+  background-image: url("door-tile.png"); }
+
+.tile-5 {
+  background: black; }
+
+.tile-7 {
+  background-image: url("wall-tile-c.png"); }
+
+.tile-8 {
+  background-image: url("wall-tile-h.png"); }
+
+.tile-9 {
+  background-image: url("wall-tile-v.png"); }
+
+.entity-0 {
+  background: none; }
+
+.entity-1 {
+  background: url("zombie.png"); }
+
+.entity-2 {
+  background: url("boss.png"); }
+
+.entity-3 {
+  background: url("weapon-upgrade.png"); }
+
+.entity {
+  width: 50px;
+  flex-grow: 1;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  z-index: 16; }
+
+.entity-grid {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 123%;
+  width: 123%;
+  margin-top: -11.5%;
+  margin-left: -11.5%;
+  display: flex;
+  flex-flow: column nowrap;
+  z-index: 15; }
+
+.entity-row {
+  height: 50px;
+  display: flex;
+  flex-grow: 1;
+  flex-flow: row nowrap; }
+
 .character-sprite {
   background-image: url("http://error.diodeware.com/fcc/twitty.png");
   background-repeat: no-repeat;
@@ -83,19 +136,19 @@ body {
 
 .translate-left {
   margin-left: -22.5%;
-  transition: margin-left 0.24s ease; }
+  transition: margin-left 0.25s ease; }
 
 .translate-right {
   margin-left: -0.25%;
-  transition: margin-left 0.24s ease; }
+  transition: margin-left 0.25s ease; }
 
 .translate-up {
   margin-top: -22.5%;
-  transition: margin-top 0.24s ease; }
+  transition: margin-top 0.25s ease; }
 
 .translate-down {
   margin-top: -0.25%;
-  transition: margin-top 0.24s ease; }
+  transition: margin-top 0.25s ease; }
 
 .control-btn {
   padding: 1em;
