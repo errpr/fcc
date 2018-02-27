@@ -11,10 +11,43 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 //@ts-check
-
 var TILE_VISIBILITY = 11;
-
 var TRANSITION_SPEED = 180;
+
+var NUMBER_OF_FLOOR_TILES = 4;
+var NUMBER_OF_ITEM_DROP_ENTITIES = 3;
+var NUMBER_OF_ENEMY_ENTITIES = 4; // not including boss
+
+var ENTITY_NOTHING = 0;
+var ENTITY_FOOD = 1;
+var ENTITY_UPGRADE = 2;
+
+var ENTITY_ZOMBIE = 3;
+var ENTITY_RED_ZOMBIE = 4;
+var ENTITY_ELF = 5;
+var ENTITY_RED_ELF = 6;
+var ENTITY_BOSS = 7;
+
+var TILE_FLOOR_GRAVEL = 0;
+var TILE_FLOOR_GRASS = 1;
+var TILE_FLOOR_MUD = 2;
+var TILE_FLOOR_BRICK = 3;
+var TILE_NOTHINGNESS = 5;
+var TILE_WALL_TOP = 6;
+var TILE_WALL_BOTTOM = 7;
+var TILE_WALL_LEFT = 8;
+var TILE_WALL_RIGHT = 9;
+var TILE_WALL_CORNER_TOP_LEFT = 10;
+var TILE_WALL_CORNER_TOP_RIGHT = 11;
+var TILE_WALL_CORNER_BOTTOM_LEFT = 12;
+var TILE_WALL_CORNER_BOTTOM_RIGHT = 13;
+var TILE_DOOR_LEFT = 14;
+var TILE_DOOR_TOP = 15;
+var TILE_DOOR_BOTTOM = 16;
+var TILE_DOOR_RIGHT = 17;
+
+var WALL_WITHOUT_DOOR = 1;
+var WALL_WITH_DOOR = 2;
 
 var Entity = function () {
     /** @param {number} t */
@@ -27,15 +60,15 @@ var Entity = function () {
         this.attack = 0;
         this.xpvalue = 0;
         switch (t) {
-            case 3:
+            case ENTITY_ZOMBIE:
                 this.hp = 2;this.attack = 1;this.xpvalue = 1;break;
-            case 4:
+            case ENTITY_RED_ZOMBIE:
                 this.hp = 10;this.attack = 5;this.xpvalue = 4;break;
-            case 5:
+            case ENTITY_ELF:
                 this.hp = 20;this.attack = 10;this.xpvalue = 8;break;
-            case 6:
+            case ENTITY_RED_ELF:
                 this.hp = 30;this.attack = 15;this.xpvalue = 16;break;
-            case 7:
+            case ENTITY_BOSS:
                 this.hp = 100;this.attack = 20;break;
         }
     }
@@ -62,11 +95,11 @@ var Entity = function () {
                 var drop = Math.floor(Math.random() * 2);
                 switch (drop) {
                     case 0:
-                        return 1; // dmg up
+                        return ENTITY_UPGRADE;
                     case 1:
-                        return 2; // hp up
+                        return ENTITY_FOOD;
                     default:
-                        return 0; // nada
+                        return ENTITY_NOTHING;
                 }
             } else {
                 return 0;
@@ -75,7 +108,7 @@ var Entity = function () {
     }, {
         key: 'kill',
         value: function kill() {
-            this.type = 0;
+            this.type = ENTITY_NOTHING;
         }
     }]);
 
@@ -94,7 +127,9 @@ var Room = function Room(x, y, height, width, walls) {
     this.x = x;
     this.y = y;
     this.height = height;
+    this.midHeight = Math.floor(height / 2);
     this.width = width;
+    this.midWidth = Math.floor(width / 2);
     this.walls = walls;
     this.id = id;
     this.tiles = [[0]];
@@ -127,8 +162,8 @@ var perqs = {
 };
 
 function resetGlobals() {
-    roomMap = Array(11).fill(null).map(function (e) {
-        return Array(11).fill(0);
+    roomMap = Array(TILE_VISIBILITY).fill(null).map(function (e) {
+        return Array(TILE_VISIBILITY).fill(0);
     });
     roomMap[5][5] = 1;
     rooms = [new Room(0, 0, 0, 0, {}, 0)];
@@ -145,6 +180,10 @@ function resetGlobals() {
 
 resetGlobals();
 
+function randomEnemy() {
+    return Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES;
+}
+
 /** @param {Room} room
  * @returns {Entity[][]}   */
 function generateRoomEntities(room) {
@@ -152,13 +191,13 @@ function generateRoomEntities(room) {
     for (var i = 1; i < room.height - 1; i++) {
         m[i] = Array(room.width).fill(0);
         for (var j = 1; j < room.width - 1; j++) {
-            if (i == Math.floor(room.height / 2) && j == 1 || i == Math.floor(room.height / 2) && j == room.width - 2 || i == 1 && j == Math.floor(room.width / 2) || i == room.height - 2 && j == Math.floor(room.width / 2)) {
+            if (i == room.midHeight && j == 1 || i == room.midHeight && j == room.width - 2 || i == 1 && j == room.midWidth || i == room.height - 2 && j == room.midWidth) {
                 //dont spawn enemy in front of door
                 m[i][j] = 0;
                 continue;
             }
             //should probably switch to perlin noise
-            m[i][j] = Math.random() > 0.85 ? new Entity(Math.floor(Math.random() * 4) + 3) : 0;
+            m[i][j] = Math.random() > 0.85 ? randomEnemy() : 0;
         }
     }
     return m;
@@ -238,8 +277,8 @@ function createBossRoom(directionEntered, prevRoom) {
     newRoom.entities = Array(newRoom.height).fill(null).map(function (e) {
         return Array(newRoom.width).fill(0);
     });
-    var boss = new Entity(7);
-    newRoom.entities[Math.floor(newRoom.height / 2)][Math.floor(newRoom.width / 2)] = boss;
+    var boss = new Entity(ENTITY_BOSS);
+    newRoom.entities[newRoom.midHeight][newRoom.midWidth] = boss;
     //@ts-ignore
     newRoom.boss = boss;
     rooms.push(newRoom);
@@ -296,7 +335,7 @@ function changeRoom(directionEntered, newRoom) {
 
 /** @returns {number} */
 function floorTile() {
-    return Math.floor(Math.random() * 4);
+    return Math.floor(Math.random() * NUMBER_OF_FLOOR_TILES);
 }
 
 /**
@@ -313,14 +352,14 @@ function generateRoomTiles(room) {
 
     for (var i = 0; i < height; i++) {
         m[i] = Array(width);
-        m[i][0] = 8;
-        m[i][width - 1] = 9;
+        m[i][0] = TILE_WALL_LEFT;
+        m[i][width - 1] = TILE_WALL_RIGHT;
 
         for (var j = 1; j < width - 1; j++) {
             if (i == 0) {
-                m[i][j] = 6;
+                m[i][j] = TILE_WALL_TOP;
             } else if (i == height - 1) {
-                m[i][j] = 7;
+                m[i][j] = TILE_WALL_BOTTOM;
             } else {
                 m[i][j] = forceTile ? forceTile : floorTile();
             }
@@ -328,24 +367,24 @@ function generateRoomTiles(room) {
     }
 
     // put in doors
-    if (room.walls.left == 2) {
-        m[Math.floor(height / 2)][0] = 14;
+    if (room.walls.left == WALL_WITH_DOOR) {
+        m[room.midHeight][0] = TILE_DOOR_LEFT;
     }
-    if (room.walls.right == 2) {
-        m[Math.floor(height / 2)][width - 1] = 17;
+    if (room.walls.right == WALL_WITH_DOOR) {
+        m[room.midHeight][width - 1] = TILE_DOOR_RIGHT;
     }
-    if (room.walls.up == 2) {
-        m[0][Math.floor(width / 2)] = 15;
+    if (room.walls.up == WALL_WITH_DOOR) {
+        m[0][room.midWidth] = TILE_DOOR_TOP;
     }
-    if (room.walls.down == 2) {
-        m[height - 1][Math.floor(width / 2)] = 16;
+    if (room.walls.down == WALL_WITH_DOOR) {
+        m[height - 1][room.midWidth] = TILE_DOOR_BOTTOM;
     }
 
     // put in corners
-    m[0][0] = 10;
-    m[0][width - 1] = 11;
-    m[height - 1][0] = 12;
-    m[height - 1][width - 1] = 13;
+    m[0][0] = TILE_WALL_CORNER_TOP_LEFT;
+    m[0][width - 1] = TILE_WALL_CORNER_TOP_RIGHT;
+    m[height - 1][0] = TILE_WALL_CORNER_BOTTOM_LEFT;
+    m[height - 1][width - 1] = TILE_WALL_CORNER_BOTTOM_RIGHT;
 
     return m;
 }
@@ -357,17 +396,17 @@ function generateRoomTiles(room) {
  * @returns {number[][]}
  */
 function getVisibleTiles(x, y, room) {
-    var x1 = Math.floor(x - TILE_VISIBILITY / 2) + 1;
-    var x2 = Math.floor(x + TILE_VISIBILITY / 2) + 1;
-    var y1 = Math.floor(y - TILE_VISIBILITY / 2) + 1;
-    var y2 = Math.floor(y + TILE_VISIBILITY / 2) + 1;
+    var x1 = Math.ceil(x - TILE_VISIBILITY / 2);
+    var x2 = Math.ceil(x + TILE_VISIBILITY / 2);
+    var y1 = Math.ceil(y - TILE_VISIBILITY / 2);
+    var y2 = Math.ceil(y + TILE_VISIBILITY / 2);
     var t = [];
 
     for (var i = y1; i < y2; i++) {
         t.push([]);
         for (var j = x1; j < x2; j++) {
             if (i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
-                t[i - y1].push(5);
+                t[i - y1].push(TILE_NOTHINGNESS);
                 continue;
             }
             t[i - y1].push(room.tiles[i][j]);
@@ -384,17 +423,17 @@ function getVisibleTiles(x, y, room) {
  * @returns {number[][]}
  */
 function getVisibleEntities(x, y, room) {
-    var x1 = Math.floor(x - TILE_VISIBILITY / 2) + 1;
-    var x2 = Math.floor(x + TILE_VISIBILITY / 2) + 1;
-    var y1 = Math.floor(y - TILE_VISIBILITY / 2) + 1;
-    var y2 = Math.floor(y + TILE_VISIBILITY / 2) + 1;
+    var x1 = Math.ceil(x - TILE_VISIBILITY / 2);
+    var x2 = Math.ceil(x + TILE_VISIBILITY / 2);
+    var y1 = Math.ceil(y - TILE_VISIBILITY / 2);
+    var y2 = Math.ceil(y + TILE_VISIBILITY / 2);
     var t = [];
 
     for (var i = y1; i < y2; i++) {
         t.push([]);
         for (var j = x1; j < x2; j++) {
             if (i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
-                t[i - y1].push(0);
+                t[i - y1].push(ENTITY_NOTHING);
                 continue;
             }
             t[i - y1].push(room.entities[i][j]);
@@ -410,7 +449,7 @@ function getVisibleEntities(x, y, room) {
 
 function EntityCell(props) {
     var e = props.entity;
-    if (e == 0 || e.type == 0) {
+    if (e == ENTITY_NOTHING || e.type == ENTITY_NOTHING) {
         return React.createElement('div', { className: 'entity entity-0' });
     } else {
         return React.createElement('div', { className: "entity entity-" + e.type + " facing-" + e.facing });
@@ -419,7 +458,7 @@ function EntityCell(props) {
 
 function EntityRow(props) {
     var entityCells = props.entities.map(function (e, j) {
-        return React.createElement(EntityCell, { key: '' + props.i + j, entity: e ? e : 0 });
+        return React.createElement(EntityCell, { key: '' + props.i + j, entity: e ? e : ENTITY_NOTHING });
     });
     return React.createElement(
         'div',
@@ -792,6 +831,11 @@ var App = function (_React$Component2) {
             });
             spawnPlayerNotification("WEAPON UP");
         }
+
+        /** @param {string} direction
+         *  @param {Room} newRoom
+         */
+
     }, {
         key: 'animateRoomChange',
         value: function animateRoomChange(direction, newRoom) {
@@ -799,13 +843,13 @@ var App = function (_React$Component2) {
             var newY = void 0;
             switch (direction) {
                 case "left":
-                    newX = newRoom.width - 2;newY = Math.floor(newRoom.height / 2);break;
+                    newX = newRoom.width - 2;newY = newRoom.midHeight;break;
                 case "right":
-                    newX = 1;newY = Math.floor(newRoom.height / 2);break;
+                    newX = 1;newY = newRoom.midHeight;break;
                 case "up":
-                    newX = Math.floor(newRoom.width / 2);newY = newRoom.height - 2;break;
+                    newX = newRoom.midWidth;newY = newRoom.height - 2;break;
                 case "down":
-                    newX = Math.floor(newRoom.width / 2);newY = 1;break;
+                    newX = newRoom.midWidth;newY = 1;break;
             }
             this.setState(function (prevState) {
                 return {
@@ -921,19 +965,19 @@ var App = function (_React$Component2) {
             var room = rooms[currentRoomId];
             var tile = room.tiles[y][x];
             var entity = room.entities[y][x];
-            if (tile == 6 || tile == 7 || tile == 8 || tile == 9) {
+            if (tile == TILE_WALL_TOP || tile == TILE_WALL_BOTTOM || tile == TILE_WALL_RIGHT || tile == TILE_WALL_LEFT) {
                 return "wall";
             }
-            if (tile == 14 || tile == 15 || tile == 16 || tile == 17) {
+            if (tile == TILE_DOOR_TOP || tile == TILE_DOOR_BOTTOM || tile == TILE_DOOR_RIGHT || tile == TILE_DOOR_LEFT) {
                 return "door";
             }
-            if (entity.type == 3) {
+            if (entity.type == ENTITY_UPGRADE) {
                 return "upgrade";
             }
-            if (entity.type == 4) {
+            if (entity.type == ENTITY_FOOD) {
                 return "food";
             }
-            if (entity.type == 1 || entity.type == 2) {
+            if (entity.type == ENTITY_ZOMBIE || entity.type == ENTITY_RED_ZOMBIE || entity.type == ENTITY_ELF || entity.type == ENTITY_RED_ELF || entity.type == ENTITY_BOSS) {
                 return "enemy";
             }
             return false;

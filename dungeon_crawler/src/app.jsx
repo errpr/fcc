@@ -152,7 +152,7 @@ function generateRoomEntities(room) {
             if( (i == room.midHeight && j == 1) ||
                 (i == room.midHeight && j == room.width - 2) ||
                 (i == 1 && j == room.midWidth) ||
-                (i == room.height - 2 && j == room.midWidth) {
+                (i == room.height - 2 && j == room.midWidth) ){
                 //dont spawn enemy in front of door
                 m[i][j] = 0;
                 continue;
@@ -451,6 +451,7 @@ function TileRow(props) {
         </div>
     );
 }
+
 
 function TileGrid(props) {
     let tileRows = props.tiles.map((e, i) => {
