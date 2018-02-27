@@ -150,6 +150,19 @@ function spawnPlayerNotification(text) {
     }, 1100);
 }
 
+function spawnDamageNotification(text) {
+    var p = document.createElement("p");
+    p.innerText = text;
+    p.classList.add("floating-damage");
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(function () {
+        p.classList.add("float-out-damage");
+    }, 100);
+    setTimeout(function () {
+        p.remove();
+    }, 1100);
+}
+
 /** @type {number[][]} */
 var roomMap = void 0;
 /** @type {Room[]} */
@@ -773,6 +786,7 @@ var App = function (_React$Component2) {
             if (amount <= 0) {
                 amount = 1;
             }
+            spawnDamageNotification("-" + amount + " HP");
             var nextHp = this.state.player.hp - amount;
             if (nextHp <= 0) {
                 this.playerDeath();
@@ -810,7 +824,7 @@ var App = function (_React$Component2) {
         key: 'fightEnemy',
         value: function fightEnemy(enemyEntity) {
             var slain = enemyEntity.takeDamage(this.state.player.weaponDamage);
-            if (enemyEntity.type == 2) {
+            if (enemyEntity.type == ENTITY_BOSS) {
                 this.setState({ boss: enemyEntity });
             }
             if (slain) {

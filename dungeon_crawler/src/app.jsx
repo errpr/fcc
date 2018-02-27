@@ -110,7 +110,16 @@ function spawnPlayerNotification(text) {
     setTimeout(()=>{ p.remove() }, 1100);
 }
 
-/** @type {number[][]} */
+function spawnDamageNotification(text) {
+    let p = document.createElement("p");
+    p.innerText = text;
+    p.classList.add("floating-damage");
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(()=>{ p.classList.add("float-out-damage") }, 100);
+    setTimeout(()=>{ p.remove() }, 1100);
+}
+
+/** @type {number[][]} */ 
 let roomMap;
 /** @type {Room[]} */
 let rooms;
@@ -619,6 +628,7 @@ class App extends React.Component {
         if(amount <= 0) {
             amount = 1;
         }
+        spawnDamageNotification("-" + amount + " HP");
         let nextHp = this.state.player.hp - amount;
         if(nextHp <= 0) {
             this.playerDeath();
@@ -651,7 +661,7 @@ class App extends React.Component {
     /** @param {Entity} enemyEntity */
     fightEnemy(enemyEntity) {
         let slain = enemyEntity.takeDamage(this.state.player.weaponDamage);
-        if(enemyEntity.type == 2) {
+        if(enemyEntity.type == ENTITY_BOSS) {
             this.setState({ boss: enemyEntity });
         }
         if(slain) {
