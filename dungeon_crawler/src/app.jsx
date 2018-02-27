@@ -2,6 +2,8 @@
 const TILE_VISIBILITY = 11;
 const TRANSITION_SPEED = 180;
 
+const PERQ_FREQUENCY = 3;
+
 const NUMBER_OF_FLOOR_TILES = 4;
 const NUMBER_OF_ITEM_DROP_ENTITIES = 3;
 const NUMBER_OF_ENEMY_ENTITIES = 4; // not including boss
@@ -651,7 +653,7 @@ class App extends React.Component {
             p.hp = p.hp + 3;
             p.weaponDamage = p.weaponDamage + 1;
             spawnPlayerNotification("LEVEL UP");
-            if(p.level % 5 == 0) {
+            if(p.level % PERQ_FREQUENCY == 0) {
                 this.setState({ perqTime: true });
             }
         }
