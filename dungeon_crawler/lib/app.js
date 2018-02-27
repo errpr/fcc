@@ -25,9 +25,10 @@ var Entity = function () {
         this.type = t;
         this.hp = 0;
         this.attack = 0;
+        this.xpvalue = 0;
         switch (t) {
             case 1:
-                this.hp = 1;this.attack = 1;break;
+                this.hp = 2;this.attack = 1;this.xpvalue = 1;break;
             case 2:
                 this.hp = 10;this.attack = 5;break;
         }
@@ -42,21 +43,27 @@ var Entity = function () {
             this.hp = this.hp - amount;
             if (this.hp <= 0) {
                 this.type = this.spawnLoot();
-                return true;
+                return this.xpvalue;
             }
             return false;
         }
     }, {
         key: 'spawnLoot',
         value: function spawnLoot() {
-            var drop = Math.floor(Math.random() * 10);
-            switch (drop) {
-                case 0:
-                    return 3; // dmg up
-                case 1:
-                    return 4; // hp up
-                default:
-                    return 0; // nada
+            var baseChance = 0.15;
+            var droppedAnthing = Math.random() < baseChance + perqs.greed / 10;
+            if (droppedAnthing) {
+                var drop = Math.floor(Math.random() * 2);
+                switch (drop) {
+                    case 0:
+                        return 3; // dmg up
+                    case 1:
+                        return 4; // hp up
+                    default:
+                        return 0; // nada
+                }
+            } else {
+                return 0;
             }
         }
     }, {
@@ -68,6 +75,9 @@ var Entity = function () {
 
     return Entity;
 }();
+
+// ended up not needing to be a class, oh well
+
 
 var Room = function Room(x, y, height, width, walls) {
     var id = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : rooms.length;
@@ -101,11 +111,14 @@ function spawnPlayerNotification(text) {
 
 /** @type {number[][]} */
 var roomMap = void 0;
-
 /** @type {Room[]} */
 var rooms = void 0;
-
 var currentRoomId = 1;
+var perqs = {
+    carbs: 0,
+    greed: 0,
+    armor: 0
+};
 
 function resetGlobals() {
     roomMap = Array(11).fill(null).map(function (e) {
@@ -117,6 +130,11 @@ function resetGlobals() {
     rooms[1].tiles = generateRoomTiles(rooms[1]);
     rooms[1].entities = generateRoomEntities(rooms[1]);
     currentRoomId = 1;
+    perqs = {
+        carbs: 0,
+        greed: 0,
+        armor: 0
+    };
 }
 
 resetGlobals();
@@ -540,6 +558,91 @@ function GameOverInterface(props) {
     );
 }
 
+function PerqInterface(props) {
+    if (!props.visible) {
+        return null;
+    }
+    return React.createElement(
+        'div',
+        { id: 'perq-interface' },
+        React.createElement(
+            'p',
+            { id: 'perq-caption' },
+            'Choose a perquisite'
+        ),
+        React.createElement(
+            'div',
+            { onClick: function onClick() {
+                    return props.choiceHandler('carbs');
+                }, className: 'perq-choice', id: 'perq-carbs' },
+            React.createElement('img', { src: 'http://error.diodeware.com/fcc/dungeon_crawler/food.png', className: 'perq-icon', id: 'perq-carbs-icon' }),
+            React.createElement(
+                'h3',
+                { className: 'perq-title' },
+                'Carboload'
+            ),
+            React.createElement(
+                'p',
+                { className: 'perq-description' },
+                'Food heals for more'
+            )
+        ),
+        React.createElement(
+            'div',
+            { onClick: function onClick() {
+                    return props.choiceHandler('greed');
+                }, className: 'perq-choice', id: 'perq-greed' },
+            React.createElement('img', { src: 'http://error.diodeware.com/fcc/dungeon_crawler/bag.png', className: 'perq-icon', id: 'perq-greed-icon' }),
+            React.createElement(
+                'h3',
+                { className: 'perq-title' },
+                'Greediness'
+            ),
+            React.createElement(
+                'p',
+                { className: 'perq-description' },
+                'Loot drops more often'
+            )
+        ),
+        React.createElement(
+            'div',
+            { onClick: function onClick() {
+                    return props.choiceHandler('armor');
+                }, className: 'perq-choice', id: 'perq-armor' },
+            React.createElement('img', { src: 'http://error.diodeware.com/fcc/dungeon_crawler/armor.png', className: 'perq-icon', id: 'perq-armor-icon' }),
+            React.createElement(
+                'h3',
+                { className: 'perq-title' },
+                'Armor'
+            ),
+            React.createElement(
+                'p',
+                { className: 'perq-description' },
+                'Take less damage'
+            )
+        )
+    );
+}
+
+var defaultAppState = {
+    player: {
+        x: 1,
+        y: 5,
+        hp: 30,
+        weaponDamage: 1,
+        level: 1,
+        xptnl: 3
+    },
+    moving: false,
+    aiming: false,
+    ignoreNextMove: false,
+    facing: 'l',
+    tiles: [[]],
+    entities: [[]],
+    boss: false,
+    perqTime: false
+};
+
 var App = function (_React$Component2) {
     _inherits(App, _React$Component2);
 
@@ -548,21 +651,7 @@ var App = function (_React$Component2) {
 
         var _this2 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-        _this2.state = {
-            tiles: [[1]],
-            entities: [[0]],
-            player: {
-                x: 1,
-                y: 5,
-                hp: 0,
-                weaponDamage: 1
-            },
-            moving: false,
-            aiming: false,
-            ignoreNextMove: false,
-            facing: 'l',
-            boss: false
-        };
+        _this2.state = defaultAppState;
 
         _this2.move = _this2.move.bind(_this2);
 
@@ -593,23 +682,18 @@ var App = function (_React$Component2) {
 
         _this2.resetGame = function (e) {
             resetGlobals();
+            _this2.setState(defaultAppState);
             _this2.setState({
-                player: {
-                    x: 1,
-                    y: 5,
-                    hp: 30,
-                    weaponDamage: 1,
-                    level: 1,
-                    xptnl: 3
-                },
-                moving: false,
-                aiming: false,
-                ignoreNextMove: false,
-                facing: 'l',
                 tiles: getVisibleTiles(1, 5, rooms[1]),
-                entities: getVisibleEntities(1, 5, rooms[1]),
-                boss: false
+                entities: getVisibleEntities(1, 5, rooms[1])
             });
+        };
+
+        _this2.perqOff = function (perq) {
+            _this2.setState({
+                perqTime: false
+            });
+            perqs[perq]++;
         };
         return _this2;
     }
@@ -633,6 +717,10 @@ var App = function (_React$Component2) {
     }, {
         key: 'takeDamage',
         value: function takeDamage(amount) {
+            amount = amount - perqs.armor;
+            if (amount < 0) {
+                amount = 0;
+            }
             var nextHp = this.state.player.hp - amount;
             if (nextHp <= 0) {
                 this.playerDeath();
@@ -651,12 +739,15 @@ var App = function (_React$Component2) {
         value: function gainXp() {
             var p = this.state.player;
             p.xptnl--;
-            if (p.xptnl = 0) {
-                p.level++;
+            if (p.xptnl <= 0) {
+                p.level = p.level + 1;
                 p.xptnl = Math.round(Math.log(p.level) * 5);
                 p.hp = p.hp + 3;
                 p.weaponDamage = p.weaponDamage + 1;
                 spawnPlayerNotification("LEVEL UP");
+                if (p.level % 5 == 0) {
+                    this.setState({ perqTime: true });
+                }
             }
             this.setState({ player: p });
         }
@@ -679,7 +770,7 @@ var App = function (_React$Component2) {
         key: 'consumeFood',
         value: function consumeFood(foodEntity) {
             foodEntity.kill();
-            var hp = this.state.player.hp + 3;
+            var hp = this.state.player.hp + 3 + perqs.carbs;
             this.setState(function (prevState) {
                 return { player: _extends({}, prevState.player, { hp: hp }) };
             });
@@ -869,6 +960,7 @@ var App = function (_React$Component2) {
                     React.createElement(EntityGrid, { entities: this.state.entities }),
                     React.createElement('div', { id: 'lighting-gradient-horizontal' }),
                     React.createElement('div', { id: 'lighting-gradient-vertical' }),
+                    React.createElement(PerqInterface, { visible: this.state.perqTime, choiceHandler: this.perqOff }),
                     React.createElement(UserInterface, { moveHandler: this.move, player: this.state.player, boss: this.state.boss }),
                     React.createElement(GameOverInterface, { player: this.state.player, reset: this.resetGame, boss: this.state.boss })
                 )

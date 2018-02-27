@@ -11,8 +11,9 @@ class Entity {
         this.type = t;
         this.hp = 0;
         this.attack = 0;
+        this.xpvalue = 0;
         switch(t) {
-            case(1): this.hp = 1; this.attack = 1; break;
+            case(1): this.hp = 2; this.attack = 1; this.xpvalue = 1; break;
             case(2): this.hp = 10; this.attack = 5; break;  
         }
     }
@@ -22,17 +23,23 @@ class Entity {
         this.hp = this.hp - amount;
         if(this.hp <= 0) {
             this.type = this.spawnLoot();
-            return true;
+            return this.xpvalue;
         }
         return false;
     }
 
     spawnLoot() {
-        let drop = Math.floor(Math.random() * 10);
-        switch(drop) {
-            case(0): return 3; // dmg up
-            case(1): return 4; // hp up
-            default: return 0; // nada
+        let baseChance = 0.15
+        let droppedAnthing = (Math.random() < (baseChance + (perqs.greed / 10)));
+        if(droppedAnthing) {
+            let drop = Math.floor(Math.random() * 2);
+            switch(drop) {
+                case(0): return 3; // dmg up
+                case(1): return 4; // hp up
+                default: return 0; // nada
+            }
+        } else {
+            return 0;
         }
     }
 
@@ -41,6 +48,7 @@ class Entity {
     }
 }
 
+// ended up not needing to be a class, oh well
 class Room {
     constructor(x, y, height, width, walls, id = rooms.length, boss = false) {
         this.x = x;
@@ -66,11 +74,14 @@ function spawnPlayerNotification(text) {
 
 /** @type {number[][]} */
 let roomMap;
-
 /** @type {Room[]} */
 let rooms;
-
 let currentRoomId = 1;
+let perqs = {
+    carbs: 0,
+    greed: 0,
+    armor: 0
+};
 
 function resetGlobals() {
     roomMap = Array(11).fill(null).map(e => Array(11).fill(0));
@@ -80,6 +91,11 @@ function resetGlobals() {
     rooms[1].tiles = generateRoomTiles(rooms[1]);
     rooms[1].entities = generateRoomEntities(rooms[1]);
     currentRoomId = 1;
+    perqs = {
+        carbs: 0,
+        greed: 0,
+        armor: 0
+    }
 }
 
 resetGlobals();
@@ -451,24 +467,54 @@ function GameOverInterface(props) {
             </div>);
 }
 
+function PerqInterface(props) {
+    if(!props.visible) {
+        return null;
+    }
+    return(
+        <div id="perq-interface">
+            <p id="perq-caption">Choose a perquisite</p>
+            <div onClick={() => props.choiceHandler('carbs')} className="perq-choice" id="perq-carbs">
+                <img src="http://error.diodeware.com/fcc/dungeon_crawler/food.png" className="perq-icon" id="perq-carbs-icon"></img>
+                <h3 className="perq-title">Carboload</h3>
+                <p className="perq-description">Food heals for more</p>
+            </div>
+            <div onClick={() => props.choiceHandler('greed')} className="perq-choice" id="perq-greed">
+                <img src="http://error.diodeware.com/fcc/dungeon_crawler/bag.png" className="perq-icon" id="perq-greed-icon"></img>
+                <h3 className="perq-title">Greediness</h3>
+                <p className="perq-description">Loot drops more often</p>
+            </div>
+            <div onClick={() => props.choiceHandler('armor')} className="perq-choice" id="perq-armor">
+                <img src="http://error.diodeware.com/fcc/dungeon_crawler/armor.png" className="perq-icon" id="perq-armor-icon"></img>
+                <h3 className="perq-title">Armor</h3>
+                <p className="perq-description">Take less damage</p>
+            </div>
+        </div>);
+}
+
+const defaultAppState = {
+    player: {
+        x: 1,
+        y: 5,
+        hp: 30,
+        weaponDamage: 1,
+        level: 1,
+        xptnl: 3
+    },
+    moving: false,
+    aiming: false,
+    ignoreNextMove: false,
+    facing: 'l',
+    tiles: [[]],
+    entities: [[]],
+    boss: false,
+    perqTime: false,
+};
+
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            tiles: [[1]],
-            entities: [[0]],
-            player: {
-                x: 1,
-                y: 5,
-                hp: 0,
-                weaponDamage: 1
-            },
-            moving: false,
-            aiming: false,
-            ignoreNextMove: false,
-            facing: 'l',
-            boss: false
-        }
+        this.state = defaultAppState;
 
         this.move = this.move.bind(this);
 
@@ -491,23 +537,18 @@ class App extends React.Component {
 
         this.resetGame = (e) => {
             resetGlobals();
+            this.setState(defaultAppState);
             this.setState({
-                player: {
-                    x: 1,
-                    y: 5,
-                    hp: 30,
-                    weaponDamage: 1,
-                    level: 1,
-                    xptnl: 3
-                },
-                moving: false,
-                aiming: false,
-                ignoreNextMove: false,
-                facing: 'l',
                 tiles: getVisibleTiles(1, 5, rooms[1]),
-                entities: getVisibleEntities(1, 5, rooms[1]),
-                boss: false
-            });
+                entities: getVisibleEntities(1, 5, rooms[1])
+            })
+        }
+
+        this.perqOff = (perq) => {
+            this.setState({
+                perqTime: false,
+            })
+            perqs[perq]++;
         }
     }
 
@@ -524,6 +565,10 @@ class App extends React.Component {
 
     /** @param {number} amount */
     takeDamage(amount) {
+        amount = amount - perqs.armor;
+        if(amount < 0) {
+            amount = 0;
+        }
         let nextHp = this.state.player.hp - amount;
         if(nextHp <= 0) {
             this.playerDeath();
@@ -540,12 +585,15 @@ class App extends React.Component {
     gainXp() {
         let p = this.state.player;
         p.xptnl--;
-        if(p.xptnl = 0) {
-            p.level++;
+        if(p.xptnl <= 0) {
+            p.level = p.level + 1;
             p.xptnl = Math.round(Math.log(p.level) * 5);
             p.hp = p.hp + 3;
             p.weaponDamage = p.weaponDamage + 1;
             spawnPlayerNotification("LEVEL UP");
+            if(p.level % 5 == 0) {
+                this.setState({ perqTime: true });
+            }
         }
         this.setState({ player: p });
     }
@@ -564,7 +612,7 @@ class App extends React.Component {
 
     consumeFood(foodEntity) {
         foodEntity.kill();
-        let hp = this.state.player.hp + 3;
+        let hp = this.state.player.hp + 3 + perqs.carbs;
         this.setState(prevState => { return { player: { ...prevState.player, hp: hp} } });
         spawnPlayerNotification("HP UP");
     }
@@ -711,6 +759,7 @@ class App extends React.Component {
                     <EntityGrid entities={this.state.entities} />
                     <div id="lighting-gradient-horizontal"></div>
                     <div id="lighting-gradient-vertical"></div>
+                    <PerqInterface visible={this.state.perqTime} choiceHandler={this.perqOff} />
                     <UserInterface moveHandler={this.move} player={this.state.player} boss={this.state.boss} />
                     <GameOverInterface player={this.state.player} reset={this.resetGame} boss={this.state.boss} />
                 </div>
