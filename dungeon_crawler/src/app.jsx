@@ -148,7 +148,6 @@ function resetGlobals() {
 resetGlobals();
 
 function randomEnemy() {
-    console.log("spawn");
     let value = Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES;
     return new Entity(value);
 }
@@ -165,7 +164,6 @@ function generateRoomEntities(room) {
                 (i == 1 && j == room.midWidth) ||
                 (i == room.height - 2 && j == room.midWidth) ){
                 //dont spawn enemy in front of door
-                console.log("nospawn");
                 m[i][j] = 0;
                 continue;
             }
