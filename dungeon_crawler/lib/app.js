@@ -181,7 +181,9 @@ function resetGlobals() {
 resetGlobals();
 
 function randomEnemy() {
-    return Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES;
+    console.log("spawn");
+    var value = Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES;
+    return new Entity(value);
 }
 
 /** @param {Room} room
@@ -193,11 +195,16 @@ function generateRoomEntities(room) {
         for (var j = 1; j < room.width - 1; j++) {
             if (i == room.midHeight && j == 1 || i == room.midHeight && j == room.width - 2 || i == 1 && j == room.midWidth || i == room.height - 2 && j == room.midWidth) {
                 //dont spawn enemy in front of door
+                console.log("nospawn");
                 m[i][j] = 0;
                 continue;
             }
             //should probably switch to perlin noise
-            m[i][j] = Math.random() > 0.85 ? randomEnemy() : 0;
+            if (Math.random() > 0.85) {
+                m[i][j] = randomEnemy();
+            } else {
+                m[i][j] = new Entity(0);
+            }
         }
     }
     return m;
@@ -423,10 +430,10 @@ function getVisibleTiles(x, y, room) {
  * @returns {number[][]}
  */
 function getVisibleEntities(x, y, room) {
-    var x1 = Math.ceil(x - TILE_VISIBILITY / 2);
-    var x2 = Math.ceil(x + TILE_VISIBILITY / 2);
-    var y1 = Math.ceil(y - TILE_VISIBILITY / 2);
-    var y2 = Math.ceil(y + TILE_VISIBILITY / 2);
+    var x1 = Math.floor(x - TILE_VISIBILITY / 2 + 1);
+    var x2 = Math.floor(x + TILE_VISIBILITY / 2 + 1);
+    var y1 = Math.floor(y - TILE_VISIBILITY / 2 + 1);
+    var y2 = Math.floor(y + TILE_VISIBILITY / 2 + 1);
     var t = [];
 
     for (var i = y1; i < y2; i++) {
