@@ -39,11 +39,12 @@ var Entity = function () {
     _createClass(Entity, [{
         key: 'takeDamage',
         value: function takeDamage(amount) {
-            console.log(amount);
             this.hp = this.hp - amount;
             if (this.hp <= 0) {
                 this.type = this.spawnLoot();
+                return true;
             }
+            return false;
         }
     }, {
         key: 'spawnLoot',
@@ -85,9 +86,20 @@ var Room = function Room(x, y, height, width, walls) {
     this.boss = boss;
 };
 
+function spawnPlayerNotification(text) {
+    var p = document.createElement("p");
+    p.innerText = text;
+    p.classList.add("floating-notification");
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(function () {
+        p.classList.add("float-out-animation");
+    }, 100);
+    setTimeout(function () {
+        p.remove();
+    }, 1100);
+}
+
 /** @type {number[][]} */
-
-
 var roomMap = void 0;
 
 /** @type {Room[]} */
@@ -483,6 +495,18 @@ var UserInterface = function (_React$Component) {
                     { className: "ui-text" + (this.props.boss ? "" : " invisible"), id: 'ui-boss-hp' },
                     'BOSS HP:',
                     this.props.boss ? this.props.boss.hp : ""
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'ui-text', id: 'ui-player-level' },
+                    'LVL:',
+                    this.props.player.level
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'ui-text', id: 'ui-player-xptnl' },
+                    'XP-REQ:',
+                    this.props.player.xptnl
                 )
             );
         }
@@ -574,7 +598,9 @@ var App = function (_React$Component2) {
                     x: 1,
                     y: 5,
                     hp: 30,
-                    weaponDamage: 1
+                    weaponDamage: 1,
+                    level: 1,
+                    xptnl: 3
                 },
                 moving: false,
                 aiming: false,
@@ -620,15 +646,32 @@ var App = function (_React$Component2) {
                 });
             }
         }
+    }, {
+        key: 'gainXp',
+        value: function gainXp() {
+            var p = this.state.player;
+            p.xptnl--;
+            if (p.xptnl = 0) {
+                p.level++;
+                p.xptnl = Math.round(Math.log(p.level) * 5);
+                p.hp = p.hp + 3;
+                p.weaponDamage = p.weaponDamage + 1;
+                spawnPlayerNotification("LEVEL UP");
+            }
+            this.setState({ player: p });
+        }
 
         /** @param {Entity} enemyEntity */
 
     }, {
         key: 'fightEnemy',
         value: function fightEnemy(enemyEntity) {
-            enemyEntity.takeDamage(this.state.player.weaponDamage);
+            var slain = enemyEntity.takeDamage(this.state.player.weaponDamage);
             if (enemyEntity.type == 2) {
                 this.setState({ boss: enemyEntity });
+            }
+            if (slain) {
+                this.gainXp();
             }
             this.takeDamage(enemyEntity.attack);
         }
@@ -640,6 +683,7 @@ var App = function (_React$Component2) {
             this.setState(function (prevState) {
                 return { player: _extends({}, prevState.player, { hp: hp }) };
             });
+            spawnPlayerNotification("HP UP");
         }
     }, {
         key: 'consumeUpgrade',
@@ -649,6 +693,7 @@ var App = function (_React$Component2) {
             this.setState(function (prevState) {
                 return { player: _extends({}, prevState.player, { weaponDamage: d }) };
             });
+            spawnPlayerNotification("WEAPON UP");
         }
     }, {
         key: 'animateRoomChange',
@@ -749,7 +794,6 @@ var App = function (_React$Component2) {
             }
             var collision = this.checkCollision(newX, newY);
             if (collision) {
-                console.log(collision);
                 this.interact(collision, newX, newY, direction);
                 if (collision == "enemy" || collision == "wall" || collision == "door") {
                     return;
@@ -820,6 +864,7 @@ var App = function (_React$Component2) {
                     'div',
                     { id: 'tile-viewport' },
                     React.createElement('div', { className: "character-sprite" + (this.state.facing == 'l' ? ' facing-left' : ' facing-right') + (this.state.moving ? ' moving' : '') }),
+                    React.createElement('div', { id: 'player-notifications-container' }),
                     React.createElement(TileGrid, { tiles: this.state.tiles }),
                     React.createElement(EntityGrid, { entities: this.state.entities }),
                     React.createElement('div', { id: 'lighting-gradient-horizontal' }),

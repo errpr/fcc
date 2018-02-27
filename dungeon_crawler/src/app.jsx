@@ -19,11 +19,12 @@ class Entity {
 
     /** @param {number} amount */
     takeDamage(amount) {
-        console.log(amount);
         this.hp = this.hp - amount;
         if(this.hp <= 0) {
             this.type = this.spawnLoot();
+            return true;
         }
+        return false;
     }
 
     spawnLoot() {
@@ -52,6 +53,15 @@ class Room {
         this.entities = [[]];
         this.boss = boss;
     }
+}
+
+function spawnPlayerNotification(text) {
+    let p = document.createElement("p");
+    p.innerText = text;
+    p.classList.add("floating-notification");
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(()=>{ p.classList.add("float-out-animation") }, 100);
+    setTimeout(()=>{ p.remove() }, 1100);
 }
 
 /** @type {number[][]} */
@@ -423,6 +433,8 @@ class UserInterface extends React.Component {
                 <p className="ui-text" id="ui-player-hp">HP:{this.props.player.hp}</p>
                 <p className="ui-text" id="ui-player-weapon">ATK:{this.props.player.weaponDamage}</p>
                 <p className={"ui-text" + (this.props.boss ? "" : " invisible")} id="ui-boss-hp">BOSS HP:{(this.props.boss ? this.props.boss.hp : "")}</p>
+                <p className="ui-text" id="ui-player-level">LVL:{this.props.player.level}</p>
+                <p className="ui-text" id="ui-player-xptnl">XP-REQ:{this.props.player.xptnl}</p>
             </div>
         );
     }
@@ -484,7 +496,9 @@ class App extends React.Component {
                     x: 1,
                     y: 5,
                     hp: 30,
-                    weaponDamage: 1
+                    weaponDamage: 1,
+                    level: 1,
+                    xptnl: 3
                 },
                 moving: false,
                 aiming: false,
@@ -522,11 +536,28 @@ class App extends React.Component {
         }
     }
 
+
+    gainXp() {
+        let p = this.state.player;
+        p.xptnl--;
+        if(p.xptnl = 0) {
+            p.level++;
+            p.xptnl = Math.round(Math.log(p.level) * 5);
+            p.hp = p.hp + 3;
+            p.weaponDamage = p.weaponDamage + 1;
+            spawnPlayerNotification("LEVEL UP");
+        }
+        this.setState({ player: p });
+    }
+
     /** @param {Entity} enemyEntity */
     fightEnemy(enemyEntity) {
-        enemyEntity.takeDamage(this.state.player.weaponDamage);
+        let slain = enemyEntity.takeDamage(this.state.player.weaponDamage);
         if(enemyEntity.type == 2) {
             this.setState({ boss: enemyEntity });
+        }
+        if(slain) {
+            this.gainXp();
         }
         this.takeDamage(enemyEntity.attack);
     }
@@ -535,12 +566,14 @@ class App extends React.Component {
         foodEntity.kill();
         let hp = this.state.player.hp + 3;
         this.setState(prevState => { return { player: { ...prevState.player, hp: hp} } });
+        spawnPlayerNotification("HP UP");
     }
 
     consumeUpgrade(upgradeEntity) {
         upgradeEntity.kill();
         let d = this.state.player.weaponDamage + 1;
         this.setState(prevState => { return { player: { ...prevState.player, weaponDamage: d} } });
+        spawnPlayerNotification("WEAPON UP");
     }
 
     animateRoomChange(direction, newRoom) {
@@ -609,7 +642,6 @@ class App extends React.Component {
         }
         let collision = this.checkCollision(newX, newY);
         if(collision) {
-            console.log(collision);
             this.interact(collision, newX, newY, direction);
             if(collision == "enemy" || collision == "wall" || collision == "door") {
                 return;
@@ -674,6 +706,7 @@ class App extends React.Component {
                     <div className={"character-sprite" + 
                                     (this.state.facing == 'l' ? ' facing-left' : ' facing-right') +
                                     (this.state.moving ? ' moving' : '')}></div>
+                    <div id="player-notifications-container"></div>
                     <TileGrid tiles={this.state.tiles} />
                     <EntityGrid entities={this.state.entities} />
                     <div id="lighting-gradient-horizontal"></div>
