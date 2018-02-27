@@ -7,7 +7,7 @@
 .move-button {
   display: block; }
 
-@media all and (min-width: 600px) {
+@media (min-width: 600px) {
   * {
     font-size: 16pt; }
 
@@ -123,10 +123,10 @@ body {
   background: none; }
 
 .entity-1 {
-  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/weapon-upgrade.png"); }
+  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/food.png"); }
 
 .entity-2 {
-  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/food.png"); }
+  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/weapon-upgrade.png"); }
 
 .entity-3 {
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-l.png"); }
