@@ -14,7 +14,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var TILE_VISIBILITY = 11;
 
-var TRANSITION_SPEED = 260;
+var TRANSITION_SPEED = 180;
 
 var Entity = function () {
     /** @param {number} t */
@@ -29,7 +29,7 @@ var Entity = function () {
             case 1:
                 this.hp = 1;this.attack = 1;break;
             case 2:
-                this.hp = 5;this.attack = 5;break;
+                this.hp = 10;this.attack = 5;break;
         }
     }
 
@@ -70,7 +70,7 @@ var Entity = function () {
 
 var Room = function Room(x, y, height, width, walls) {
     var id = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : rooms.length;
-    var boss_room = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
+    var boss = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
 
     _classCallCheck(this, Room);
 
@@ -82,22 +82,32 @@ var Room = function Room(x, y, height, width, walls) {
     this.id = id;
     this.tiles = [[0]];
     this.entities = [[]];
+    this.boss = boss;
 };
 
 /** @type {number[][]} */
 
 
-var roomMap = Array(11).fill(null).map(function (e) {
-    return Array(11).fill(0);
-});
-roomMap[5][5] = 1;
+var roomMap = void 0;
 
 /** @type {Room[]} */
-var rooms = [new Room(0, 0, 0, 0, {}, 0)];
-rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1 }, 1));
+var rooms = void 0;
+
 var currentRoomId = 1;
-rooms[1].tiles = generateRoomTiles(rooms[1]);
-rooms[1].entities = generateRoomEntities(rooms[1]);
+
+function resetGlobals() {
+    roomMap = Array(11).fill(null).map(function (e) {
+        return Array(11).fill(0);
+    });
+    roomMap[5][5] = 1;
+    rooms = [new Room(0, 0, 0, 0, {}, 0)];
+    rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1 }, 1));
+    rooms[1].tiles = generateRoomTiles(rooms[1]);
+    rooms[1].entities = generateRoomEntities(rooms[1]);
+    currentRoomId = 1;
+}
+
+resetGlobals();
 
 /** @param {Room} room
  * @returns {Entity[][]}   */
@@ -168,6 +178,38 @@ function createAdditionalDoors(walls) {
     return walls;
 }
 
+function createBossRoom(directionEntered, prevRoom) {
+    var newX = prevRoom.x;
+    var newY = prevRoom.y;
+    var walls = { left: 1, right: 1, up: 1, down: 1 };
+    switch (directionEntered) {
+        case "right":
+            newX++;break;
+        case "left":
+            newX--;break;
+        case "up":
+            newY--;break;
+        case "down":
+            newY++;break;
+    }
+
+    walls = matchNeighboringDoors(newX, newY, walls);
+
+    var id = rooms.length;
+    var newRoom = new Room(newX, newY, Math.floor(Math.random() * 10) + 6, Math.floor(Math.random() * 10) + 6, walls, id, true);
+    roomMap[newY][newX] = id;
+    newRoom.tiles = generateRoomTiles(newRoom, 1);
+    newRoom.entities = Array(newRoom.height).fill(null).map(function (e) {
+        return Array(newRoom.width).fill(0);
+    });
+    var boss = new Entity(2);
+    newRoom.entities[Math.floor(newRoom.height / 2)][Math.floor(newRoom.width / 2)] = boss;
+    //@ts-ignore
+    newRoom.boss = boss;
+    rooms.push(newRoom);
+    return newRoom;
+}
+
 function createRoom(directionEntered, prevRoom) {
     var newX = prevRoom.x;
     var newY = prevRoom.y;
@@ -199,7 +241,13 @@ function createRoom(directionEntered, prevRoom) {
 /** @param {string} directionEntered the direction player traveled to hit the door
  *  @param {Object} prevRoom the room player was in when they hit the door */
 function enterNewDoor(directionEntered, prevRoom) {
-    var newRoom = createRoom(directionEntered, prevRoom);
+    var newRoom = void 0;
+    if (Math.floor(Math.random() * currentRoomId) > 4) {
+        // create boss room
+        newRoom = createBossRoom(directionEntered, prevRoom);
+    } else {
+        newRoom = createRoom(directionEntered, prevRoom);
+    }
     changeRoom(directionEntered, newRoom);
     return newRoom.id;
 }
@@ -217,9 +265,12 @@ function floorTile() {
 
 /**
  * @param {Room} room
+ * @param {number | boolean} forceTile
  * @returns {number[][]}
  */
 function generateRoomTiles(room) {
+    var forceTile = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
     var height = room.height;
     var width = room.width;
     var m = Array(height);
@@ -235,7 +286,7 @@ function generateRoomTiles(room) {
             } else if (i == height - 1) {
                 m[i][j] = 7;
             } else {
-                m[i][j] = floorTile();
+                m[i][j] = forceTile ? forceTile : floorTile();
             }
         }
     }
@@ -426,6 +477,12 @@ var UserInterface = function (_React$Component) {
                     { className: 'ui-text', id: 'ui-player-weapon' },
                     'ATK:',
                     this.props.player.weaponDamage
+                ),
+                React.createElement(
+                    'p',
+                    { className: "ui-text" + (this.props.boss ? "" : " invisible"), id: 'ui-boss-hp' },
+                    'BOSS HP:',
+                    this.props.boss ? this.props.boss.hp : ""
                 )
             );
         }
@@ -433,6 +490,31 @@ var UserInterface = function (_React$Component) {
 
     return UserInterface;
 }(React.Component);
+
+function GameOverInterface(props) {
+    var alive = props.player.hp > 0;
+    var victory = props.boss && props.boss.hp <= 0;
+    var toggleScreen = alive || victory;
+    return React.createElement(
+        'div',
+        { className: "game-over-screen-container " + (alive && !victory ? "invisible" : "") },
+        React.createElement(
+            'h1',
+            { className: "dark-souls " + (alive || victory ? "invisible" : "") },
+            'YOU DIED'
+        ),
+        React.createElement(
+            'h1',
+            { className: "dark-souls " + (victory && alive ? "" : "invisible") },
+            'YOU WON'
+        ),
+        React.createElement(
+            'button',
+            { className: "respawn-button" + (alive && !victory ? " invisible" : ""), onClick: props.reset },
+            'Try Again'
+        )
+    );
+}
 
 var App = function (_React$Component2) {
     _inherits(App, _React$Component2);
@@ -448,13 +530,14 @@ var App = function (_React$Component2) {
             player: {
                 x: 1,
                 y: 5,
-                hp: 30,
+                hp: 0,
                 weaponDamage: 1
             },
             moving: false,
             aiming: false,
             ignoreNextMove: false,
-            facing: 'l'
+            facing: 'l',
+            boss: false
         };
 
         _this2.move = _this2.move.bind(_this2);
@@ -483,13 +566,40 @@ var App = function (_React$Component2) {
                     e.preventDefault();_this2.move("right");break;
             }
         };
+
+        _this2.resetGame = function (e) {
+            resetGlobals();
+            _this2.setState({
+                player: {
+                    x: 1,
+                    y: 5,
+                    hp: 30,
+                    weaponDamage: 1
+                },
+                moving: false,
+                aiming: false,
+                ignoreNextMove: false,
+                facing: 'l',
+                tiles: getVisibleTiles(1, 5, rooms[1]),
+                entities: getVisibleEntities(1, 5, rooms[1]),
+                boss: false
+            });
+        };
         return _this2;
     }
 
     _createClass(App, [{
         key: 'playerDeath',
         value: function playerDeath() {
-            console.log("you died");
+            this.setState(function (prevState) {
+                return {
+                    player: _extends({}, prevState.player, {
+                        hp: 0,
+                        weaponDamage: 0
+                    }),
+                    moving: true
+                };
+            });
         }
 
         /** @param {number} amount */
@@ -504,7 +614,7 @@ var App = function (_React$Component2) {
                 document.getElementById("tile-viewport").classList.add("damage");
                 setTimeout(function () {
                     return document.getElementById("tile-viewport").classList.remove("damage");
-                }, TRANSITION_SPEED);
+                }, 300);
                 this.setState(function (prevState) {
                     return { player: _extends({}, prevState.player, { hp: nextHp }) };
                 });
@@ -517,6 +627,9 @@ var App = function (_React$Component2) {
         key: 'fightEnemy',
         value: function fightEnemy(enemyEntity) {
             enemyEntity.takeDamage(this.state.player.weaponDamage);
+            if (enemyEntity.type == 2) {
+                this.setState({ boss: enemyEntity });
+            }
             this.takeDamage(enemyEntity.attack);
         }
     }, {
@@ -556,7 +669,8 @@ var App = function (_React$Component2) {
                 return {
                     tiles: getVisibleTiles(newX, newY, newRoom),
                     entities: getVisibleEntities(newX, newY, newRoom),
-                    player: _extends({}, prevState.player, { x: newX, y: newY })
+                    player: _extends({}, prevState.player, { x: newX, y: newY }),
+                    boss: newRoom.boss
                 };
             });
         }
@@ -597,7 +711,7 @@ var App = function (_React$Component2) {
                 case "enemy":
                     this.fightEnemy(rooms[currentRoomId].entities[y][x]);break;
                 case "door":
-                    this.enterDoor(direction);
+                    this.enterDoor(direction);break;
                 case "upgrade":
                     this.consumeUpgrade(rooms[currentRoomId].entities[y][x]);break;
                 case "food":
@@ -710,7 +824,8 @@ var App = function (_React$Component2) {
                     React.createElement(EntityGrid, { entities: this.state.entities }),
                     React.createElement('div', { id: 'lighting-gradient-horizontal' }),
                     React.createElement('div', { id: 'lighting-gradient-vertical' }),
-                    React.createElement(UserInterface, { moveHandler: this.move, player: this.state.player })
+                    React.createElement(UserInterface, { moveHandler: this.move, player: this.state.player, boss: this.state.boss }),
+                    React.createElement(GameOverInterface, { player: this.state.player, reset: this.resetGame, boss: this.state.boss })
                 )
             );
         }

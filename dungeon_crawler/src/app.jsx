@@ -2,7 +2,7 @@
 
 const TILE_VISIBILITY = 11;
 
-const TRANSITION_SPEED = 260;
+const TRANSITION_SPEED = 180;
 
 class Entity {
     /** @param {number} t */
@@ -13,7 +13,7 @@ class Entity {
         this.attack = 0;
         switch(t) {
             case(1): this.hp = 1; this.attack = 1; break;
-            case(2): this.hp = 5; this.attack = 5; break;  
+            case(2): this.hp = 10; this.attack = 5; break;  
         }
     }
 
@@ -41,7 +41,7 @@ class Entity {
 }
 
 class Room {
-    constructor(x, y, height, width, walls, id = rooms.length, boss_room = false) {
+    constructor(x, y, height, width, walls, id = rooms.length, boss = false) {
         this.x = x;
         this.y = y;
         this.height = height;
@@ -50,19 +50,29 @@ class Room {
         this.id = id;
         this.tiles = [[0]];
         this.entities = [[]];
+        this.boss = boss;
     }
 }
 
 /** @type {number[][]} */
-let roomMap = Array(11).fill(null).map(e => Array(11).fill(0));
-roomMap[5][5] = 1;
+let roomMap;
 
 /** @type {Room[]} */
-let rooms = [new Room(0,0,0,0,{},0)];
-rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1}, 1));
+let rooms;
+
 let currentRoomId = 1;
-rooms[1].tiles = generateRoomTiles(rooms[1]);
-rooms[1].entities = generateRoomEntities(rooms[1]);
+
+function resetGlobals() {
+    roomMap = Array(11).fill(null).map(e => Array(11).fill(0));
+    roomMap[5][5] = 1;
+    rooms = [new Room(0,0,0,0,{},0)];
+    rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1}, 1));
+    rooms[1].tiles = generateRoomTiles(rooms[1]);
+    rooms[1].entities = generateRoomEntities(rooms[1]);
+    currentRoomId = 1;
+}
+
+resetGlobals();
 
 /** @param {Room} room
  * @returns {Entity[][]}   */
@@ -134,6 +144,38 @@ function createAdditionalDoors(walls) {
     return walls;
 }
 
+function createBossRoom(directionEntered, prevRoom) {
+    let newX = prevRoom.x;
+    let newY = prevRoom.y;
+    let walls = { left: 1, right: 1, up: 1, down: 1};
+    switch(directionEntered) {
+        case("right"): newX++; break;
+        case("left"): newX--; break;
+        case("up"): newY--; break;
+        case("down"): newY++; break;
+    }
+
+    walls = matchNeighboringDoors(newX, newY, walls);
+
+    let id = rooms.length;
+    let newRoom = new Room( newX,
+                            newY,
+                            Math.floor(Math.random() * 10) + 6, 
+                            Math.floor(Math.random() * 10) + 6,
+                            walls,
+                            id,
+                            true );
+    roomMap[newY][newX] = id;
+    newRoom.tiles = generateRoomTiles(newRoom, 1);
+    newRoom.entities = Array(newRoom.height).fill(null).map(e => Array(newRoom.width).fill(0));
+    let boss = new Entity(2);
+    newRoom.entities[Math.floor(newRoom.height / 2)][Math.floor(newRoom.width / 2)] = boss;
+    //@ts-ignore
+    newRoom.boss = boss;
+    rooms.push(newRoom);
+    return newRoom;
+}
+
 function createRoom(directionEntered, prevRoom) {
     let newX = prevRoom.x;
     let newY = prevRoom.y;
@@ -167,7 +209,13 @@ function createRoom(directionEntered, prevRoom) {
 /** @param {string} directionEntered the direction player traveled to hit the door
  *  @param {Object} prevRoom the room player was in when they hit the door */
 function enterNewDoor(directionEntered, prevRoom) {
-    let newRoom = createRoom(directionEntered, prevRoom);
+    let newRoom;
+    if(Math.floor(Math.random() * currentRoomId) > 4) {
+        // create boss room
+        newRoom = createBossRoom(directionEntered, prevRoom);
+    } else {
+        newRoom = createRoom(directionEntered, prevRoom);
+    }
     changeRoom(directionEntered, newRoom);
     return newRoom.id;
 }
@@ -185,9 +233,10 @@ function floorTile() {
 
 /**
  * @param {Room} room
+ * @param {number | boolean} forceTile
  * @returns {number[][]}
  */
-function generateRoomTiles(room) {
+function generateRoomTiles(room, forceTile = false) {
     let height = room.height;
     let width = room.width;
     let m = Array(height);
@@ -203,7 +252,7 @@ function generateRoomTiles(room) {
             } else if(i == height - 1) {
                 m[i][j] = 7;
             } else {
-                m[i][j] = floorTile();
+                m[i][j] = (forceTile ? forceTile : floorTile());
             }
         }
     }
@@ -373,9 +422,21 @@ class UserInterface extends React.Component {
                 <button onClick={this.moveDown} className="move-button" id="move-button-down" ></button>
                 <p className="ui-text" id="ui-player-hp">HP:{this.props.player.hp}</p>
                 <p className="ui-text" id="ui-player-weapon">ATK:{this.props.player.weaponDamage}</p>
+                <p className={"ui-text" + (this.props.boss ? "" : " invisible")} id="ui-boss-hp">BOSS HP:{(this.props.boss ? this.props.boss.hp : "")}</p>
             </div>
         );
     }
+}
+
+function GameOverInterface(props) {
+    let alive = props.player.hp > 0;
+    let victory = props.boss && props.boss.hp <= 0;
+    let toggleScreen = (alive || victory);
+    return (<div className={"game-over-screen-container " + (alive && !victory ? "invisible" : "")}>
+                <h1 className={"dark-souls " + (alive || victory ? "invisible" : "")}>YOU DIED</h1>
+                <h1 className={"dark-souls " + (victory && alive ? "" : "invisible")}>YOU WON</h1>
+                <button className={"respawn-button" + (alive && !victory ? " invisible" : "")} onClick={props.reset}>Try Again</button>
+            </div>);
 }
 
 class App extends React.Component {
@@ -387,13 +448,14 @@ class App extends React.Component {
             player: {
                 x: 1,
                 y: 5,
-                hp: 30,
+                hp: 0,
                 weaponDamage: 1
             },
             moving: false,
             aiming: false,
             ignoreNextMove: false,
             facing: 'l',
+            boss: false
         }
 
         this.move = this.move.bind(this);
@@ -414,10 +476,36 @@ class App extends React.Component {
                 case("ArrowRight"): e.preventDefault(); this.move("right"); break;
             }
         }
+
+        this.resetGame = (e) => {
+            resetGlobals();
+            this.setState({
+                player: {
+                    x: 1,
+                    y: 5,
+                    hp: 30,
+                    weaponDamage: 1
+                },
+                moving: false,
+                aiming: false,
+                ignoreNextMove: false,
+                facing: 'l',
+                tiles: getVisibleTiles(1, 5, rooms[1]),
+                entities: getVisibleEntities(1, 5, rooms[1]),
+                boss: false
+            });
+        }
     }
 
     playerDeath() {
-        console.log("you died");
+        this.setState(prevState => { return {
+            player: {
+                ...prevState.player,
+                hp: 0,
+                weaponDamage: 0,
+            },
+            moving: true
+        } });
     }
 
     /** @param {number} amount */
@@ -427,7 +515,7 @@ class App extends React.Component {
             this.playerDeath();
         } else {
             document.getElementById("tile-viewport").classList.add("damage");
-            setTimeout(() => document.getElementById("tile-viewport").classList.remove("damage"), TRANSITION_SPEED);
+            setTimeout(() => document.getElementById("tile-viewport").classList.remove("damage"), 300);
             this.setState(prevState => {
                 return { player: { ...prevState.player, hp: nextHp } };
             });
@@ -437,6 +525,9 @@ class App extends React.Component {
     /** @param {Entity} enemyEntity */
     fightEnemy(enemyEntity) {
         enemyEntity.takeDamage(this.state.player.weaponDamage);
+        if(enemyEntity.type == 2) {
+            this.setState({ boss: enemyEntity });
+        }
         this.takeDamage(enemyEntity.attack);
     }
 
@@ -464,7 +555,8 @@ class App extends React.Component {
         this.setState(prevState => { return {
             tiles: getVisibleTiles(newX, newY, newRoom),
             entities: getVisibleEntities(newX, newY, newRoom),
-            player: { ...prevState.player, x: newX, y: newY }
+            player: { ...prevState.player, x: newX, y: newY },
+            boss: newRoom.boss,
         }});
     }
 
@@ -494,7 +586,7 @@ class App extends React.Component {
     interact(type, x, y, direction) {
         switch(type) {
             case("enemy"): this.fightEnemy(rooms[currentRoomId].entities[y][x]); break;
-            case("door"): this.enterDoor(direction);
+            case("door"): this.enterDoor(direction); break;
             case("upgrade"): this.consumeUpgrade(rooms[currentRoomId].entities[y][x]); break;
             case("food"): this.consumeFood(rooms[currentRoomId].entities[y][x]); break;
         }
@@ -586,7 +678,8 @@ class App extends React.Component {
                     <EntityGrid entities={this.state.entities} />
                     <div id="lighting-gradient-horizontal"></div>
                     <div id="lighting-gradient-vertical"></div>
-                    <UserInterface moveHandler={this.move} player={this.state.player} />
+                    <UserInterface moveHandler={this.move} player={this.state.player} boss={this.state.boss} />
+                    <GameOverInterface player={this.state.player} reset={this.resetGame} boss={this.state.boss} />
                 </div>
             </div>
         );

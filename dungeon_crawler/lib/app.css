@@ -7,7 +7,8 @@ body {
   background-color: black; }
 
 #root {
-  position: relative; }
+  position: relative;
+  overflow: hidden; }
 
 #tile-viewport {
   position: relative;
@@ -181,19 +182,19 @@ body {
 
 .translate-left {
   margin-left: -22.5%;
-  transition: margin-left 0.25s ease; }
+  transition: margin-left 0.15s ease; }
 
 .translate-right {
   margin-left: -0.25%;
-  transition: margin-left 0.25s ease; }
+  transition: margin-left 0.15s ease; }
 
 .translate-up {
   margin-top: -22.5%;
-  transition: margin-top 0.25s ease; }
+  transition: margin-top 0.15s ease; }
 
 .translate-down {
   margin-top: -0.25%;
-  transition: margin-top 0.25s ease; }
+  transition: margin-top 0.15s ease; }
 
 @keyframes shake {
   0% {
@@ -219,7 +220,7 @@ body {
   100% {
     transform: translate(1px, -2px) rotate(-1deg); } }
 .damage {
-  animation: shake 0.25s;
+  animation: shake 0.3s;
   animation-iteration-count: infinite; }
 
 #ui-overlay {
@@ -235,7 +236,7 @@ body {
   padding: 1em;
   margin: 1em;
   border: 1px solid black;
-  z-index: 31;
+  z-index: 35;
   position: absolute;
   width: 20px;
   height: 20px;
@@ -280,12 +281,49 @@ body {
   background: none; }
 
 #ui-player-hp {
-  left: 0;
+  left: 1em;
   bottom: 2vw; }
 
 #ui-player-weapon {
-  right: 0;
+  right: 1em;
   bottom: 2vw;
   text-align: right; }
+
+#prefetch {
+  position: absolute;
+  left: -99999px;
+  top: -99999px; }
+
+.game-over-screen-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  z-index: 50; }
+
+.respawn-button {
+  position: absolute;
+  width: 100px;
+  height: 50px;
+  bottom: 25%;
+  left: 50%;
+  margin-left: -50px;
+  color: white;
+  background: none;
+  border: 1px solid white; }
+
+.dark-souls {
+  margin-top: 25%;
+  text-align: center;
+  font-size: 200%;
+  letter-spacing: 0.7em;
+  color: white;
+  margin-left: auto;
+  margin-right: auto; }
+
+.invisible {
+  display: none; }
 
 /*# sourceMappingURL=app.css.map */
