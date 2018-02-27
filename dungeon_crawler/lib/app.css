@@ -4,9 +4,15 @@
   margin: 0;
   font-size: 12pt; }
 
+.move-button {
+  display: block; }
+
 @media all and (min-width: 600px) {
   * {
-    font-size: 16pt; } }
+    font-size: 16pt; }
+
+  .move-button {
+    display: none; } }
 body {
   background-color: black; }
 
