@@ -151,7 +151,7 @@ function generateRoomEntities(room) {
         for(let j = 1; j < room.width - 1; j++) {
             if( (i == room.midHeight && j == 1) ||
                 (i == room.midHeight && j == room.width - 2) ||
-                (i == 1 && j == room.midWidth ||
+                (i == 1 && j == room.midWidth) ||
                 (i == room.height - 2 && j == room.midWidth) {
                 //dont spawn enemy in front of door
                 m[i][j] = 0;
