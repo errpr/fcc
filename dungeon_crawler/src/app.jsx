@@ -566,8 +566,8 @@ class App extends React.Component {
     /** @param {number} amount */
     takeDamage(amount) {
         amount = amount - perqs.armor;
-        if(amount < 0) {
-            amount = 0;
+        if(amount <= 0) {
+            amount = 1;
         }
         let nextHp = this.state.player.hp - amount;
         if(nextHp <= 0) {
