@@ -49,7 +49,7 @@ class Entity {
         this.xpvalue = 0;
         switch(t) {
             case(ENTITY_ZOMBIE): this.hp = 2; this.attack = 1; this.xpvalue = 1; break;
-            case(ENTITY_RED_ZOMBIE): this.hp = 10; this.attack = 5; this.xpvalue = 4; break;  
+            case(ENTITY_RED_ZOMBIE): this.hp = 10; this.attack = 4; this.xpvalue = 3; break;  
             case(ENTITY_ELF): this.hp = 20; this.attack = 10; this.xpvalue = 8; break;
             case(ENTITY_RED_ELF): this.hp = 30; this.attack = 15; this.xpvalue = 16; break;
             case(ENTITY_BOSS): this.hp = 100; this.attack = 20; break;
@@ -205,6 +205,7 @@ function matchNeighboringDoors(x, y, walls) {
 }
 
 // this algorithm is borked and spawns too many doors, but my brain is tired
+// also shouldn't spawn doors that lead to existing rooms
 function createAdditionalDoors(walls) {
     let doorsToPlace = 2 + Math.floor(Math.random() * 2);
     let w = ["left", "right", "up", "down"];
@@ -299,6 +300,7 @@ function enterNewDoor(directionEntered, prevRoom) {
     if(!bossSpawned && Math.floor(Math.random() * currentRoomId) > 4) {
         // create boss room
         newRoom = createBossRoom(directionEntered, prevRoom);
+        bossSpawned = true;
     } else {
         newRoom = createRoom(directionEntered, prevRoom);
     }

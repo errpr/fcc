@@ -14,6 +14,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var TILE_VISIBILITY = 11;
 var TRANSITION_SPEED = 180;
 
+var PERQ_FREQUENCY = 3;
+
 var NUMBER_OF_FLOOR_TILES = 4;
 var NUMBER_OF_ITEM_DROP_ENTITIES = 3;
 var NUMBER_OF_ENEMY_ENTITIES = 4; // not including boss
@@ -811,7 +813,7 @@ var App = function (_React$Component2) {
                 p.hp = p.hp + 3;
                 p.weaponDamage = p.weaponDamage + 1;
                 spawnPlayerNotification("LEVEL UP");
-                if (p.level % 5 == 0) {
+                if (p.level % PERQ_FREQUENCY == 0) {
                     this.setState({ perqTime: true });
                 }
             }
