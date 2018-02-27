@@ -129,6 +129,7 @@ let perqs = {
     greed: 0,
     armor: 0
 };
+let bossSpawned;
 
 function resetGlobals() {
     roomMap = Array(TILE_VISIBILITY).fill(null).map(e => Array(TILE_VISIBILITY).fill(0));
@@ -143,6 +144,7 @@ function resetGlobals() {
         greed: 0,
         armor: 0
     }
+    bossSpawned = false;
 }
 
 resetGlobals();
@@ -292,7 +294,7 @@ function createRoom(directionEntered, prevRoom) {
  *  @param {Object} prevRoom the room player was in when they hit the door */
 function enterNewDoor(directionEntered, prevRoom) {
     let newRoom;
-    if(Math.floor(Math.random() * currentRoomId) > 4) {
+    if(!bossSpawned && Math.floor(Math.random() * currentRoomId) > 4) {
         // create boss room
         newRoom = createBossRoom(directionEntered, prevRoom);
     } else {
