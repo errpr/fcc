@@ -27,10 +27,16 @@ var Entity = function () {
         this.attack = 0;
         this.xpvalue = 0;
         switch (t) {
-            case 1:
+            case 3:
                 this.hp = 2;this.attack = 1;this.xpvalue = 1;break;
-            case 2:
-                this.hp = 10;this.attack = 5;break;
+            case 4:
+                this.hp = 10;this.attack = 5;this.xpvalue = 4;break;
+            case 5:
+                this.hp = 20;this.attack = 10;this.xpvalue = 8;break;
+            case 6:
+                this.hp = 30;this.attack = 15;this.xpvalue = 16;break;
+            case 7:
+                this.hp = 100;this.attack = 20;break;
         }
     }
 
@@ -56,9 +62,9 @@ var Entity = function () {
                 var drop = Math.floor(Math.random() * 2);
                 switch (drop) {
                     case 0:
-                        return 3; // dmg up
+                        return 1; // dmg up
                     case 1:
-                        return 4; // hp up
+                        return 2; // hp up
                     default:
                         return 0; // nada
                 }
@@ -152,7 +158,7 @@ function generateRoomEntities(room) {
                 continue;
             }
             //should probably switch to perlin noise
-            m[i][j] = Math.random() > 0.85 ? new Entity(1) : 0;
+            m[i][j] = Math.random() > 0.85 ? new Entity(Math.floor(Math.random() * 4) + 3) : 0;
         }
     }
     return m;
@@ -232,7 +238,7 @@ function createBossRoom(directionEntered, prevRoom) {
     newRoom.entities = Array(newRoom.height).fill(null).map(function (e) {
         return Array(newRoom.width).fill(0);
     });
-    var boss = new Entity(2);
+    var boss = new Entity(7);
     newRoom.entities[Math.floor(newRoom.height / 2)][Math.floor(newRoom.width / 2)] = boss;
     //@ts-ignore
     newRoom.boss = boss;
@@ -718,8 +724,8 @@ var App = function (_React$Component2) {
         key: 'takeDamage',
         value: function takeDamage(amount) {
             amount = amount - perqs.armor;
-            if (amount < 0) {
-                amount = 0;
+            if (amount <= 0) {
+                amount = 1;
             }
             var nextHp = this.state.player.hp - amount;
             if (nextHp <= 0) {

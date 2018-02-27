@@ -117,22 +117,49 @@ body {
   background: none; }
 
 .entity-1 {
-  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-l.png"); }
-
-.entity-1.facing-l {
-  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-l.png"); }
-
-.entity-1.facing-r {
-  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-r.png"); }
-
-.entity-2 {
-  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/boss.png"); }
-
-.entity-3 {
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/weapon-upgrade.png"); }
 
-.entity-4 {
+.entity-2 {
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/food.png"); }
+
+.entity-3 {
+  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-l.png"); }
+
+.entity-3.facing-l {
+  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-l.png"); }
+
+.entity-3.facing-r {
+  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/zombie-r.png"); }
+
+.entity-4 {
+  background-image: url("zombie-2-l.png"); }
+
+.entity-4.facing-l {
+  background-image: url("zombie-2-l.png"); }
+
+.entity-4.facing-r {
+  background-image: url("zombie-2-r.png"); }
+
+.entity-5 {
+  background-image: url("elf-l.png"); }
+
+.entity-5.facing-l {
+  background-image: url("elf-l.png"); }
+
+.entity-5.facing-r {
+  background-image: url("elf-r.png"); }
+
+.entity-6 {
+  background-image: url("elf-2-l.png"); }
+
+.entity-6.facing-l {
+  background-image: url("elf-2-l.png"); }
+
+.entity-6.facing-r {
+  background-image: url("elf-2-r.png"); }
+
+.entity-7 {
+  background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/boss.png"); }
 
 .entity {
   width: 50px;

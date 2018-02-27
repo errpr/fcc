@@ -1,8 +1,41 @@
 //@ts-check
-
 const TILE_VISIBILITY = 11;
-
 const TRANSITION_SPEED = 180;
+
+const NUMBER_OF_FLOOR_TILES = 4;
+const NUMBER_OF_ITEM_DROP_ENTITIES = 3;
+const NUMBER_OF_ENEMY_ENTITIES = 4; // not including boss
+
+const ENTITY_NOTHING = 0;
+const ENTITY_FOOD = 1;
+const ENTITY_UPGRADE = 2;
+
+const ENTITY_ZOMBIE = 3;
+const ENTITY_RED_ZOMBIE = 4;
+const ENTITY_ELF = 5;
+const ENTITY_RED_ELF = 6;
+const ENTITY_BOSS = 7;
+
+const TILE_FLOOR_GRAVEL = 0;
+const TILE_FLOOR_GRASS = 1;
+const TILE_FLOOR_MUD = 2;
+const TILE_FLOOR_BRICK = 3;
+const TILE_NOTHINGNESS = 5;
+const TILE_WALL_TOP = 6;
+const TILE_WALL_BOTTOM = 7;
+const TILE_WALL_LEFT = 8;
+const TILE_WALL_RIGHT = 9;
+const TILE_WALL_CORNER_TOP_LEFT = 10;
+const TILE_WALL_CORNER_TOP_RIGHT = 11;
+const TILE_WALL_CORNER_BOTTOM_LEFT = 12;
+const TILE_WALL_CORNER_BOTTOM_RIGHT = 13;
+const TILE_DOOR_LEFT = 14;
+const TILE_DOOR_TOP = 15;
+const TILE_DOOR_BOTTOM = 16;
+const TILE_DOOR_RIGHT = 17;
+
+const WALL_WITHOUT_DOOR = 1;
+const WALL_WITH_DOOR = 2;
 
 class Entity {
     /** @param {number} t */
@@ -13,8 +46,11 @@ class Entity {
         this.attack = 0;
         this.xpvalue = 0;
         switch(t) {
-            case(1): this.hp = 2; this.attack = 1; this.xpvalue = 1; break;
-            case(2): this.hp = 10; this.attack = 5; break;  
+            case(ENTITY_ZOMBIE): this.hp = 2; this.attack = 1; this.xpvalue = 1; break;
+            case(ENTITY_RED_ZOMBIE): this.hp = 10; this.attack = 5; this.xpvalue = 4; break;  
+            case(ENTITY_ELF): this.hp = 20; this.attack = 10; this.xpvalue = 8; break;
+            case(ENTITY_RED_ELF): this.hp = 30; this.attack = 15; this.xpvalue = 16; break;
+            case(ENTITY_BOSS): this.hp = 100; this.attack = 20; break;
         }
     }
 
@@ -34,9 +70,9 @@ class Entity {
         if(droppedAnthing) {
             let drop = Math.floor(Math.random() * 2);
             switch(drop) {
-                case(0): return 3; // dmg up
-                case(1): return 4; // hp up
-                default: return 0; // nada
+                case(0): return ENTITY_UPGRADE;
+                case(1): return ENTITY_FOOD;
+                default: return ENTITY_NOTHING;
             }
         } else {
             return 0;
@@ -44,7 +80,7 @@ class Entity {
     }
 
     kill() {
-        this.type = 0;
+        this.type = ENTITY_NOTHING;
     }
 }
 
@@ -54,7 +90,9 @@ class Room {
         this.x = x;
         this.y = y;
         this.height = height;
+        this.midHeight = Math.floor(height / 2);
         this.width = width;
+        this.midWidth = Math.floor(width / 2);
         this.walls = walls;
         this.id = id;
         this.tiles = [[0]];
@@ -84,7 +122,7 @@ let perqs = {
 };
 
 function resetGlobals() {
-    roomMap = Array(11).fill(null).map(e => Array(11).fill(0));
+    roomMap = Array(TILE_VISIBILITY).fill(null).map(e => Array(TILE_VISIBILITY).fill(0));
     roomMap[5][5] = 1;
     rooms = [new Room(0,0,0,0,{},0)];
     rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1}, 1));
@@ -100,6 +138,10 @@ function resetGlobals() {
 
 resetGlobals();
 
+function randomEnemy() {
+    return Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES
+}
+
 /** @param {Room} room
  * @returns {Entity[][]}   */
 function generateRoomEntities(room) {
@@ -107,16 +149,16 @@ function generateRoomEntities(room) {
     for(let i = 1; i < room.height - 1; i++) {
         m[i] = Array(room.width).fill(0);
         for(let j = 1; j < room.width - 1; j++) {
-            if( (i == Math.floor(room.height / 2) && j == 1) ||
-                (i == Math.floor(room.height / 2) && j == room.width - 2) ||
-                (i == 1 && j == Math.floor(room.width / 2)) ||
-                (i == room.height - 2 && j == Math.floor(room.width / 2))) {
+            if( (i == room.midHeight && j == 1) ||
+                (i == room.midHeight && j == room.width - 2) ||
+                (i == 1 && j == room.midWidth ||
+                (i == room.height - 2 && j == room.midWidth) {
                 //dont spawn enemy in front of door
                 m[i][j] = 0;
                 continue;
             }
             //should probably switch to perlin noise
-            m[i][j] = (Math.random() > 0.85) ? new Entity(1) : 0;
+            m[i][j] = (Math.random() > 0.85) ? randomEnemy() : 0;
         }
     }
     return m;
@@ -194,8 +236,8 @@ function createBossRoom(directionEntered, prevRoom) {
     roomMap[newY][newX] = id;
     newRoom.tiles = generateRoomTiles(newRoom, 1);
     newRoom.entities = Array(newRoom.height).fill(null).map(e => Array(newRoom.width).fill(0));
-    let boss = new Entity(2);
-    newRoom.entities[Math.floor(newRoom.height / 2)][Math.floor(newRoom.width / 2)] = boss;
+    let boss = new Entity(ENTITY_BOSS);
+    newRoom.entities[newRoom.midHeight][newRoom.midWidth] = boss;
     //@ts-ignore
     newRoom.boss = boss;
     rooms.push(newRoom);
@@ -254,7 +296,7 @@ function changeRoom(directionEntered, newRoom) {
 
 /** @returns {number} */
 function floorTile() {
-    return Math.floor(Math.random() * 4);
+    return Math.floor(Math.random() * NUMBER_OF_FLOOR_TILES);
 }
 
 /**
@@ -269,14 +311,14 @@ function generateRoomTiles(room, forceTile = false) {
 
     for(let i = 0; i < height; i++) {
         m[i] = Array(width);
-        m[i][0] = 8;
-        m[i][width - 1] = 9;
+        m[i][0] = TILE_WALL_LEFT;
+        m[i][width - 1] = TILE_WALL_RIGHT;
 
         for(let j = 1; j < width - 1; j++) {
             if(i == 0) {
-                m[i][j] = 6;
+                m[i][j] = TILE_WALL_TOP;
             } else if(i == height - 1) {
-                m[i][j] = 7;
+                m[i][j] = TILE_WALL_BOTTOM;
             } else {
                 m[i][j] = (forceTile ? forceTile : floorTile());
             }
@@ -284,24 +326,24 @@ function generateRoomTiles(room, forceTile = false) {
     }
 
     // put in doors
-    if(room.walls.left == 2) {
-        m[Math.floor(height / 2)][0] = 14;
+    if(room.walls.left == WALL_WITH_DOOR) {
+        m[room.midHeight][0] = TILE_DOOR_LEFT;
     }
-    if(room.walls.right == 2) {
-        m[Math.floor(height / 2)][width - 1] = 17;
+    if(room.walls.right == WALL_WITH_DOOR) {
+        m[room.midHeight][width - 1] = TILE_DOOR_RIGHT;
     }
-    if(room.walls.up == 2) {
-        m[0][Math.floor(width / 2)] = 15;
+    if(room.walls.up == WALL_WITH_DOOR) {
+        m[0][room.midWidth] = TILE_DOOR_TOP;
     }
-    if(room.walls.down == 2) {
-        m[height - 1][Math.floor(width / 2)] = 16;
+    if(room.walls.down == WALL_WITH_DOOR) {
+        m[height - 1][room.midWidth] = TILE_DOOR_BOTTOM;
     }
     
     // put in corners
-    m[0][0] = 10; 
-    m[0][width - 1] = 11;
-    m[height - 1][0] = 12;
-    m[height - 1][width - 1] = 13;
+    m[0][0] = TILE_WALL_CORNER_TOP_LEFT; 
+    m[0][width - 1] = TILE_WALL_CORNER_TOP_RIGHT;
+    m[height - 1][0] = TILE_WALL_CORNER_BOTTOM_LEFT;
+    m[height - 1][width - 1] = TILE_WALL_CORNER_BOTTOM_RIGHT;
 
     return m;
 }
@@ -313,17 +355,17 @@ function generateRoomTiles(room, forceTile = false) {
  * @returns {number[][]}
  */
 function getVisibleTiles(x, y, room) {
-    let x1 = Math.floor(x - (TILE_VISIBILITY / 2)) + 1;
-    let x2 = Math.floor(x + (TILE_VISIBILITY / 2)) + 1;
-    let y1 = Math.floor(y - (TILE_VISIBILITY / 2)) + 1;
-    let y2 = Math.floor(y + (TILE_VISIBILITY / 2)) + 1;
+    let x1 = Math.ceil(x - (TILE_VISIBILITY / 2));
+    let x2 = Math.ceil(x + (TILE_VISIBILITY / 2));
+    let y1 = Math.ceil(y - (TILE_VISIBILITY / 2));
+    let y2 = Math.ceil(y + (TILE_VISIBILITY / 2));
     let t = [];
 
     for(let i = y1; i < y2; i++) {
         t.push([]);
         for(let j = x1; j < x2; j++) {
             if(i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
-                t[i - y1].push(5);
+                t[i - y1].push(TILE_NOTHINGNESS);
                 continue;
             }
             t[i - y1].push(room.tiles[i][j]);
@@ -340,17 +382,17 @@ function getVisibleTiles(x, y, room) {
  * @returns {number[][]}
  */
 function getVisibleEntities(x, y, room) {
-    let x1 = Math.floor(x - (TILE_VISIBILITY / 2)) + 1;
-    let x2 = Math.floor(x + (TILE_VISIBILITY / 2)) + 1;
-    let y1 = Math.floor(y - (TILE_VISIBILITY / 2)) + 1;
-    let y2 = Math.floor(y + (TILE_VISIBILITY / 2)) + 1;
+    let x1 = Math.ceil(x - (TILE_VISIBILITY / 2));
+    let x2 = Math.ceil(x + (TILE_VISIBILITY / 2));
+    let y1 = Math.ceil(y - (TILE_VISIBILITY / 2));
+    let y2 = Math.ceil(y + (TILE_VISIBILITY / 2));
     let t = [];
 
     for(let i = y1; i < y2; i++) {
         t.push([]);
         for(let j = x1; j < x2; j++) {
             if(i < 0 || j < 0 || i > room.height - 1 || j > room.width - 1) {
-                t[i - y1].push(0);
+                t[i - y1].push(ENTITY_NOTHING);
                 continue;
             }
             t[i - y1].push(room.entities[i][j]);
@@ -366,7 +408,7 @@ function getVisibleEntities(x, y, room) {
 
 function EntityCell(props) {
     let e = props.entity;
-    if(e == 0 || e.type == 0) {
+    if(e == ENTITY_NOTHING || e.type == ENTITY_NOTHING) {
         return <div className="entity entity-0"></div>;
     } else {
         return <div className={"entity entity-" + e.type + " facing-" + e.facing}></div>;
@@ -375,7 +417,7 @@ function EntityCell(props) {
 
 function EntityRow(props) {
     let entityCells = props.entities.map((e, j) => {
-        return <EntityCell key={`${props.i}${j}`} entity={e ? e : 0 } />; 
+        return <EntityCell key={`${props.i}${j}`} entity={e ? e : ENTITY_NOTHING } />; 
     });
     return(
         <div className="entity-row">
@@ -541,13 +583,13 @@ class App extends React.Component {
             this.setState({
                 tiles: getVisibleTiles(1, 5, rooms[1]),
                 entities: getVisibleEntities(1, 5, rooms[1])
-            })
+            });
         }
 
         this.perqOff = (perq) => {
             this.setState({
                 perqTime: false,
-            })
+            });
             perqs[perq]++;
         }
     }
@@ -624,14 +666,17 @@ class App extends React.Component {
         spawnPlayerNotification("WEAPON UP");
     }
 
+    /** @param {string} direction
+     *  @param {Room} newRoom
+     */
     animateRoomChange(direction, newRoom) {
         let newX;
         let newY;
         switch(direction) {
-            case("left"): newX = newRoom.width - 2; newY = Math.floor(newRoom.height / 2); break;
-            case("right"): newX = 1; newY = Math.floor(newRoom.height / 2); break;
-            case("up"): newX = Math.floor(newRoom.width / 2); newY = newRoom.height - 2; break;
-            case("down"): newX = Math.floor(newRoom.width / 2); newY = 1; break;
+            case("left"): newX = newRoom.width - 2; newY = newRoom.midHeight; break;
+            case("right"): newX = 1; newY = newRoom.midHeight; break;
+            case("up"): newX = newRoom.midWidth; newY = newRoom.height - 2; break;
+            case("down"): newX = newRoom.midWidth; newY = 1; break;
         }       
         this.setState(prevState => { return {
             tiles: getVisibleTiles(newX, newY, newRoom),
@@ -718,19 +763,29 @@ class App extends React.Component {
         let room = rooms[currentRoomId];
         let tile = room.tiles[y][x];
         let entity = room.entities[y][x];
-        if(tile == 6 || tile == 7 || tile == 8 || tile == 9){
+        if( tile == TILE_WALL_TOP    || 
+            tile == TILE_WALL_BOTTOM || 
+            tile == TILE_WALL_RIGHT  || 
+            tile == TILE_WALL_LEFT) {
             return "wall";
         }
-        if(tile == 14 || tile == 15 || tile == 16 || tile == 17) {
+        if( tile == TILE_DOOR_TOP    || 
+            tile == TILE_DOOR_BOTTOM || 
+            tile == TILE_DOOR_RIGHT  || 
+            tile == TILE_DOOR_LEFT) {
             return "door";
         }
-        if(entity.type == 3) {
+        if(entity.type == ENTITY_UPGRADE) {
             return "upgrade";
         }
-        if(entity.type == 4) {
+        if(entity.type == ENTITY_FOOD) {
             return "food";
         }
-        if(entity.type == 1 || entity.type == 2) {
+        if( entity.type == ENTITY_ZOMBIE || 
+            entity.type == ENTITY_RED_ZOMBIE ||
+            entity.type == ENTITY_ELF ||
+            entity.type == ENTITY_RED_ELF ||
+            entity.type == ENTITY_BOSS) {
             return "enemy";
         }
         return false;
