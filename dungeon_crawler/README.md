@@ -1,11 +1,8 @@
-# Blank application template
+# Dungeon Crawler
 
-For my react apps made locally but intended to be pasted into a codepen after development.
+I went a little too ham on this freeCodeCamp project. 
+But I'm happy with how it turned out. Beware the red cat.
 
-## How to use
+https://codepen.io/errpr/pen/EQONWP
 
-1. Copy into blank folder
-1. Change app name in `package.json`
-1. Run `yarn install`
-1. Change description, author, and title in `src/index.html`
-1. Run `ruby build_watcher.rb` and start development!
+https://error.diodeware.com/fcc/dungeon_crawler/index.html
