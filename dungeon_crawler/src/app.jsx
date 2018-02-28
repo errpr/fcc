@@ -4,6 +4,10 @@ const TRANSITION_SPEED = 180;
 
 const PERQ_FREQUENCY = 3;
 
+const TOTAL_ROOMS_TALL = 30;
+const TOTAL_ROOMS_WIDE = 30;
+const MIN_ROOM_SIZE = 8;
+
 const NUMBER_OF_FLOOR_TILES = 4;
 const NUMBER_OF_ITEM_DROP_ENTITIES = 3;
 const NUMBER_OF_ENEMY_ENTITIES = 4; // not including boss
@@ -47,12 +51,13 @@ class Entity {
         this.hp = 0;
         this.attack = 0;
         this.xpvalue = 0;
+        this.notification = "";
         switch(t) {
-            case(ENTITY_ZOMBIE): this.hp = 2; this.attack = 1; this.xpvalue = 1; break;
-            case(ENTITY_RED_ZOMBIE): this.hp = 10; this.attack = 4; this.xpvalue = 3; break;  
-            case(ENTITY_ELF): this.hp = 20; this.attack = 10; this.xpvalue = 8; break;
-            case(ENTITY_RED_ELF): this.hp = 30; this.attack = 15; this.xpvalue = 16; break;
-            case(ENTITY_BOSS): this.hp = 100; this.attack = 20; break;
+            case(ENTITY_ZOMBIE):     this.hp = 2;   this.attack = 1;  this.xpvalue = 1; break;
+            case(ENTITY_RED_ZOMBIE): this.hp = 6;  this.attack = 3;  this.xpvalue = 2; break;  
+            case(ENTITY_ELF):        this.hp = 20;  this.attack = 6; this.xpvalue = 5; break;
+            case(ENTITY_RED_ELF):    this.hp = 40;  this.attack = 12; this.xpvalue = 12; break;
+            case(ENTITY_BOSS):       this.hp = 200; this.attack = 20; break;
         }
     }
 
@@ -67,13 +72,17 @@ class Entity {
     }
 
     spawnLoot() {
-        let baseChance = 0.15
-        let droppedAnthing = (Math.random() < (baseChance + (perqs.greed / 10)));
-        if(droppedAnthing) {
-            let drop = Math.floor(Math.random() * 2);
+        let baseChance = 0.21
+        let droppedAnything = (Math.random() < (baseChance + (perqs.greed / 10)));
+        if(droppedAnything) {
+            let drop = Math.floor(Math.random() * 6);
             switch(drop) {
                 case(0): return ENTITY_UPGRADE;
                 case(1): return ENTITY_FOOD;
+                case(2): return ENTITY_FOOD;
+                case(3): return ENTITY_FOOD;
+                case(4): return ENTITY_FOOD;
+                case(5): return ENTITY_FOOD;
                 default: return ENTITY_NOTHING;
             }
         } else {
@@ -97,28 +106,11 @@ class Room {
         this.midWidth = Math.floor(width / 2);
         this.walls = walls;
         this.id = id;
+        this.enemyPool = [0];
         this.tiles = [[0]];
         this.entities = [[]];
         this.boss = boss;
     }
-}
-
-function spawnPlayerNotification(text) {
-    let p = document.createElement("p");
-    p.innerText = text;
-    p.classList.add("floating-notification");
-    document.getElementById("player-notifications-container").appendChild(p);
-    setTimeout(()=>{ p.classList.add("float-out-animation") }, 100);
-    setTimeout(()=>{ p.remove() }, 1100);
-}
-
-function spawnDamageNotification(text) {
-    let p = document.createElement("p");
-    p.innerText = text;
-    p.classList.add("floating-damage");
-    document.getElementById("player-notifications-container").appendChild(p);
-    setTimeout(()=>{ p.classList.add("float-out-damage") }, 100);
-    setTimeout(()=>{ p.remove() }, 1100);
 }
 
 /** @type {number[][]} */ 
@@ -134,10 +126,11 @@ let perqs = {
 let bossSpawned;
 
 function resetGlobals() {
-    roomMap = Array(TILE_VISIBILITY).fill(null).map(e => Array(TILE_VISIBILITY).fill(0));
-    roomMap[5][5] = 1;
+    roomMap = Array(TOTAL_ROOMS_TALL).fill(null).map(e => Array(TOTAL_ROOMS_WIDE).fill(0));
+    roomMap[Math.floor(TOTAL_ROOMS_TALL / 2)][Math.floor(TOTAL_ROOMS_WIDE / 2)] = 1;
     rooms = [new Room(0,0,0,0,{},0)];
-    rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1}, 1));
+    rooms.push(new Room(Math.floor(TOTAL_ROOMS_TALL / 2), Math.floor(TOTAL_ROOMS_WIDE / 2), 10, 10, { right: 2, left: 1, up: 1, down: 1}, 1));
+    rooms[1].enemyPool = generateRoomEnemyPool(1);
     rooms[1].tiles = generateRoomTiles(rooms[1]);
     rooms[1].entities = generateRoomEntities(rooms[1]);
     currentRoomId = 1;
@@ -151,9 +144,85 @@ function resetGlobals() {
 
 resetGlobals();
 
-function randomEnemy() {
-    let value = Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES;
-    return new Entity(value);
+
+function spawnPlayerNotification(text) {
+    let p = document.createElement("p");
+    p.innerText = text;
+    p.classList.add("floating-notification");
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(()=>{ p.classList.add("float-out-animation") }, 100);
+    setTimeout(()=>{ p.remove() }, 1100);
+}
+
+function spawnEntityNotification(direction, text) {
+    let p = document.createElement("p");
+    p.innerText = text;
+
+    p.classList.add("entity-notification");
+    p.classList.add("note-" + direction);
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(()=>{ p.classList.add("float-down") }, 100);
+    setTimeout(()=>{ p.remove() }, 1100);
+}
+
+function spawnDamageNotification(text) {
+    let p = document.createElement("p");
+    p.innerText = text;
+    p.classList.add("floating-damage");
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(()=>{ p.classList.add("float-out-damage") }, 100);
+    setTimeout(()=>{ p.remove() }, 1100);
+}
+
+function generateRoomEnemyPool(roomId) {
+    let intensity = Math.floor(roomId / 4) + NUMBER_OF_ITEM_DROP_ENTITIES;
+    let enemies = [];
+
+    if(intensity < NUMBER_OF_ITEM_DROP_ENTITIES) {
+        intensity = NUMBER_OF_ITEM_DROP_ENTITIES;
+    }
+
+    if(intensity >= ENTITY_BOSS) {
+        intensity = ENTITY_BOSS - 1;
+    }
+
+    let lowest_enemy = intensity - 2;
+    let low_enemy = intensity - 1;
+    let avg_enemy = intensity;
+    let high_enemy = intensity + 1;
+    let highest_enemy = intensity + 2;
+    if(lowest_enemy >= NUMBER_OF_ITEM_DROP_ENTITIES) {
+        enemies.push(lowest_enemy);
+        enemies.push(lowest_enemy);
+    }
+    if(low_enemy >= NUMBER_OF_ITEM_DROP_ENTITIES) {
+        enemies.push(low_enemy);
+        enemies.push(low_enemy);
+        enemies.push(low_enemy);
+    }
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    if(high_enemy < ENTITY_BOSS) {
+        enemies.push(high_enemy);
+        enemies.push(high_enemy);
+    }
+    if(highest_enemy < ENTITY_BOSS) {
+        enemies.push(highest_enemy);
+    }
+    return enemies;
+}
+
+function randomEnemy(room) {
+    let enemies = room.enemyPool;
+    for (let i = enemies.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [enemies[i], enemies[j]] = [enemies[j], enemies[i]];
+    }
+    return new Entity(enemies[0]);
 }
 
 /** @param {Room} room
@@ -166,14 +235,14 @@ function generateRoomEntities(room) {
             if( (i == room.midHeight && j == 1) ||
                 (i == room.midHeight && j == room.width - 2) ||
                 (i == 1 && j == room.midWidth) ||
-                (i == room.height - 2 && j == room.midWidth) ){
+                (i == room.height - 2 && j == room.midWidth) ) {
                 //dont spawn enemy in front of door
                 m[i][j] = 0;
                 continue;
             }
             //should probably switch to perlin noise
-            if(Math.random() > 0.85) {
-                m[i][j] = randomEnemy();
+            if(Math.random() > 0.82) {
+                m[i][j] = randomEnemy(room);
             } else {
                 m[i][j] = new Entity(0);
             }
@@ -204,29 +273,40 @@ function matchNeighboringDoors(x, y, walls) {
     return w;
 }
 
-// this algorithm is borked and spawns too many doors, but my brain is tired
-// also shouldn't spawn doors that lead to existing rooms
-function createAdditionalDoors(walls) {
-    let doorsToPlace = 2 + Math.floor(Math.random() * 2);
-    let w = ["left", "right", "up", "down"];
-    for (let i = w.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [w[i], w[j]] = [w[j], w[i]];
+function randomizeWalls() {
+    let w = ["left","up","right","down"];
+    let sorter = (a, b) => { return (Math.random() > 0.5 ? 1 : -1); };
+    w.sort(sorter);
+    w.sort(sorter);
+    return w;
+}
+
+function wallNeighborExists(direction, x, y) {
+    switch(direction) {
+        case("left"):  return (roomMap[y][x - 1] != undefined && roomMap[y][x - 1] > 0);
+        case("up"):    return (roomMap[y][x - 1] != undefined && roomMap[y - 1][x] > 0);
+        case("right"): return (roomMap[y][x - 1] != undefined && roomMap[y][x + 1] > 0);
+        case("down"):  return (roomMap[y][x - 1] != undefined && roomMap[y + 1][x] > 0);
     }
-    let i = 0;
-    while(doorsToPlace > 0) {
-        let wallToCheck = walls[w[i]];
-        if(wallToCheck == 2) {
-            doorsToPlace--;
+}
+
+function createAdditionalDoors(walls, roomx, roomy) {
+    let total_doors = walls.left + walls.right + walls.up + walls.down - 4;
+    if(total_doors >= 4) { return walls; } // already maxed on doors
+    let doorsToAdd = 4 - total_doors - Math.floor(Math.random() * 2);
+    if(doorsToAdd == 0) {
+        doorsToAdd = 1;
+    }
+    let w = randomizeWalls();
+    for(let i = 0; doorsToAdd > 0; i++) {
+        if(wallNeighborExists(w[i], roomx, roomy)) {
+            // dont spawn a door here because we would already
+            // have a door if there was one to connect to
+            continue;
         } else {
             walls[w[i]] = 2;
-            doorsToPlace--;
+            doorsToAdd--;
         }
-        if(i > 4) {
-            console.log("Somethings wrong with door placement.");
-            break;
-        }
-        i++;
     }
     return walls;
 }
@@ -247,8 +327,8 @@ function createBossRoom(directionEntered, prevRoom) {
     let id = rooms.length;
     let newRoom = new Room( newX,
                             newY,
-                            Math.floor(Math.random() * 10) + 6, 
-                            Math.floor(Math.random() * 10) + 6,
+                            7, 
+                            7,
                             walls,
                             id,
                             true );
@@ -276,16 +356,17 @@ function createRoom(directionEntered, prevRoom) {
 
     walls = matchNeighboringDoors(newX, newY, walls);
 
-    walls = createAdditionalDoors(walls);
+    walls = createAdditionalDoors(walls, newX, newY);
 
     let id = rooms.length;
     let newRoom = new Room( newX,
                             newY,
-                            Math.floor(Math.random() * 10) + 6, 
-                            Math.floor(Math.random() * 10) + 6,
+                            Math.floor(Math.random() * 10) + MIN_ROOM_SIZE, 
+                            Math.floor(Math.random() * 10) + MIN_ROOM_SIZE,
                             walls,
                             id );
     roomMap[newY][newX] = id;
+    newRoom.enemyPool = generateRoomEnemyPool(id);
     newRoom.tiles = generateRoomTiles(newRoom);
     newRoom.entities = generateRoomEntities(newRoom);
     rooms.push(newRoom);
@@ -422,6 +503,27 @@ function getVisibleEntities(x, y, room) {
     return t;
 }
 
+function getVisibleRooms(x, y) {
+    let x1 = x - 2;
+    let x2 = x + 3;
+    let y1 = y - 2;
+    let y2 = y + 3;
+    let t = [];
+
+    for(let i = y1; i < y2; i++) {
+        t.push([]);
+        for(let j = x1; j < x2; j++) {
+            if(i < 0 || j < 0 || i > TOTAL_ROOMS_TALL - 1 || j > TOTAL_ROOMS_WIDE - 1) {
+                t[i - y1].push(0);
+                continue;
+            }
+            t[i - y1].push(roomMap[i][j]);
+        }
+    }
+    
+    return t;
+}
+
 /*
     Begin React stuff 
 */
@@ -431,7 +533,15 @@ function EntityCell(props) {
     if(e == ENTITY_NOTHING || e.type == ENTITY_NOTHING) {
         return <div className="entity entity-0"></div>;
     } else {
-        return <div className={"entity entity-" + e.type + " facing-" + e.facing}></div>;
+        let note = <p className="entity-notification"></p>;
+        if(props.entity.notification && props.entity.notification !== "") {
+            note = <p className="entity-notification float-down">{props.entity.notification}</p>;
+        }
+        return(
+            <div className={"entity entity-" + e.type + " facing-" + e.facing}>
+                {note}
+            </div>
+        );
     }
 }
 
@@ -555,6 +665,43 @@ function PerqInterface(props) {
         </div>);
 }
 
+function MiniMapRoom(props) {
+    if(props.room == 0) {
+        return <div className="minimap-cell empty-cell"></div>
+    }
+    let room = rooms[props.room];
+    
+    return(
+        <div className="minimap-cell">
+            <div className={"minimap-door minimap-door-up" + (room.walls.up == 2 ? " door-exists" : "")}></div>
+            <div className={"minimap-door minimap-door-down" + (room.walls.down == 2 ? " door-exists" : "")}></div>
+            <div className={"minimap-door minimap-door-left" + (room.walls.left == 2 ? " door-exists" : "")}></div>
+            <div className={"minimap-door minimap-door-right" + (room.walls.right == 2 ? " door-exists" : "")}></div>
+            <div className={"minimap-room" + (room.boss ? " boss-room" : "")}></div>
+        </div>
+    );
+}
+
+function MiniMapRow(props) {
+    let minimapRooms = props.rooms.map(e => { return <MiniMapRoom room={e} />; });
+    return(
+        <div className="minimap-row">
+            {minimapRooms}
+        </div>
+    );
+}
+
+function MiniMapGrid(props) {
+    let minimapRows = props.rooms.map(e => { return <MiniMapRow rooms={e} /> ;});
+    return(
+        <div id="minimap-viewport">
+            <div id="minimap-grid">
+                {minimapRows}
+            </div>
+        </div>
+    );
+}
+
 const defaultAppState = {
     player: {
         x: 1,
@@ -570,6 +717,7 @@ const defaultAppState = {
     facing: 'l',
     tiles: [[]],
     entities: [[]],
+    rooms: [[]],
     boss: false,
     perqTime: false,
 };
@@ -632,7 +780,7 @@ class App extends React.Component {
         if(amount <= 0) {
             amount = 1;
         }
-        spawnDamageNotification("-" + amount + " HP");
+        spawnDamageNotification("-" + amount);
         let nextHp = this.state.player.hp - amount;
         if(nextHp <= 0) {
             this.playerDeath();
@@ -646,13 +794,13 @@ class App extends React.Component {
     }
 
 
-    gainXp() {
+    gainXp(xpValue) {
         let p = this.state.player;
-        p.xptnl--;
+        p.xptnl = p.xptnl - xpValue;
         if(p.xptnl <= 0) {
             p.level = p.level + 1;
-            p.xptnl = Math.round(Math.log(p.level) * 5);
-            p.hp = p.hp + 3;
+            p.xptnl = 3 + p.level;
+            p.hp = p.hp + 3 + perqs.carbs;
             p.weaponDamage = p.weaponDamage + 1;
             spawnPlayerNotification("LEVEL UP");
             if(p.level % PERQ_FREQUENCY == 0) {
@@ -663,13 +811,14 @@ class App extends React.Component {
     }
 
     /** @param {Entity} enemyEntity */
-    fightEnemy(enemyEntity) {
-        let slain = enemyEntity.takeDamage(this.state.player.weaponDamage);
+    fightEnemy(enemyEntity, direction) {
+        let xp = enemyEntity.takeDamage(this.state.player.weaponDamage);
+        spawnEntityNotification(direction, this.state.player.weaponDamage);
         if(enemyEntity.type == ENTITY_BOSS) {
             this.setState({ boss: enemyEntity });
         }
-        if(slain) {
-            this.gainXp();
+        if(xp) {
+            this.gainXp(xp);
         }
         this.takeDamage(enemyEntity.attack);
     }
@@ -703,6 +852,7 @@ class App extends React.Component {
         this.setState(prevState => { return {
             tiles: getVisibleTiles(newX, newY, newRoom),
             entities: getVisibleEntities(newX, newY, newRoom),
+            rooms: getVisibleRooms(newRoom.x, newRoom.y),
             player: { ...prevState.player, x: newX, y: newY },
             boss: newRoom.boss,
         }});
@@ -733,7 +883,7 @@ class App extends React.Component {
      *  @param {number} y */
     interact(type, x, y, direction) {
         switch(type) {
-            case("enemy"): this.fightEnemy(rooms[currentRoomId].entities[y][x]); break;
+            case("enemy"): this.fightEnemy(rooms[currentRoomId].entities[y][x], direction); break;
             case("door"): this.enterDoor(direction); break;
             case("upgrade"): this.consumeUpgrade(rooms[currentRoomId].entities[y][x]); break;
             case("food"): this.consumeFood(rooms[currentRoomId].entities[y][x]); break;
@@ -819,8 +969,11 @@ class App extends React.Component {
     }
 
     componentWillMount() {
-        this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y, rooms[currentRoomId]),
-                        entities: getVisibleEntities(this.state.player.x, this.state.player.y, rooms[currentRoomId]) });
+        let p = this.state.player;
+        let r = rooms[currentRoomId];
+        this.setState({ tiles: getVisibleTiles(p.x, p.y, r),
+                        entities: getVisibleEntities(p.x, p.y, r),
+                        rooms: getVisibleRooms(r.x, r.y) });
         this.registerKeys();
     }
     
@@ -834,6 +987,7 @@ class App extends React.Component {
                     <div id="player-notifications-container"></div>
                     <TileGrid tiles={this.state.tiles} />
                     <EntityGrid entities={this.state.entities} />
+                    <MiniMapGrid rooms={this.state.rooms} />
                     <div id="lighting-gradient-horizontal"></div>
                     <div id="lighting-gradient-vertical"></div>
                     <PerqInterface visible={this.state.perqTime} choiceHandler={this.perqOff} />

@@ -16,6 +16,10 @@ var TRANSITION_SPEED = 180;
 
 var PERQ_FREQUENCY = 3;
 
+var TOTAL_ROOMS_TALL = 30;
+var TOTAL_ROOMS_WIDE = 30;
+var MIN_ROOM_SIZE = 8;
+
 var NUMBER_OF_FLOOR_TILES = 4;
 var NUMBER_OF_ITEM_DROP_ENTITIES = 3;
 var NUMBER_OF_ENEMY_ENTITIES = 4; // not including boss
@@ -61,17 +65,18 @@ var Entity = function () {
         this.hp = 0;
         this.attack = 0;
         this.xpvalue = 0;
+        this.notification = "";
         switch (t) {
             case ENTITY_ZOMBIE:
                 this.hp = 2;this.attack = 1;this.xpvalue = 1;break;
             case ENTITY_RED_ZOMBIE:
-                this.hp = 10;this.attack = 5;this.xpvalue = 4;break;
+                this.hp = 6;this.attack = 3;this.xpvalue = 2;break;
             case ENTITY_ELF:
-                this.hp = 20;this.attack = 10;this.xpvalue = 8;break;
+                this.hp = 20;this.attack = 6;this.xpvalue = 5;break;
             case ENTITY_RED_ELF:
-                this.hp = 30;this.attack = 15;this.xpvalue = 16;break;
+                this.hp = 40;this.attack = 12;this.xpvalue = 12;break;
             case ENTITY_BOSS:
-                this.hp = 100;this.attack = 20;break;
+                this.hp = 200;this.attack = 20;break;
         }
     }
 
@@ -91,14 +96,22 @@ var Entity = function () {
     }, {
         key: 'spawnLoot',
         value: function spawnLoot() {
-            var baseChance = 0.15;
-            var droppedAnthing = Math.random() < baseChance + perqs.greed / 10;
-            if (droppedAnthing) {
-                var drop = Math.floor(Math.random() * 2);
+            var baseChance = 0.21;
+            var droppedAnything = Math.random() < baseChance + perqs.greed / 10;
+            if (droppedAnything) {
+                var drop = Math.floor(Math.random() * 6);
                 switch (drop) {
                     case 0:
                         return ENTITY_UPGRADE;
                     case 1:
+                        return ENTITY_FOOD;
+                    case 2:
+                        return ENTITY_FOOD;
+                    case 3:
+                        return ENTITY_FOOD;
+                    case 4:
+                        return ENTITY_FOOD;
+                    case 5:
                         return ENTITY_FOOD;
                     default:
                         return ENTITY_NOTHING;
@@ -134,10 +147,46 @@ var Room = function Room(x, y, height, width, walls) {
     this.midWidth = Math.floor(width / 2);
     this.walls = walls;
     this.id = id;
+    this.enemyPool = [0];
     this.tiles = [[0]];
     this.entities = [[]];
     this.boss = boss;
 };
+
+/** @type {number[][]} */
+
+
+var roomMap = void 0;
+/** @type {Room[]} */
+var rooms = void 0;
+var currentRoomId = 1;
+var perqs = {
+    carbs: 0,
+    greed: 0,
+    armor: 0
+};
+var bossSpawned = void 0;
+
+function resetGlobals() {
+    roomMap = Array(TOTAL_ROOMS_TALL).fill(null).map(function (e) {
+        return Array(TOTAL_ROOMS_WIDE).fill(0);
+    });
+    roomMap[Math.floor(TOTAL_ROOMS_TALL / 2)][Math.floor(TOTAL_ROOMS_WIDE / 2)] = 1;
+    rooms = [new Room(0, 0, 0, 0, {}, 0)];
+    rooms.push(new Room(Math.floor(TOTAL_ROOMS_TALL / 2), Math.floor(TOTAL_ROOMS_WIDE / 2), 10, 10, { right: 2, left: 1, up: 1, down: 1 }, 1));
+    rooms[1].enemyPool = generateRoomEnemyPool(1);
+    rooms[1].tiles = generateRoomTiles(rooms[1]);
+    rooms[1].entities = generateRoomEntities(rooms[1]);
+    currentRoomId = 1;
+    perqs = {
+        carbs: 0,
+        greed: 0,
+        armor: 0
+    };
+    bossSpawned = false;
+}
+
+resetGlobals();
 
 function spawnPlayerNotification(text) {
     var p = document.createElement("p");
@@ -146,6 +195,21 @@ function spawnPlayerNotification(text) {
     document.getElementById("player-notifications-container").appendChild(p);
     setTimeout(function () {
         p.classList.add("float-out-animation");
+    }, 100);
+    setTimeout(function () {
+        p.remove();
+    }, 1100);
+}
+
+function spawnEntityNotification(direction, text) {
+    var p = document.createElement("p");
+    p.innerText = text;
+
+    p.classList.add("entity-notification");
+    p.classList.add("note-" + direction);
+    document.getElementById("player-notifications-container").appendChild(p);
+    setTimeout(function () {
+        p.classList.add("float-down");
     }, 100);
     setTimeout(function () {
         p.remove();
@@ -165,41 +229,57 @@ function spawnDamageNotification(text) {
     }, 1100);
 }
 
-/** @type {number[][]} */
-var roomMap = void 0;
-/** @type {Room[]} */
-var rooms = void 0;
-var currentRoomId = 1;
-var perqs = {
-    carbs: 0,
-    greed: 0,
-    armor: 0
-};
-var bossSpawned = void 0;
+function generateRoomEnemyPool(roomId) {
+    var intensity = Math.floor(roomId / 4) + NUMBER_OF_ITEM_DROP_ENTITIES;
+    var enemies = [];
 
-function resetGlobals() {
-    roomMap = Array(TILE_VISIBILITY).fill(null).map(function (e) {
-        return Array(TILE_VISIBILITY).fill(0);
-    });
-    roomMap[5][5] = 1;
-    rooms = [new Room(0, 0, 0, 0, {}, 0)];
-    rooms.push(new Room(5, 5, 10, 10, { right: 2, left: 1, up: 1, down: 1 }, 1));
-    rooms[1].tiles = generateRoomTiles(rooms[1]);
-    rooms[1].entities = generateRoomEntities(rooms[1]);
-    currentRoomId = 1;
-    perqs = {
-        carbs: 0,
-        greed: 0,
-        armor: 0
-    };
-    bossSpawned = false;
+    if (intensity < NUMBER_OF_ITEM_DROP_ENTITIES) {
+        intensity = NUMBER_OF_ITEM_DROP_ENTITIES;
+    }
+
+    if (intensity >= ENTITY_BOSS) {
+        intensity = ENTITY_BOSS - 1;
+    }
+
+    var lowest_enemy = intensity - 2;
+    var low_enemy = intensity - 1;
+    var avg_enemy = intensity;
+    var high_enemy = intensity + 1;
+    var highest_enemy = intensity + 2;
+    if (lowest_enemy >= NUMBER_OF_ITEM_DROP_ENTITIES) {
+        enemies.push(lowest_enemy);
+        enemies.push(lowest_enemy);
+    }
+    if (low_enemy >= NUMBER_OF_ITEM_DROP_ENTITIES) {
+        enemies.push(low_enemy);
+        enemies.push(low_enemy);
+        enemies.push(low_enemy);
+    }
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    enemies.push(avg_enemy);
+    if (high_enemy < ENTITY_BOSS) {
+        enemies.push(high_enemy);
+        enemies.push(high_enemy);
+    }
+    if (highest_enemy < ENTITY_BOSS) {
+        enemies.push(highest_enemy);
+    }
+    return enemies;
 }
 
-resetGlobals();
-
-function randomEnemy() {
-    var value = Math.floor(Math.random() * NUMBER_OF_ENEMY_ENTITIES) + NUMBER_OF_ITEM_DROP_ENTITIES;
-    return new Entity(value);
+function randomEnemy(room) {
+    var enemies = room.enemyPool;
+    for (var i = enemies.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var _ref = [enemies[j], enemies[i]];
+        enemies[i] = _ref[0];
+        enemies[j] = _ref[1];
+    }
+    return new Entity(enemies[0]);
 }
 
 /** @param {Room} room
@@ -215,8 +295,8 @@ function generateRoomEntities(room) {
                 continue;
             }
             //should probably switch to perlin noise
-            if (Math.random() > 0.85) {
-                m[i][j] = randomEnemy();
+            if (Math.random() > 0.82) {
+                m[i][j] = randomEnemy(room);
             } else {
                 m[i][j] = new Entity(0);
             }
@@ -247,30 +327,48 @@ function matchNeighboringDoors(x, y, walls) {
     return w;
 }
 
-// this algorithm is borked and spawns too many doors, but my brain is tired
-function createAdditionalDoors(walls) {
-    var doorsToPlace = 2 + Math.floor(Math.random() * 2);
-    var w = ["left", "right", "up", "down"];
-    for (var _i = w.length - 1; _i > 0; _i--) {
-        var j = Math.floor(Math.random() * (_i + 1));
-        var _ref = [w[j], w[_i]];
-        w[_i] = _ref[0];
-        w[j] = _ref[1];
+function randomizeWalls() {
+    var w = ["left", "up", "right", "down"];
+    var sorter = function sorter(a, b) {
+        return Math.random() > 0.5 ? 1 : -1;
+    };
+    w.sort(sorter);
+    w.sort(sorter);
+    return w;
+}
+
+function wallNeighborExists(direction, x, y) {
+    switch (direction) {
+        case "left":
+            return roomMap[y][x - 1] != undefined && roomMap[y][x - 1] > 0;
+        case "up":
+            return roomMap[y][x - 1] != undefined && roomMap[y - 1][x] > 0;
+        case "right":
+            return roomMap[y][x - 1] != undefined && roomMap[y][x + 1] > 0;
+        case "down":
+            return roomMap[y][x - 1] != undefined && roomMap[y + 1][x] > 0;
     }
-    var i = 0;
-    while (doorsToPlace > 0) {
-        var wallToCheck = walls[w[i]];
-        if (wallToCheck == 2) {
-            doorsToPlace--;
+}
+
+function createAdditionalDoors(walls, roomx, roomy) {
+    var total_doors = walls.left + walls.right + walls.up + walls.down - 4;
+    if (total_doors >= 4) {
+        return walls;
+    } // already maxed on doors
+    var doorsToAdd = 4 - total_doors - Math.floor(Math.random() * 2);
+    if (doorsToAdd == 0) {
+        doorsToAdd = 1;
+    }
+    var w = randomizeWalls();
+    for (var i = 0; doorsToAdd > 0; i++) {
+        if (wallNeighborExists(w[i], roomx, roomy)) {
+            // dont spawn a door here because we would already
+            // have a door if there was one to connect to
+            continue;
         } else {
             walls[w[i]] = 2;
-            doorsToPlace--;
+            doorsToAdd--;
         }
-        if (i > 4) {
-            console.log("Somethings wrong with door placement.");
-            break;
-        }
-        i++;
     }
     return walls;
 }
@@ -293,7 +391,7 @@ function createBossRoom(directionEntered, prevRoom) {
     walls = matchNeighboringDoors(newX, newY, walls);
 
     var id = rooms.length;
-    var newRoom = new Room(newX, newY, Math.floor(Math.random() * 10) + 6, Math.floor(Math.random() * 10) + 6, walls, id, true);
+    var newRoom = new Room(newX, newY, 7, 7, walls, id, true);
     roomMap[newY][newX] = id;
     newRoom.tiles = generateRoomTiles(newRoom, 1);
     newRoom.entities = Array(newRoom.height).fill(null).map(function (e) {
@@ -324,11 +422,12 @@ function createRoom(directionEntered, prevRoom) {
 
     walls = matchNeighboringDoors(newX, newY, walls);
 
-    walls = createAdditionalDoors(walls);
+    walls = createAdditionalDoors(walls, newX, newY);
 
     var id = rooms.length;
-    var newRoom = new Room(newX, newY, Math.floor(Math.random() * 10) + 6, Math.floor(Math.random() * 10) + 6, walls, id);
+    var newRoom = new Room(newX, newY, Math.floor(Math.random() * 10) + MIN_ROOM_SIZE, Math.floor(Math.random() * 10) + MIN_ROOM_SIZE, walls, id);
     roomMap[newY][newX] = id;
+    newRoom.enemyPool = generateRoomEnemyPool(id);
     newRoom.tiles = generateRoomTiles(newRoom);
     newRoom.entities = generateRoomEntities(newRoom);
     rooms.push(newRoom);
@@ -342,6 +441,7 @@ function enterNewDoor(directionEntered, prevRoom) {
     if (!bossSpawned && Math.floor(Math.random() * currentRoomId) > 4) {
         // create boss room
         newRoom = createBossRoom(directionEntered, prevRoom);
+        bossSpawned = true;
     } else {
         newRoom = createRoom(directionEntered, prevRoom);
     }
@@ -465,6 +565,27 @@ function getVisibleEntities(x, y, room) {
     return t;
 }
 
+function getVisibleRooms(x, y) {
+    var x1 = x - 2;
+    var x2 = x + 3;
+    var y1 = y - 2;
+    var y2 = y + 3;
+    var t = [];
+
+    for (var i = y1; i < y2; i++) {
+        t.push([]);
+        for (var j = x1; j < x2; j++) {
+            if (i < 0 || j < 0 || i > TOTAL_ROOMS_TALL - 1 || j > TOTAL_ROOMS_WIDE - 1) {
+                t[i - y1].push(0);
+                continue;
+            }
+            t[i - y1].push(roomMap[i][j]);
+        }
+    }
+
+    return t;
+}
+
 /*
     Begin React stuff 
 */
@@ -474,7 +595,19 @@ function EntityCell(props) {
     if (e == ENTITY_NOTHING || e.type == ENTITY_NOTHING) {
         return React.createElement('div', { className: 'entity entity-0' });
     } else {
-        return React.createElement('div', { className: "entity entity-" + e.type + " facing-" + e.facing });
+        var note = React.createElement('p', { className: 'entity-notification' });
+        if (props.entity.notification && props.entity.notification !== "") {
+            note = React.createElement(
+                'p',
+                { className: 'entity-notification float-down' },
+                props.entity.notification
+            );
+        }
+        return React.createElement(
+            'div',
+            { className: "entity entity-" + e.type + " facing-" + e.facing },
+            note
+        );
     }
 }
 
@@ -691,6 +824,49 @@ function PerqInterface(props) {
     );
 }
 
+function MiniMapRoom(props) {
+    if (props.room == 0) {
+        return React.createElement('div', { className: 'minimap-cell empty-cell' });
+    }
+    var room = rooms[props.room];
+
+    return React.createElement(
+        'div',
+        { className: 'minimap-cell' },
+        React.createElement('div', { className: "minimap-door minimap-door-up" + (room.walls.up == 2 ? " door-exists" : "") }),
+        React.createElement('div', { className: "minimap-door minimap-door-down" + (room.walls.down == 2 ? " door-exists" : "") }),
+        React.createElement('div', { className: "minimap-door minimap-door-left" + (room.walls.left == 2 ? " door-exists" : "") }),
+        React.createElement('div', { className: "minimap-door minimap-door-right" + (room.walls.right == 2 ? " door-exists" : "") }),
+        React.createElement('div', { className: "minimap-room" + (room.boss ? " boss-room" : "") })
+    );
+}
+
+function MiniMapRow(props) {
+    var minimapRooms = props.rooms.map(function (e) {
+        return React.createElement(MiniMapRoom, { room: e });
+    });
+    return React.createElement(
+        'div',
+        { className: 'minimap-row' },
+        minimapRooms
+    );
+}
+
+function MiniMapGrid(props) {
+    var minimapRows = props.rooms.map(function (e) {
+        return React.createElement(MiniMapRow, { rooms: e });
+    });
+    return React.createElement(
+        'div',
+        { id: 'minimap-viewport' },
+        React.createElement(
+            'div',
+            { id: 'minimap-grid' },
+            minimapRows
+        )
+    );
+}
+
 var defaultAppState = {
     player: {
         x: 1,
@@ -706,6 +882,7 @@ var defaultAppState = {
     facing: 'l',
     tiles: [[]],
     entities: [[]],
+    rooms: [[]],
     boss: false,
     perqTime: false
 };
@@ -788,7 +965,7 @@ var App = function (_React$Component2) {
             if (amount <= 0) {
                 amount = 1;
             }
-            spawnDamageNotification("-" + amount + " HP");
+            spawnDamageNotification("-" + amount);
             var nextHp = this.state.player.hp - amount;
             if (nextHp <= 0) {
                 this.playerDeath();
@@ -804,13 +981,13 @@ var App = function (_React$Component2) {
         }
     }, {
         key: 'gainXp',
-        value: function gainXp() {
+        value: function gainXp(xpValue) {
             var p = this.state.player;
-            p.xptnl--;
+            p.xptnl = p.xptnl - xpValue;
             if (p.xptnl <= 0) {
                 p.level = p.level + 1;
-                p.xptnl = Math.round(Math.log(p.level) * 5);
-                p.hp = p.hp + 3;
+                p.xptnl = 3 + p.level;
+                p.hp = p.hp + 3 + perqs.carbs;
                 p.weaponDamage = p.weaponDamage + 1;
                 spawnPlayerNotification("LEVEL UP");
                 if (p.level % PERQ_FREQUENCY == 0) {
@@ -824,13 +1001,14 @@ var App = function (_React$Component2) {
 
     }, {
         key: 'fightEnemy',
-        value: function fightEnemy(enemyEntity) {
-            var slain = enemyEntity.takeDamage(this.state.player.weaponDamage);
+        value: function fightEnemy(enemyEntity, direction) {
+            var xp = enemyEntity.takeDamage(this.state.player.weaponDamage);
+            spawnEntityNotification(direction, this.state.player.weaponDamage);
             if (enemyEntity.type == ENTITY_BOSS) {
                 this.setState({ boss: enemyEntity });
             }
-            if (slain) {
-                this.gainXp();
+            if (xp) {
+                this.gainXp(xp);
             }
             this.takeDamage(enemyEntity.attack);
         }
@@ -878,6 +1056,7 @@ var App = function (_React$Component2) {
                 return {
                     tiles: getVisibleTiles(newX, newY, newRoom),
                     entities: getVisibleEntities(newX, newY, newRoom),
+                    rooms: getVisibleRooms(newRoom.x, newRoom.y),
                     player: _extends({}, prevState.player, { x: newX, y: newY }),
                     boss: newRoom.boss
                 };
@@ -918,7 +1097,7 @@ var App = function (_React$Component2) {
         value: function interact(type, x, y, direction) {
             switch (type) {
                 case "enemy":
-                    this.fightEnemy(rooms[currentRoomId].entities[y][x]);break;
+                    this.fightEnemy(rooms[currentRoomId].entities[y][x], direction);break;
                 case "door":
                     this.enterDoor(direction);break;
                 case "upgrade":
@@ -1014,8 +1193,11 @@ var App = function (_React$Component2) {
     }, {
         key: 'componentWillMount',
         value: function componentWillMount() {
-            this.setState({ tiles: getVisibleTiles(this.state.player.x, this.state.player.y, rooms[currentRoomId]),
-                entities: getVisibleEntities(this.state.player.x, this.state.player.y, rooms[currentRoomId]) });
+            var p = this.state.player;
+            var r = rooms[currentRoomId];
+            this.setState({ tiles: getVisibleTiles(p.x, p.y, r),
+                entities: getVisibleEntities(p.x, p.y, r),
+                rooms: getVisibleRooms(r.x, r.y) });
             this.registerKeys();
         }
     }, {
@@ -1031,6 +1213,7 @@ var App = function (_React$Component2) {
                     React.createElement('div', { id: 'player-notifications-container' }),
                     React.createElement(TileGrid, { tiles: this.state.tiles }),
                     React.createElement(EntityGrid, { entities: this.state.entities }),
+                    React.createElement(MiniMapGrid, { rooms: this.state.rooms }),
                     React.createElement('div', { id: 'lighting-gradient-horizontal' }),
                     React.createElement('div', { id: 'lighting-gradient-vertical' }),
                     React.createElement(PerqInterface, { visible: this.state.perqTime, choiceHandler: this.perqOff }),
