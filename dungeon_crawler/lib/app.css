@@ -2,7 +2,10 @@
   padding: 0;
   border: 0;
   margin: 0;
-  font-size: 12pt; }
+  font-size: 10pt; }
+
+button:active {
+  border: none; }
 
 .move-button {
   display: block; }
@@ -273,8 +276,8 @@ body {
   margin: 1em;
   z-index: 35;
   position: absolute;
-  width: 200px;
-  height: 200px;
+  width: 125px;
+  height: 125px;
   background: none;
   background-repeat: no-repeat;
   background-position: center;
@@ -283,28 +286,28 @@ body {
 #move-button-left {
   left: 0;
   top: 50%;
-  margin-top: -100px;
+  margin-top: -62.5px;
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/button-left.png");
   background-size: auto 25%; }
 
 #move-button-right {
   right: 0;
   top: 50%;
-  margin-top: -100px;
+  margin-top: -62.5px;
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/button-right.png");
   background-size: auto 25%; }
 
 #move-button-up {
   top: 0;
   left: 50%;
-  margin-left: -100px;
+  margin-left: -62.5px;
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/button-up.png");
   background-size: auto 25%; }
 
 #move-button-down {
   bottom: 0;
   left: 50%;
-  margin-left: -100px;
+  margin-left: -62.5px;
   background-image: url("http://error.diodeware.com/fcc/dungeon_crawler/button-down.png");
   background-size: auto 25%; }
 
