@@ -1,3 +1,5 @@
+let debugvar;
+
 async function main() {
     let req;
     let data;
@@ -10,27 +12,33 @@ async function main() {
         data = await req.json();
     }
 
-    doD3Stuff(data);
+    debugvar = data;
+    let gdpData = data.data;
+    let filteredData = filterDates(gdpData, Date.parse("1990-01-01"), Date.parse("2019-01-01"));
+    console.log(filteredData);
+    doD3Stuff(filteredData);
+}
+
+function filterDates(data, minDate, maxDate) {
+    return data.filter(e => { let d = Date.parse(e[0]); return (d >= minDate && d < maxDate);});
 }
 
 function doD3Stuff(data) {
-    let rc = createRangeConverter(data.data.map(e => e[1]), 0, 100);
-    d3.select("#root")
-        .selectAll("div")
-        .data(data.data)
+    let dataValues = data.map(e => e[1]);
+    let rc = createRangeConverter(dataValues, 0, 100);
+
+    let scale = d3.scaleLinear()
+        .domain([dataValues.reduce((a, b) => { return Math.min(a, b); }), dataValues.reduce((a, b) => { return Math.max(a, b); })])
+        .range([0, 100]);
+
+    console.log(scale(900));
+
+    let root = d3.select("#root")
+    root.selectAll("div")
+        .data(data)
         .enter()
             .append("div")
-            .style("height", function(d, i) { return rc(d[1]) + "%"; })
-}
-
-function createRangeConverter(data, newMin, newMax) {
-    let max = data.reduce((a, b) => { return Math.max(a, b); });
-    let min = data.reduce((a, b) => { return Math.min(a, b); });
-    let range = max - min;
-    let newRange = newMax - newMin
-    return function(d) {
-        return (((d - min) * newMax) / range) + newMin;
-    }
+            .style("height", function(d, i) { return scale(d[1]) + "%"; });
 }
 
 main();
