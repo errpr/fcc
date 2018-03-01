@@ -1,0 +1,13 @@
+#root {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-end;
+    height: 400px;
+}
+
+#root div {
+    flex-grow: 1;
+    flex-shrink: 1;
+    background-color: lightblue;
+    margin: 1px;
+}
