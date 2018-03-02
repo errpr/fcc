@@ -52,9 +52,15 @@ function infoboxFormat(data) {
 function render(data) {
     let firstPlaceSeconds = data.find(e => e["Place"] === 1)["Seconds"];
     
+    yExtent = d3.extent(data, el => { return el["Place"]; });
+    xExtent = d3.extent(data, el => { return el["Seconds"] - firstPlaceSeconds; });
 
-    scaleY.domain(d3.extent(data, el => { return el["Place"]; }));
-    scaleX.domain(d3.extent(data, el => { return el["Seconds"] - firstPlaceSeconds; }));
+    // pad the domain so the data isnt on top of the axis
+    yExtent[1] += 1;
+    xExtent[1] += 10;
+    
+    scaleY.domain(yExtent);
+    scaleX.domain(xExtent);
 
     let point = chart.selectAll(".point")
                    .data(data)
