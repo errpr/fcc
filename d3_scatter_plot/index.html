@@ -14,6 +14,28 @@
 <div id="infobox"></div>
 <div id="root">
 </div>
+<div>
+    <h3>Add your own data:</h3>
+    <fieldset id="add-data-container">
+        <label for="name-input">
+            Name of cyclist
+        </label><br>
+        <input type="text" name="name-input" id="name-input" value="Bjarne Stroutrup"><br>
+        <label for="time-input">
+                Time completed in seconds
+        </label><br>
+        <input type="text" name="time-input" id="time-input" value="2199"><br>
+        <label for="doping-source">
+                URL to source of doping allegations. (leave blank if none)
+        </label><br>
+        <input type="text" name="doping-source" id="doping-source" value="https://en.wikipedia.org/wiki/Bjarne_Stroustrup"><br>
+        <label for="doping-description">
+                Short description of allegations. (leave blank if none)
+        </label><br>
+        <input type="text" name="doping-description" id="doping-description" value="Invented C++, to the bane of all."><br>
+        <button id="add-data-button" onclick="addData()">Add Data</button>
+    </fieldset>
+</div>
 
 <script src="vendor/d3/d3.js"></script>
 <script src="app.js"></script>
