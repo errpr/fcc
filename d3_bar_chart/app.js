@@ -1,12 +1,12 @@
 let globalData;
 
-let margin = { top: 20, right: 20, bottom: 50, left: 50 };
+const margin = { top: 20, right: 20, bottom: 50, left: 50 };
 
-let outerWidth = 800;
-let outerHeight = 600;
+const outerWidth = 800;
+const outerHeight = 600;
 
-let width = outerWidth - margin.left - margin.right;
-let height = outerHeight - margin.top - margin.bottom;
+const width = outerWidth - margin.left - margin.right;
+const height = outerHeight - margin.top - margin.bottom;
 
 let scaleY = d3.scaleLinear().range([height, 0]);
 let scaleX = d3.scaleTime().range([0, width]);
