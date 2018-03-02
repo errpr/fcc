@@ -1,16 +1,16 @@
 let globalData;
 
-const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+const margin = { top: 20, right: 200, bottom: 50, left: 50 };
 
 const outerWidth = 800;
 const outerHeight = 600;
+const circleSize = 8;
 
 const width = outerWidth - margin.left - margin.right;
 const height = outerHeight - margin.top - margin.bottom;
 
-let scaleY = d3.scaleLinear().range([height, 0]);
-let scaleX = d3.scaleTime().range([0, width]);
-
+let scaleY = d3.scaleLinear().range([0, height]);
+let scaleX = d3.scaleTime().range([width, 0]);
 let chart = d3.select("#root")
                 .append("svg")
                 .attr("width", outerWidth)
@@ -18,9 +18,40 @@ let chart = d3.select("#root")
                 .append("g")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+let infobox = d3.select("#infobox").style("visibility", "hidden");
+
+let mutedRed = d3.hsl(10, 0.5, 0.5);
+let mutedGreen = d3.hsl(90, 0.5, 0.5);
+
+let legend = chart.append("g")
+                .attr("class", "legend")
+                .attr("transform", `translate(${height - 100}, ${width - 100})`);
+let g1 = legend.append("g")
+                .attr("transform", "translate(0, 10)");
+let g2 = legend.append("g")
+                .attr("transform", "translate(0, -10)");
+g1.append("circle")
+            .attr("fill", mutedGreen)
+            .attr("r", circleSize);
+g1.append("text")
+            .text("No doping allegations")
+            .attr("transform", `translate(${circleSize}, ${circleSize / 2})`);
+g2.append("circle")
+            .attr("fill", mutedRed)
+            .attr("r", circleSize);
+g2.append("text")
+            .text("Doping allegations")
+            .attr("transform", `translate(${circleSize}, ${circleSize / 2})`);
+
+function infoboxFormat(data) {
+    return `<p>Name: ${data["Name"]}</p>
+            <p>Ranking: ${data["Place"]}</p>
+            <p>${(data["Doping"] === "") ? "" : `<a href=${data["URL"]}>${data["Doping"]}</a></p>`}`;
+}
+
 function render(data) {
     let firstPlaceSeconds = data.find(e => e["Place"] === 1)["Seconds"];
-    let circleSize = 5;
+    
 
     scaleY.domain(d3.extent(data, el => { return el["Place"]; }));
     scaleX.domain(d3.extent(data, el => { return el["Seconds"] - firstPlaceSeconds; }));
@@ -35,30 +66,17 @@ function render(data) {
     enterPoint.append("circle")
                 .attr("class", "point-circle");
     enterPoint.append("text")
-                .attr("class", "point-name");
-
-    let infobox = enterPoint.append("div")
-                            .attr("class", "point-info-container");
-    infobox.append("p")
-            .attr("class", "point-info-name");
-    infobox.append("p")
-            .attr("class", "point-info-place");
-    infobox.append("p")
-            .attr("class", "point-info-time");
-    infobox.append("p")
-            .attr("class", "point-info-year");
-    infobox.append("p")
-            .attr("class", "point-info-nationality");
-    infobox.append("a")
-            .attr("class", "point-info-allegations-link");
+                .attr("class", "point-name")
+                .attr("transform", `translate(${circleSize}, ${circleSize /2})`);
 
     point.merge(enterPoint)
-        .attr("transform", (d, i) => `translate(${scaleX(d["Seconds"] - firstPlaceSeconds)}, ${scaleY(d["Place"])})`);
+        .attr("transform", (d, i) => `translate(${scaleX(d["Seconds"] - firstPlaceSeconds)}, ${scaleY(d["Place"])})`)
+        .on("mouseover", d => infobox.style("visibility", "visible").html(infoboxFormat(d)));
 
     point.merge(enterPoint)
         .selectAll(".point-circle")
           .attr("r", circleSize)
-          .attr("fill", (d, i) => d3.hsl(100, 0.5, 0.5));
+          .attr("fill", (d, i) => (d["Doping"] === "") ? mutedGreen : mutedRed );
 
     point.merge(enterPoint)
         .selectAll(".point-name")
@@ -66,7 +84,8 @@ function render(data) {
 
 
     let yAxis = d3.axisLeft(scaleY);
-    let xAxis = d3.axisBottom(scaleX).ticks(5);
+    let xAxis = d3.axisBottom(scaleX)
+                  .tickFormat(d => d3.timeFormat("%Mm %Ss")( (new Date(2018, 0, 1, 0, 0, 0).setSeconds(d) ))).ticks(5);
 
     
     d3.select(".y.axis").call(yAxis);
