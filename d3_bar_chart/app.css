@@ -1,13 +1,34 @@
-#root {
+
+#controls-container {
     display: flex;
     flex-flow: row nowrap;
-    align-items: flex-end;
-    height: 400px;
+    justify-content: center;
+    width: 800px;
 }
 
-#root div {
+.control-group {
+    flex-grow: 1;
+    display: flex;
+    flex-flow: row nowrap;
+    width: 30vw;
+    margin: 1vw;
+}
+
+.controls-item {
     flex-grow: 1;
     flex-shrink: 1;
-    background-color: lightblue;
-    margin: 1px;
+    text-align: center;
+    font-size: 2em;
+}
+
+.bar:hover {
+    opacity: 0.5;
+}
+
+
+.x.axis .tick text {
+    transform-origin: top left;
+    transform: 
+        translate(10px, 10px)
+        rotate(45deg);
 }

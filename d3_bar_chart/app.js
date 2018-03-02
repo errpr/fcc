@@ -1,44 +1,109 @@
-let debugvar;
+let globalData;
 
-async function main() {
-    let req;
-    let data;
+let margin = { top: 20, right: 20, bottom: 50, left: 50 };
 
-    try {
-        req = await fetch("GDP-data.json");
-        data = await req.json()
-    } catch {
-        req = await fetch("https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json");
-        data = await req.json();
-    }
+let outerWidth = 800;
+let outerHeight = 600;
 
-    debugvar = data;
-    let gdpData = data.data;
-    let filteredData = filterDates(gdpData, Date.parse("1990-01-01"), Date.parse("2019-01-01"));
-    console.log(filteredData);
-    doD3Stuff(filteredData);
+let width = outerWidth - margin.left - margin.right;
+let height = outerHeight - margin.top - margin.bottom;
+
+let scaleY = d3.scaleLinear().range([height, 0]);
+let scaleX = d3.scaleTime().range([0, width]);
+
+let chart = d3.select("#root")
+                .append("svg")
+                .attr("width", outerWidth)
+                .attr("height", outerHeight)
+                .append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+let minYear = 1947;
+let maxYear = 2018;
+
+function increaseMinYear() {
+    if(minYear == maxYear - 1) { return; }
+    minYear++;
+    refilter();
+    document.getElementById("min-year-display").innerText = minYear;
+}
+
+function decreaseMinYear() {
+    minYear--;
+    refilter();
+    document.getElementById("min-year-display").innerText = minYear;
+}
+
+function increaseMaxYear() {
+    maxYear++;
+    refilter();
+    document.getElementById("max-year-display").innerText = maxYear;
+}
+
+function decreaseMaxYear() {
+    if(maxYear == minYear + 1) { return; }
+    maxYear--;
+    refilter();
+    document.getElementById("max-year-display").innerText = maxYear;
 }
 
 function filterDates(data, minDate, maxDate) {
     return data.filter(e => { let d = Date.parse(e[0]); return (d >= minDate && d < maxDate);});
 }
 
-function doD3Stuff(data) {
-    let dataValues = data.map(e => e[1]);
-    let rc = createRangeConverter(dataValues, 0, 100);
-
-    let scale = d3.scaleLinear()
-        .domain([dataValues.reduce((a, b) => { return Math.min(a, b); }), dataValues.reduce((a, b) => { return Math.max(a, b); })])
-        .range([0, 100]);
-
-    console.log(scale(900));
-
-    let root = d3.select("#root")
-    root.selectAll("div")
-        .data(data)
-        .enter()
-            .append("div")
-            .style("height", function(d, i) { return scale(d[1]) + "%"; });
+function refilter() {
+    render(filterDates(globalData.data, Date.parse(minYear + "-01-01"), Date.parse(maxYear + "-01-01")));
 }
 
-main();
+function render(data) {
+    scaleY.domain(d3.extent(data, el => { return el[1]; }));
+    scaleX.domain(d3.extent(data, el => { return Date.parse(el[0]); }));
+
+    let barWidth = width / data.length;
+
+    let bar = chart.selectAll(".bar")
+                   .data(data)
+    
+    bar.exit().remove();
+
+    bar.enter().append("g")
+        .attr("class", "bar")
+      .append("rect")
+      .merge(bar)
+        .attr("x", (d, i) => scaleX(Date.parse(d[0])))
+        .attr("y", (d, i) => scaleY(d[1]))
+        .attr("height", (d, i) => height - scaleY(d[1]))
+        .attr("width", barWidth)
+        .attr("fill", (d, i) => d3.hsl(100 + (((i % 4) + 2) * 40), 0.5, 0.5));
+
+
+    let yAxis = d3.axisLeft(scaleY);
+    let xAxis = d3.axisBottom(scaleX).ticks(5);
+
+    
+    d3.select(".y.axis").call(yAxis);
+
+
+    d3.select(".x.axis").call(xAxis);
+}
+
+d3.json("GDP-data.json", (e, d) => {
+    globalData = d;
+    
+    d3.select("svg")
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", margin.left + 5)
+        .attr("x", 1 - margin.top)
+        .attr("dy", ".75em")
+        .style("text-anchor", "end")
+        .text("United States Gross Domestic Product");
+
+    chart.append("g")
+        .attr("class", "y axis");
+
+    chart.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0, ${height})`);
+    refilter();
+});

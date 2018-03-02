@@ -9,9 +9,22 @@
     <title>D3 Bar Chart</title>
 </head>
 <body>
-<h1 id="title">D3 Bar Chart</h1>
+<h1 id="title">United States GDP by Quarter</h1>
 
 <div id="root">
+</div>
+
+<div id="controls-container">
+    <div id="min-year-group" class="control-group">
+        <button class="controls-item" id="min-year-plus" onclick="increaseMinYear()">+</button>
+        <p class="controls-item" id="min-year-display">1947</p>
+        <button class="controls-item" id="min-year-minus" onclick="decreaseMinYear()">-</button>
+    </div>
+    <div id="max-year-group" class="control-group">
+        <button class="controls-item" id="max-year-plus" onclick="increaseMaxYear()">+</button>
+        <p class="controls-item" id="max-year-display">2018</p>
+        <button class="controls-item" id="max-year-minus" onclick="decreaseMaxYear()">-</button>
+    </div>  
 </div>
 
 <script src="vendor/d3/d3.js"></script>
