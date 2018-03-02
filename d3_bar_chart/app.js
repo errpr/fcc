@@ -96,7 +96,7 @@ function render(data) {
     d3.select(".x.axis").call(xAxis);
 }
 
-d3.json("GDP-data.json", (e, d) => {
+d3.json("https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json", (e, d) => {
     globalData = d;
     
     d3.select("svg")
