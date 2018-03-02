@@ -11,7 +11,7 @@
     display: flex;
     flex-flow: row nowrap;
     width: 30vw;
-    margin: 1vw;
+    margin: 1em;
 }
 
 .controls-item {

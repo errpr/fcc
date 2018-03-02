@@ -83,7 +83,7 @@ function render(data) {
 
     bar.merge(enterBar)
         .selectAll(".bar-title")
-          .text((d, i) => d[0]);
+          .text((d, i) => `Date: ${d[0]}\nGDP: ${d[1]}`);
 
 
     let yAxis = d3.axisLeft(scaleY);
