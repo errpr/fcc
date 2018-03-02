@@ -66,15 +66,24 @@ function render(data) {
     
     bar.exit().remove();
 
-    bar.enter().append("g")
-        .attr("class", "bar")
-      .append("rect")
-      .merge(bar)
-        .attr("x", (d, i) => scaleX(Date.parse(d[0])))
-        .attr("y", (d, i) => scaleY(d[1]))
-        .attr("height", (d, i) => height - scaleY(d[1]))
-        .attr("width", barWidth)
-        .attr("fill", (d, i) => d3.hsl(100 + (((i % 4) + 2) * 40), 0.5, 0.5));
+    enterBar = bar.enter().append("g")
+                .attr("class", "bar");
+    enterBar.append("rect")
+                .attr("class", "bar-rect");
+    enterBar.append("title")
+                .attr("class", "bar-title");
+
+    bar.merge(enterBar)
+        .selectAll(".bar-rect")
+          .attr("x", (d, i) => scaleX(Date.parse(d[0])))
+          .attr("y", (d, i) => scaleY(d[1]))
+          .attr("height", (d, i) => height - scaleY(d[1]))
+          .attr("width", barWidth)
+          .attr("fill", (d, i) => d3.hsl(100, 0.5, 0.5));
+
+    bar.merge(enterBar)
+        .selectAll(".bar-title")
+          .text((d, i) => d[0]);
 
 
     let yAxis = d3.axisLeft(scaleY);
