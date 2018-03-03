@@ -25,7 +25,7 @@ let infobox = d3.select("#infobox").style("visibility", "hidden");
 function infoboxFormat(data, baseTemp) {
     return `<p>Date: ${d3.timeFormat("%B")(new Date(2018, data["month"]))} ${data["year"]}</p>
             <p>Variance: ${data["variance"]}</p>
-            <p>Temp: ${baseTemp + data["variance"]}`;
+            <p>Temp: ${baseTemp + data["variance"]}&deg;C`;
 }
 
 function render(data) {
