@@ -3,7 +3,7 @@ let globalData;
 const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 
 const outerWidth = 900;
-const outerHeight = 1200;
+const outerHeight = 1000;
 const circleSize = 32;
 
 const width = outerWidth - margin.left - margin.right;
@@ -46,6 +46,22 @@ function render(data) {
                     .attr('class', 'link')
                     .attr("stroke-width", 2);
 
+    let dragHandler = d3.drag()
+                        .on("start", d => {
+                            if (!d3.event.active) { layout.alphaTarget(0.3).restart(); }
+                            d.fx = d.x;
+                            d.fy = d.y;
+                        })
+                        .on("end", d => {
+                            layout.alphaTarget(0).restart();
+                            d.fx = null;
+                            d.fy = null;
+                        })
+                        .on("drag", d => { 
+                            d.fx = d3.event.x;
+                            d.fy = d3.event.y; 
+                        });
+
     let node = d3.select("#root").selectAll(".node")
                     .data(nodes)
                     .enter()
@@ -54,13 +70,13 @@ function render(data) {
                     .on("mouseover", d => infobox.style("visibility", "visible").html(infoboxFormat(d)))
                     .on("mousemove", d => infobox.style("left", (d3.event.pageX + 10) + "px").style("top", (d3.event.pageY + 10) + "px"))
                     .on("mouseout", d => infobox.style("visibility", "hidden"));
-
+    dragHandler(node);
     layout.nodes(nodes)
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("charge", d3.forceManyBody().strength(-50).distanceMax(circleSize * 2))
-            .force("collide", d3.forceCollide(circleSize * .8))
-            .force("link", d3.forceLink(links).distance(circleSize / 4))
-            .on("tick", () => tickUpdate(node, link));
+            .force("collide", d3.forceCollide(24))
+            .force("link", d3.forceLink(links).distance(100))
+            .on("tick", () => tickUpdate(node, link))
+            .alphaDecay(0.02)
 
 }
 
