@@ -82,7 +82,7 @@ function render(data) {
     d3.select(".x.axis").call(xAxis);
 }
 
-d3.json("global-temperature.json", (e, d) => {
+d3.json("https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/global-temperature.json", (e, d) => {
     globalData = d;
     
     d3.select("svg")
