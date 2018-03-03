@@ -2,8 +2,8 @@ let globalData;
 
 const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 
-const outerWidth = 800;
-const outerHeight = 600;
+const outerWidth = 900;
+const outerHeight = 1200;
 const circleSize = 32;
 
 const width = outerWidth - margin.left - margin.right;
@@ -57,8 +57,9 @@ function render(data) {
 
     layout.nodes(nodes)
             .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("charge", d3.forceManyBody())
-            .force("link", d3.forceLink(links))
+            .force("charge", d3.forceManyBody().strength(-50).distanceMax(circleSize * 2))
+            .force("collide", d3.forceCollide(circleSize * .8))
+            .force("link", d3.forceLink(links).distance(circleSize / 4))
             .on("tick", () => tickUpdate(node, link));
 
 }
@@ -68,37 +69,3 @@ d3.json("countries.json", (e, d) => {
     
     render(d);
 });
-
-function addData() {
-    let newIndex = globalData["nodes"].length
-    globalData["nodes"].push(objectifyCountry(newIndex));
-    globalData["links"].concat(objectifyNeighbors(newIndex));
-
-    render(globalData);
-}
-
-function objectifyCountry(index) {
-    let neighbors = document.getElementById("neighbor-input")
-                    .value.split(",")
-                    .map(e => {
-                        let t = globalData["nodes"].findIndex(x => x["country"].toLowerCase() === e.trim().toLowerCase());
-                        if(t < 0) { return; }
-                        return { 
-                            "target": t, 
-                            "source": index 
-                        }; 
-                    });
-    console.log(neighbors);
-    document.getElementById("neighbor-input").value = "";
-    return neighbors;
-}
-
-function objectifyNeighbors(index) {
-    let obj = {
-        "country": document.getElementById("name-input").value,
-        //"code": document.getElementById("code-input").value,
-    };
-    document.getElementById("name-input").value = "";
-    //document.getElementById("code-input").value = "";
-    return obj;
-}

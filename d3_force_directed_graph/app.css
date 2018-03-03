@@ -39,3 +39,7 @@
     border: 2px solid black;
     border-radius: 25%;
 }
+
+.node:hover {
+    border: 2px solid steelblue;
+}
