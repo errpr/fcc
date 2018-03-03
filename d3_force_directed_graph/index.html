@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="D3 Force Directed Graph">
+    <meta name="author" content="Steven Branson">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="vendor/flag-sprites.com/flags.css">
+    <link rel="stylesheet" type="text/css" href="app.css">
+    <title>D3 Force Directed Graph</title>
+</head>
+<body>
+<h2 id="title">&#x1F1E6;&#x1F1EA; 🇦🇪 National Border Connections</h1>
+
+<div id="infobox"></div>
+<div id="root">
+</div>
+<div>
+    <h3>Add your own country:</h3>
+    <fieldset id="add-data-container">
+        <label for="name-input">
+            Name of Country
+        </label><br>
+        <input class="add-data-input" type="text" name="name-input" id="name-input" value="Wakanda"><br>
+        <label for="neighbor-input">
+            Comma seperated list of bordering countries.
+        </label><br>
+        <textarea class="add-data-input" type="text" name="neighbor-input" id="neighbor-input">Kenya, Ethiopia, Uganda, South Sudan</textarea><br>
+        <button id="add-data-button" onclick="addData()">Add Data</button>
+    </fieldset>
+</div>
+
+<script src="vendor/d3/d3.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
