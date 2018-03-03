@@ -22,16 +22,6 @@ let chart = d3.select("#root")
 
 let infobox = d3.select("#infobox").style("visibility", "hidden");
 
-let mutedRed = d3.hsl(10, 0.5, 0.5);
-let mutedGreen = d3.hsl(90, 0.5, 0.5);
-
-let legend = chart.append("g")
-                .attr("class", "legend")
-                .attr("transform", `translate(${height + 100}, ${width - 100})`);
-
-legend.append("text").text("Legend of Zelda")
-
-
 function infoboxFormat(data, baseTemp) {
     return `<p>Date: ${d3.timeFormat("%B")(new Date(2018, data["month"]))} ${data["year"]}</p>
             <p>Variance: ${data["variance"]}</p>
@@ -47,9 +37,6 @@ function render(data) {
 
     scaleY.domain(yExtent);
     scaleX.domain(xExtent);
-
-    console.log(scaleY);
-    console.log(scaleX);
 
     let barWidth = width / (data.length / 12);
 
@@ -73,12 +60,8 @@ function render(data) {
 
     let yAxis = d3.axisLeft(scaleY).ticks(d3.timeMonth).tickFormat(d3.timeFormat("%B"));
     let xAxis = d3.axisBottom(scaleX);
-    
-    console.log(yAxis);
-    console.log(xAxis);
 
     d3.select(".y.axis").call(yAxis);
-
     d3.select(".x.axis").call(xAxis);
 }
 
