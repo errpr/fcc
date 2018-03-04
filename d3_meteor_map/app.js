@@ -47,6 +47,9 @@ function render(geoData, meteorData) {
             .attr("d", geoPath2)
             .attr("fill", d3.hsl(120, 0.5, 0.5))
             .style("width", 50)
+            .on("mouseover", d => infobox.style("visibility", "visible").html(infoboxFormat(d["properties"])))
+            .on("mousemove", d => infobox.style("left", (d3.event.pageX + 10) + "px").style("top", (d3.event.pageY + 10) + "px"))
+            .on("mouseout", d => infobox.style("visibility", "hidden"))
 }
 
 d3.json("custom.geo.json", (e, d) => {
