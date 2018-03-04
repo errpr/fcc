@@ -24,17 +24,26 @@ function infoboxFormat(data) {
     return `<p>${data["country"]}</p>`;
 }
 
-function render(data) {
+function render(geoData, meteorData) {
     let projection = d3.geoMercator().scale(300)
 
     let geoPath = d3.geoPath().projection(projection);
-    chart.append("path").datum(data)
+    chart.append("path").datum(geoData)
         .attr("d", geoPath);
 
+    chart.selectAll(".meteorPath")
+        .data(meteorData.features)
+        .enter()
+        .append("path")
+        .attr("class", "meteorPath")
+        .attr("d", geoPath)
+        .attr("fill", d3.hsl(120, 0.5, 0.5))
 }
 
 d3.json("custom.geo.json", (e, d) => {
-    globalData = d;
+    d3.json("meteorite-strike-data.json", (e2, d2) => {
+        globalData = d2;
     
-    render(d);
+        render(d, d2);
+    });
 });
