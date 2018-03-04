@@ -9,12 +9,14 @@ const circleSize = 32;
 const width = outerWidth - margin.left - margin.right;
 const height = outerHeight - margin.top - margin.bottom;
 
-let chart = d3.select("#root")
+let svg = d3.select("#root")
                 .append("svg")
                 .attr("width", outerWidth)
                 .attr("height", outerHeight)
-                .append("g")
-                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+                .call(d3.zoom().on("zoom", () => chart.attr("transform", d3.event.transform) ));
+let chart = svg.append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`)
+                
 
 let layout = d3.forceSimulation();
 
@@ -25,15 +27,15 @@ function infoboxFormat(data) {
 }
 
 function render(geoData, meteorData) {
-    let projection = d3.geoMercator().scale(300)
+    let projection = d3.geoMercator().scale(500).translate([width / 2, height / 2])
 
     let geoPath = d3.geoPath().projection(projection);
-    chart.append("path").datum(geoData)
+    let map = chart.append("path").datum(geoData)
         .attr("d", geoPath)
         .attr("fill", "#aaa")
         .attr("stroke", "#fff");
 
-    chart.selectAll(".meteorPath")
+    let strikes = chart.selectAll(".meteorPath")
         .data(meteorData.features)
         .enter()
         .append("path")
