@@ -1,0 +1,1 @@
+Map of meteor strikes across the earth.
