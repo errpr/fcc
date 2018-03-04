@@ -29,7 +29,9 @@ function render(geoData, meteorData) {
 
     let geoPath = d3.geoPath().projection(projection);
     chart.append("path").datum(geoData)
-        .attr("d", geoPath);
+        .attr("d", geoPath)
+        .attr("fill", "#aaa")
+        .attr("stroke", "#fff");
 
     chart.selectAll(".meteorPath")
         .data(meteorData.features)
