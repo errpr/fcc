@@ -1,0 +1,39 @@
+*
+  padding: 0
+  margin: 0
+  border: 0
+  box-sizing: border-box
+
+#drum-pad-grid 
+  display: grid
+  width: 100vw
+  height: 80vh
+  max-width: 800px
+  max-height: 800px
+  grid-template-columns: 1fr 1fr 1fr
+  grid-template-rows: 1fr 1fr 1fr
+  justify-items: center
+  align-items: center
+
+.drum-pad
+  padding: 3em
+  text-align: center
+  background-color: #888
+  border-radius: 20%
+  box-shadow: 3px 3px 5px 6px #ccc
+
+#display
+  font-size: 150%
+  width: 100%
+  max-width: 800px
+  padding: 1em
+  text-align: center
+  background-color: #722
+  color: #F33
+
+#drum-machine
+  padding: 1em
+
+@media only screen and (min-width: 800px)
+  .drum-pad
+    font-size: 150%
