@@ -60,7 +60,7 @@ Promise.all(files.map(url => d3.json(url))).then(values => {
 
     g.call(d3.axisBottom(x)
         .tickSize(13)
-        .tickFormat(d3.format(""))
+        .tickFormat(d3.format(".1f"))
         .tickValues(color.range().slice(1).map(d => color.invertExtent(d)[0])))
     .select(".domain")
         .remove();
